@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:bankcomm="http://www.bankcomm.com"
+				width="100%" height="100%" creationComplete="init()" layout="vertical" verticalAlign="middle"
+				paddingBottom="10" paddingTop="10" showCloseButton="true" xmlns:util="DMS_Util.*">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.UserBO;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.utils.ObjectProxy;
+			import mx.validators.Validator;
+			
+			public var MODE:String;
+			
+			[Bindable]
+			private var writeable:Boolean;
+			
+			[Bindable]
+			private var isUpdate:Boolean = false;
+			
+			public var userId:int;
+			
+			[Bindable]
+			public var itemObj:ObjectProxy = new ObjectProxy();
+			
+			private function init():void{
+				
+				writeable = true;
+				isUpdate = true;
+				
+				
+				initData();
+			}
+			
+			private function initData():void{
+				if(!userId || userId < 1){
+					return;
+				}
+				
+				var params:URLParameter = new URLParameter();
+				
+				var reqBody:Object = new Object();
+				reqBody["userId"] = userId;
+				
+				if(MODE == InterfaceModeConst.MODE_ADD){
+					return;
+				}
+				
+				params.reqBody = reqBody;
+				
+				Connect.request(new ConnectParameter({url:"query.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+					var rsp_body:Object=r["RSP_BODY"];
+					itemObj = new ObjectProxy(rsp_body["userBo"]);
+				}
+				}));
+			}
+			
+			private function save():void{
+				if(!check()) return;
+				var requestURL:String;
+				var userBo:UserBO = new UserBO();
+				var userRole:String=new String();
+				
+				
+				
+				requestURL = "update.ajax";
+				userBo.userId = userId;
+				if(StringUtil.trim(userName.text)!=""){
+					userBo.userName = StringUtil.trim(userName.text);
+				}
+				if(StringUtil.trim(fullName.text)!=""){
+					userBo.fullName=StringUtil.trim(fullName.text);
+				}
+				if(sexgroup.selectedValue!=null){
+				userBo.sex=sexgroup.selectedValue.toString();
+				}
+				if(StringUtil.trim(email.text)!=""){
+					userBo.email=StringUtil.trim(email.text);
+				}
+				if(StringUtil.trim(extNo.text)!=""){
+					userBo.extNo=StringUtil.trim(extNo.text);
+				}if(rolegroup.selectedValue!=null){
+				userRole=rolegroup.selectedValue.toString();
+				}
+				
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"userBo":userBo,"userRole":userRole};
+				
+				Connect.request(new ConnectParameter({url:requestURL,params: params.toParameter(),callback:function(r:Object,e:Event):void{
+					var rspBody:Object=r.RSP_BODY;
+					Alert.show(rspBody.RESULT);
+					dispatchEvent(new Event("refresh"));
+				},failback:null,isMaskAvailable:true
+				}));
+			}
+			
+			private function check():Boolean{
+				var isPass:Boolean = (Validator.validateAll(validateArr).length == 0);
+				return isPass;
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Array id="validateArr">
+		<mx:StringValidator maxLength="12" property="text" required="false" 
+							source="{userName}" tooLongError="用户名长度不能超过12位"/>
+		<mx:StringValidator maxLength="12" property="text" required="false" 
+							source="{fullName}" tooLongError="姓名长度不能超过12位"/>
+		<mx:StringValidator maxLength="12" property="text" required="false"
+							source="{email}" tooLongError="邮箱长度不能超过12位"/>
+		<mx:StringValidator maxLength="12" property="text" required="false"
+							source="{extNo}" tooLongError="分机号长度不能超过12位"/>
+	</mx:Array>
+	
+	<mx:VBox width="100%" horizontalAlign="left">
+		<mx:HBox width="50%" verticalAlign="middle">
+			<mx:Label width="35%" minWidth="120" text="用户名：" textAlign="left" id="t1"/>
+			<mx:TextInput id="userName" width="50%" minWidth="170" editable="{writeable}"
+						  text="{itemObj.userName}"/>
+			<mx:Label id="t2" width="15%" color="red" fontWeight="bold" textAlign="left"/>
+		</mx:HBox>
+		<mx:HBox width="50%" verticalAlign="middle">
+			<mx:Label width="35%" minWidth="120" text="姓名：" textAlign="left"/>
+			<mx:TextInput id="fullName" width="50%" minWidth="170" editable="{writeable}"
+						  text="{itemObj.fullName}" />
+			<mx:Label width="15%" color="red" fontWeight="bold" textAlign="left"/>
+		</mx:HBox>
+		<mx:HBox width="50%" verticalAlign="middle">
+			<mx:Label width="35%" minWidth="120" text="性别：" textAlign="left"/>
+			<mx:RadioButtonGroup id="sexgroup"/>
+			<mx:RadioButton groupName="sexgroup" id="sex1" width="22%" label="男" value="M"/>
+			<mx:RadioButton groupName="sexgroup" id="sex2" width="22%"  label="女" value="F"/>
+			<mx:RadioButton groupName="sexgroup" id="sex3" width="21%"  label="不明" value="U"/>
+			<mx:Label width="15%" text="" color="red" fontWeight="bold" textAlign="left"/>
+		</mx:HBox>
+		<mx:HBox width="50%" verticalAlign="middle">
+			<mx:Label width="35%" minWidth="120" text="邮箱：" textAlign="left"/>
+			<mx:TextInput id="email" width="50%" minWidth="170" editable="{writeable}"
+						  text="{itemObj.email}" />
+			<mx:Label width="15%" text="" color="red" fontWeight="bold" textAlign="left"/>
+		</mx:HBox>
+		<mx:HBox width="50%" verticalAlign="middle">
+			<mx:Label width="35%" minWidth="120" text="分机号：" textAlign="left"/>
+			<mx:TextInput id="extNo" width="50%" minWidth="170" editable="{writeable}"
+						  text="{itemObj.extNo}" restrict="[0-9a-zA-Z]"/>
+			<mx:Label width="15%" text="" color="red" fontWeight="bold" textAlign="left"/>
+		</mx:HBox>
+		<mx:HBox width="50%" verticalAlign="middle">
+			<mx:Label width="35%" minWidth="120" text="角色：" textAlign="left"/>
+			<mx:RadioButtonGroup id="rolegroup"/>
+			<mx:RadioButton groupName="rolegroup" id="role1" width="32.5%" label="公司用户" value="companyUser"/>
+			<mx:RadioButton groupName="rolegroup" id="role2" width="32.5%"  label="部门用户" value="departUser"/>
+			<mx:Label width="15%" text="" color="red" fontWeight="bold" textAlign="left"/>
+		</mx:HBox>
+	</mx:VBox>
+	
+	<mx:ControlBar width="100%" height="35" horizontalAlign="center" verticalAlign="middle"> 
+		<mx:Button id="confirmBtn" label="保存" click="save()"  visible="{writeable}" includeInLayout="{writeable}"/>
+		<mx:Button id="btnCancel" label="关闭"
+				   click="this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+	</mx:ControlBar>
+</mx:TitleWindow>

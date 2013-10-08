@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+  PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.bankcomm.novem.dao.ISingleTableMapper">
+	<delete id="delete">
+		DELETE
+		FROM
+		${tableName}
+		WHERE
+		<foreach collection="whereColumns" item="entry" separator="and">
+			${entry.columnName} ${entry.operand} #{entry.value}
+		</foreach>
+	</delete>
+
+	<delete id="deleteAll">
+		DELETE
+		FROM
+		${tableName}
+	</delete>
+
+	<select id="queryCount" resultType="int">
+		SELECT
+		COUNT(1)
+		FROM
+		${tableName}
+		<where>
+			<foreach collection="whereColumns" item="entry" separator="and">
+				${entry.columnName} ${entry.operand} #{entry.value}
+			</foreach>
+		</where>
+		WITH
+		UR
+	</select>
+
+	<select id="querySum" resultType="double">
+		SELECT
+		COALESCE(SUM(${sumColumn}),0)
+		FROM
+		${tableName}
+		<where>
+			<foreach collection="whereColumns" item="entry" separator="and">
+				${entry.columnName} ${entry.operand} #{entry.value}
+			</foreach>
+		</where>
+		WITH
+		UR
+	</select>
+
+	<insert id="insert" useGeneratedKeys="true" keyProperty="generateID">
+		<include refid="INSERTSQL" />
+	</insert>
+
+	<insert id="insertWithPK">
+		<include refid="INSERTSQL" />
+	</insert>
+
+	<insert id="insertList">
+		INSERT
+		INTO ${tableName}
+		<foreach collection="columnNameList" item="columnName" open="("
+			close=")" separator=",">
+			${columnName}
+		</foreach>
+		VALUES
+		<foreach collection="valueList" item="entry" separator=",">
+			<foreach collection="entry" item="singleColumn" open="("
+				separator="," close=")">
+				#{singleColumn}
+			</foreach>
+		</foreach>
+	</insert>
+
+	<sql id="INSERTSQL">
+		INSERT
+		INTO ${tableName}
+		<foreach collection="columnNameList" item="columnName" open="("
+			close=")" separator=",">
+			${columnName}
+		</foreach>
+		VALUES
+		<foreach collection="valueList" item="singleColumn" open="("
+			close=")" separator=",">
+			#{singleColumn}
+		</foreach>
+	</sql>
+
+	<update id="update">
+		UPDATE
+		${tableName}
+		SET
+		<foreach collection="columnNameList" item="columnName" open="("
+			close=")" separator=",">
+			${columnName}
+		</foreach>
+		=
+		<foreach collection="valueList" item="singleColumn" open="("
+			close=")" separator=",">
+			#{singleColumn}
+		</foreach>
+		WHERE
+		<foreach collection="whereColumns" item="entry" separator="and">
+			${entry.columnName} ${entry.operand} #{entry.value}
+		</foreach>
+	</update>
+
+	<select id="queryForList" resultType="HashMap">
+		SELECT
+		<foreach collection="resultColumns" item="entry" separator="，">
+			${entry}
+		</foreach>
+		FROM
+		${tableName}
+		<where>
+			<foreach collection="whereColumns" item="entry" separator="and">
+				${entry.columnName} ${entry.operand}
+				<choose>
+					<when test="entry.operand.name() == 'IN'">
+						<foreach collection="entry.value" item="inValue" open="("
+							close=")" separator=",">
+							#{inValue}
+						</foreach>
+					</when>
+					<when test="entry.operand.name() == 'IS'">
+						NULL
+					</when>
+					<otherwise>
+						#{entry.value}
+					</otherwise>
+				</choose>
+			</foreach>
+		</where>
+		WITH
+		UR
+	</select>
+</mapper>

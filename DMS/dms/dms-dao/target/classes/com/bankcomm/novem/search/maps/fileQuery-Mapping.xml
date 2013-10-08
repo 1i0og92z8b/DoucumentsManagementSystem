@@ -1,0 +1,340 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.search.IFileQueryMapper">
+
+	<select id="queryCount" resultType="int" 
+		parameterType="com.bankcomm.novem.bo.search.FileFieldBo">
+		SELECT
+   			COUNT(1)
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	<where>
+    	<if test="keywords!=null">
+                <foreach collection="keywords" item="keyword"
+                    index="index"  separator="OR ">
+                   F.KEYWORDS LIKE '%'||#{keyword}||'%'
+                </foreach>
+            </if>
+    	<!-- categoryId初始化时默认为零  -->
+    	<if test="categoryId > 0">
+    	LOCATE((select CATEGORY_PATH from CATEGORY where CATEGORY_ID = #{categoryId}),C.CATEGORY_PATH)>0
+    	</if>
+    	<if test=" fileName != null ">
+		AND F.FILE_NAME LIKE CONCAT('%',CONCAT(#{fileName},'%'))
+    	</if>
+    	<if test="userName != null">
+        AND F.USER_ID 
+        IN 
+        ( SELECT USER_ID FROM USER WHERE USER.USER_NAME LIKE CONCAT('%',CONCAT(#{userName},'%')) )
+         </if>
+        <if test=" startDate != null ">
+    	AND F.UPLOAD_TIME >= #{startDate}
+        </if>
+		<if test=" endDate != null ">
+		<![CDATA[
+		AND F.UPLOAD_TIME <= #{endDate}
+		]]>
+        </if>
+    	<if test=" fileState != '' ">
+    	AND F.FILE_STATE = #{fileState}
+    	</if>
+		<if test=" fileState == '' ">
+		AND F.FILE_STATE = '0'
+		</if>
+    	</where>
+
+	</select>
+
+
+
+		<select id="fileQueryByFileState" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+		 
+	SELECT * FROM
+		(
+		 SELECT
+   		F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,     
+    		F.USER_ID as  userId,   
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator  ,
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	<where>
+    	<if test="fileState != '' ">
+		F.FILE_STATE = #{fileState}
+    	</if>
+    	</where>
+    	) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+	
+		<select id="fileQueryByCategoryId" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+		SELECT * FROM
+		(
+		SELECT
+   			F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,   
+    		F.USER_ID as  userId,       
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator  ,
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+ 			WHERE LOCATE((select CATEGORY_PATH from CATEGORY where CATEGORY_ID = #{categoryId}),C.CATEGORY_PATH)>0
+ 			<if test=" fileState != '' ">
+    			AND F.FILE_STATE = #{fileState}
+    		</if>
+			<if test=" fileState == '' ">
+				AND F.FILE_STATE = '0'
+			</if>
+ 			) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+	
+		<select id="fileQueryByFileName" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+		SELECT * FROM
+		(
+		SELECT
+   			F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,   
+    		F.USER_ID as  userId,       
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator  ,
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	<where>
+    	<if test=" fileName != null ">
+    	F.FILE_NAME LIKE '%'||#{fileName}||'%'
+    	</if>
+    	<if test=" fileState != '' ">
+    	AND F.FILE_STATE = #{fileState}
+    	</if>
+		<if test=" fileState == '' ">
+		AND F.FILE_STATE = '0'
+		</if>
+    	</where>
+    	) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+	
+	<select id="fileQueryByFileNameAndFileState" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+	SELECT * FROM
+		(
+		SELECT
+   			F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,  
+    		F.USER_ID as  userId,        
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator  ,
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	WHERE
+    	F.FILE_NAME LIKE '%'||#{fileName}||'%' AND F.FILE_STATE = #{fileState}
+    	) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+	
+		<select id="fileQueryByFileId" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+		SELECT * FROM
+		(
+		SELECT
+   			F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,   
+    		F.USER_ID as  userId,       
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator , 
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	<where>
+    	<if test=" fileId != null ">
+    	F.FILE_ID = #{fileId}
+    	</if>
+    	</where>
+    	) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+	
+			<select id="fileQueryByUserIdAndFileStateAndFileName" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+		SELECT * FROM
+		(
+		SELECT
+   			F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,   
+    		F.USER_ID as  userId,       
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator , 
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	<where>
+    	<if test=" fileName != null ">
+    	 F.File_Name = #{fileName}
+    	</if>
+    	<if test=" userId != null ">
+    	AND F.USER_ID = #{userId}
+    	</if>
+    	<if test=" fileState != '' ">
+    	AND F.FILE_STATE = #{fileState}
+    	</if>
+		<if test=" fileState == '' ">
+		AND F.FILE_STATE = '0'
+		</if>
+    	</where>
+    	) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+	
+		<select id="fileSearchByFileFieldBo" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="com.bankcomm.novem.bo.search.FileBo" >
+		SELECT * FROM
+		(
+		SELECT
+   			F.FILE_ID as fileId,         
+    		F.FILE_NAME as  fileName,   
+    		F.USER_ID as  userId,       
+    		F.KEYWORDS as keywords,
+    		C.CATEGORY_PATH as categoryPath, 
+    		U.USER_NAME as userName,
+    		F.UPLOAD_TIME as uploadTime,     
+    		F.FILE_STATE as  fileState, 
+    		F.FILE_DESC as fileDesc,    
+    		F.FILE_PATH as filePath,  
+    		F.FULL_NAME as fullName,     
+    		F.CREATE_TIME as createTime,
+    		F.UPDATE_TIME as updateTime,
+    		F.UPDATOR as updator  ,
+    		rownumber() over (order by F.FILE_ID) as rn 
+ 		FROM FILE F LEFT OUTER JOIN USER U ON  F.USER_ID  = U.USER_ID 
+ 			LEFT OUTER JOIN CATEGORY C ON F.CATEGORY_ID = C.CATEGORY_ID
+    	<where>
+    	<if test="keywords!=null">
+                <foreach collection="keywords" item="keyword"
+                    index="index"  separator="OR ">
+                   F.KEYWORDS LIKE '%'||#{keyword}||'%'
+                </foreach>
+            </if>
+    	<!-- categoryId初始化时默认为零  -->
+    	<if test="categoryId > 0">
+    	AND LOCATE((select CATEGORY_PATH from CATEGORY where CATEGORY_ID = #{categoryId}),C.CATEGORY_PATH)>0
+    	</if>
+    	<if test=" fileName != null ">
+		AND F.FILE_NAME LIKE CONCAT('%',CONCAT(#{fileName},'%'))
+    	</if>
+    	<if test="userName != null">
+        AND F.USER_ID 
+        IN 
+        ( SELECT USER_ID FROM USER WHERE USER.USER_NAME LIKE CONCAT('%',CONCAT(#{userName},'%')) )
+         </if>
+        <if test=" startDate != null ">
+    	AND F.UPLOAD_TIME >= #{startDate}
+        </if>
+		<if test=" endDate != null ">
+		<![CDATA[
+		AND F.UPLOAD_TIME <= #{endDate}
+		]]>
+        </if>
+    	<if test=" fileState != '' ">
+    	AND F.FILE_STATE = #{fileState}
+    	</if>
+		<if test=" fileState == '' ">
+		AND F.FILE_STATE = '0'
+		</if>
+    	</where>
+    	) AS F1
+    	<if test="pageCond != null">
+    	<![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+    	</if>
+	</select>
+
+		<select id="categoryIdQuery" parameterType="com.bankcomm.novem.bo.search.FileFieldBo" resultType="int" >
+		   SELECT
+   			C.CATEGORY_ID,
+   			rownumber() over (order by C.CATEGORY_ID) as rn 
+			FROM CATEGORY C
+ 			WHERE LOCATE((select CATEGORY_PATH from CATEGORY C where CATEGORY_ID = #{categoryId}),C.CATEGORY_PATH)>0
+	</select>
+</mapper> 

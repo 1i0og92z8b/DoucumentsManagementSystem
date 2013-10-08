@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+
+			
+			[Bindable]
+			private var title:String = "";
+			
+			[Bindable]
+			private var dataProvider:ArrayCollection;
+//			private var dataProvider:ArrayCollection = new ArrayCollection([{"categoryName":1},{"categoryName":2}]);
+			
+			private var categoryList:ArrayCollection = new ArrayCollection();
+			
+			protected function queryPemission():void
+			{
+				// TODO Auto-generated method stub
+				
+//				var params:URLParameter = new URLParameter();
+				
+//				Connect.request(new ConnectParameter({url:"categoryPermissionSettings.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+//					var rspBody:Object=r["RSP_BODY"];							
+//					dataProvider=new ArrayCollection(rspBody["categoryList"] as Array);
+//				},isMaskAvailable:true
+//				}));
+				
+				Connect.request(new ConnectParameter({url:"categoryPermissionSettings.ajax",callback:function(r:Object,e:Event):void{
+					var rspBody:Object=r["RSP_BODY"];							
+					dataProvider=new ArrayCollection(rspBody["categoryList"] as Array);
+					
+//					var s:String = SessionBO.userInfo.role;
+//					for each(var categoryState:Object in dataProvider)
+//					{
+//						var fileIdList:Array = new Array();
+//						if(categoryState.categoryState)
+//							fileIdList.push(item["fileId"]);
+//						
+//					}
+				},isMaskAvailable:true
+				}));
+			}
+			
+			public function clickCheckBox(categoryId:int,categoryState:Boolean):void
+			{
+				// TODO Auto-generated method stub
+				var exist:Boolean = false;
+				
+				for each(var category:Object in categoryList)
+				{
+					if(category.categoryId == categoryId)
+					{
+						category.categoryState = categoryState;
+						exist = true;
+						break;
+					}
+				}
+				
+				if(!exist)
+					categoryList.addItem({"categoryId":categoryId,"categoryState":categoryState});
+			}
+			
+			private  function save():void
+			{
+				if(categoryList.length < 1){
+					Alert.show("无任何修改！","提示");
+					return;
+				}
+				var callbackFunc:Function = function():void{
+					var params:URLParameter = new URLParameter();
+				
+					for each(var category:Object in categoryList){
+					
+						params.reqBody = {"category":category};
+				
+						Connect.request(new ConnectParameter({url:"updatePermission.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+							Alert.show("保存成功","提示");
+						},isMaskAvailable:true
+						}));
+					}
+					categoryList.removeAll();
+				};
+			
+			Alert.show("是否确认保存？","确认",3,null,function(event:CloseEvent):void{
+				if(event.detail == Alert.YES){
+					if(null != callbackFunc){
+						callbackFunc();
+					}
+				}
+			},null,2);
+			}
+			
+			private  function reset():void
+			{
+				queryPemission();
+				categoryList.removeAll();
+				Alert.show("已重置","提示");
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:HBox  paddingTop="5" paddingBottom="2" paddingLeft="8">
+		<mx:Button label="保存" click="save()"/>
+		<mx:Button label="重置" click="reset()"/>
+	</mx:HBox>
+ 
+	<mx:DataGrid id="checkGrid" width="1000%" height="100%"
+									   creationComplete="queryPemission()"
+									   dataProvider="{dataProvider}">	
+		
+		<mx:columns>
+			
+			<mx:DataGridColumn dataField="categoryName" headerText="分类目录"/>
+			<mx:DataGridColumn headerText="是否给予权限">
+				<mx:itemRenderer>
+					<mx:Component>
+						
+						<mx:HBox horizontalAlign="center">
+							<mx:CheckBox id="a" label="" selected="{data.categoryState}" click="outerDocument.clickCheckBox(data.categoryId,a.selected)"/>
+						</mx:HBox>
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			
+		</mx:columns>		
+	</mx:DataGrid>
+
+</util:MyModule>
+

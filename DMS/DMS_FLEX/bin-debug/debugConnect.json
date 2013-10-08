@@ -1,0 +1,14 @@
+{
+  "IP": [
+    {
+      "id": "localhost",
+      "name": "localhost",
+      "url": "http://localhost:8080/dms-action/"
+    },
+    {
+      "id": "IP3",
+      "name": "IP[182.119.173.128]",
+      "url": "http://182.119.173.128:8092/jump-leave/"
+    }
+  ]
+}

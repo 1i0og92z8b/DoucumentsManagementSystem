@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20100713</version>
+    <author>赵扬</author>
+    <description>已上传文件</description>
+    <file>com/bankcomm/dms/modules/file/DMS_ManageUploadedFilesModule.swf</file>
+    <dict>state</dict>
+</module>

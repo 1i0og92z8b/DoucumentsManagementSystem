@@ -1,0 +1,221 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com" xmlns:components="com.bankcomm.dms.modules.category.components.*">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			import mx.core.FlexGlobals;
+			import mx.events.DynamicEvent;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.DemoBO;
+			import com.bankcomm.dms.bo.FileFieldBo;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.modules.demo.componets.DemoDetail;
+			import com.bankcomm.dms.modules.search.componets.FileDetail;
+			import com.bankcomm.dms.modules.file.components.CategoryPick;
+			
+			import flash.globalization.DateTimeFormatter;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+
+			[Bindable]
+			private var label1_textDecoration:String="none";
+			
+			[Bindable]
+			private var label2_textDecoration:String="underline";
+			
+			[Bindable]
+			private var label1_color:uint=parseInt('000000',16);
+			
+			[Bindable]
+			private var label2_color:uint=parseInt('0000ff',16);
+
+			[Bindable]
+			private var fileFieldBo:FileFieldBo = new FileFieldBo();
+			
+			private var catPick:CategoryPick = new CategoryPick();
+			
+			private function searchHandler():void{
+				
+				gridPage.param = function():Object{			
+
+					var df:DateTimeFormatter;
+					var params:URLParameter = new URLParameter();
+					if(keyInput.text != null && StringUtil.trim(keyInput.text) != ""){
+						fileFieldBo.fileName = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keyInput.text));
+					}
+					if(keywordsInput.text != null && StringUtil.trim(keywordsInput.text) != ""){
+						var str:String = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keywordsInput.text));
+						fileFieldBo.keywords=str.split(" ");
+						
+					}
+					if(userNameInput.text != null && StringUtil.trim(userNameInput.text) != ""){
+						fileFieldBo.userName = ExtentedStringUtil.symbolTranslation(StringUtil.trim(userNameInput.text));
+					}
+					if(fileCategoryInput.text != null){
+						fileFieldBo.categoryId = catPick.catNode.categoryId;
+					}
+					if(startDate.selectedDate != null ){
+						fileFieldBo.startDate = startDate.text + " 00:00:00"
+					}
+					if(endDate.selectedDate != null ){
+						fileFieldBo.endDate = endDate.text + " 23:59:59"
+					}
+					return fileFieldBo;
+					
+				};
+
+				PaginationUtil.gridPageInit(demoGrid,gridPage);
+				}
+			
+			public function showFileDetailHandler(item:Object):void{
+				var detail:FileDetail= new FileDetail();
+				detail.fileInfoBo.fileId = item["fileId"];
+				detail.fileInfoBo.fileName = item["fileName"];
+				detail.fileInfoBo.userName = item["userName"];
+				detail.fileInfoBo.userId = item["userId"];
+				detail.fileInfoBo.categoryPath = item["categoryPath"];
+				detail.fileInfoBo.uploadTime = item["uploadTime"];
+				detail.fileInfoBo.keywords = item["keywords"];
+				detail.fileInfoBo.filePath = item["filePath"];
+				detail.fileInfoBo.fileDesc = item["fileDesc"];
+				detail.fileInfoBo.fullName = item["fullName"];
+				detail.title="文件详细信息";
+				GuipPublic.popUp(detail);
+							
+						}
+			
+			public function label1ControlHandler():void{
+				if(hbox3.visible != false){
+					hbox3.visible = !hbox3.visible;
+					userNameInput.visible = !userNameInput.visible;
+					keywordsInput.visible = !keywordsInput.visible;
+					label1_textDecoration = "none";
+					label2_textDecoration = "underline";
+					label1_color=parseInt('000000',16);
+					label2_color=parseInt('0000ff',16);
+					
+					sp1.visible = !sp1.visible;
+					sp2.visible = !sp2.visible;
+					sp3.visible = !sp3.visible;
+					sp4.visible = !sp4.visible;
+				}
+			}
+			public function label2ControlHandler():void{
+				if(hbox3.visible == false){
+					hbox3.visible = !hbox3.visible;
+					userNameInput.visible = !userNameInput.visible;
+					keywordsInput.visible = !keywordsInput.visible;
+					label2_textDecoration = "none";
+					label1_textDecoration = "underline";
+					label2_color=parseInt('000000',16);
+					label1_color=parseInt('0000ff',16);
+					
+					sp1.visible = !sp1.visible;
+					sp2.visible = !sp2.visible;
+					sp3.visible = !sp3.visible;
+					sp4.visible = !sp4.visible;
+					gridPage.ps.value = 50;
+				}
+			}
+
+			protected function fileCategoryInput_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				GuipPublic.popUp(catPick,this,true);
+				FlexGlobals.topLevelApplication.addEventListener('displayCat',displayCat);				
+			}
+			
+			protected function displayCat(e:DynamicEvent):void
+			{
+				if(catPick.catNode != null){
+				fileCategoryInput.text = catPick.catNode.categoryName;
+				}
+			}
+		]]>
+		
+	</mx:Script>
+	<mx:HBox id="hbox1" width="100%"  horizontalGap="0" paddingTop="5" paddingBottom="2">
+			<mx:Spacer width="40%"/>
+			<mx:Label id="label1" text="简单搜索" textDecoration="{label1_textDecoration}" color="{label1_color}" click="label1ControlHandler()"/>
+			<mx:Spacer width="5%"/>
+			<mx:Label id="label2" text="高级搜索" textDecoration="{label2_textDecoration}" color="{label2_color}" click="label2ControlHandler()"/>
+		</mx:HBox>
+	<mx:HBox id="hbox2" width="100%" horizontalGap="0" paddingTop="5" paddingBottom="2">
+		<mx:Spacer id="sp1" width="10%"  creationComplete="sp1.visible = false" includeInLayout="{sp1.visible}"/>
+		<mx:Spacer id="sp2" width="40%"  creationComplete="sp2.visible = true" includeInLayout="{sp2.visible}"/>	   
+		<util:MySearchTextInput id="keyInput" width="200" prompt="文件名称" 
+								txChange="keyInput.showClearButton = (keyInput.text != '')"
+								clear="keyInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="50"/>
+		<mx:Spacer id="sp3" width="10%" creationComplete="sp3.visible = false" includeInLayout="{sp3.visible}"/>
+		<util:MySearchTextInput id="userNameInput" width="200" prompt="上传人" creationComplete="userNameInput.visible = false" includeInLayout="{userNameInput.visible}"
+								txChange="userNameInput.showClearButton = (userNameInput.text != '')"
+								clear="userNameInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="50"/>
+		<mx:Spacer id="sp4" width="10%" creationComplete="sp4.visible = false" includeInLayout="{sp4.visible}"/>
+		<util:MySearchTextInput id="keywordsInput" width="200" prompt="关键词，每个关键词请用空格分隔" creationComplete="keywordsInput.visible = false" includeInLayout="{keywordsInput.visible}"
+								txChange="keywordsInput.showClearButton = (keywordsInput.text != '')"
+								clear="keywordsInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="50"/>
+		<mx:Button width="23" height="23" click="searchHandler()" cornerRadius="0" toolTip="搜索" 
+				   icon="@Embed('assets/magnifier.png')"/>
+	</mx:HBox>
+	
+	<mx:HBox id="hbox3" width="100%" horizontalGap="0" paddingTop="5" paddingBottom="2" creationComplete="hbox3.visible = false" includeInLayout="{hbox3.visible}">
+		<mx:Spacer width="10%"/>
+<!--		<components:CategoryTree id="categoryTree" width="200" height="100" />-->
+		<util:MySearchTextInput id="fileCategoryInput" width="200" prompt="分类"
+								txChange="fileCategoryInput.showClearButton = (fileCategoryInput.text != '')"
+								clear="fileCategoryInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="50"
+								click="fileCategoryInput_clickHandler(event)"/>
+		<mx:Spacer width="10%"/>
+		<mx:FormItem label="开始时间">
+			<mx:DateField id="startDate" width="150" formatString="YYYY-MM-DD"/>
+		</mx:FormItem>
+		<mx:Spacer width="9%"/>
+		<mx:FormItem label="结束时间">
+			<mx:DateField id="endDate"  width="150" formatString="YYYY-MM-DD"/>
+		</mx:FormItem>
+	</mx:HBox>
+
+	<bankcomm:DoubleClickCheckDataGrid id="demoGrid" width="100%" height="100%" 
+									   creationComplete="searchHandler()"
+									   dataProvider="{gridPage.dataProvider}">
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="fileId" headerText="文件ID"/>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+			<mx:DataGridColumn dataField="userName" headerText="上传人"/>
+			<mx:DataGridColumn dataField="categoryPath" headerText="分类路径"/>
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+			<mx:DataGridColumn dataField="keywords" headerText="关键词"/>
+			<mx:DataGridColumn dataField="filePath" headerText="文件路径"/>
+<!--			<mx:DataGridColumn dataField="fileState" headerText="fileState"/>
+			<mx:DataGridColumn dataField="fileDesc" headerText="fileDesc"/>
+			<mx:DataGridColumn dataField="fullName" headerText="fullName"/>
+			<mx:DataGridColumn dataField="createTime" headerText="createTime"/>
+			<mx:DataGridColumn dataField="updateTime" headerText="updateTime"/>
+			<mx:DataGridColumn dataField="updator" headerText="updator"/>-->
+			<mx:DataGridColumn  headerText="查看详情">
+			<mx:itemRenderer>  
+				<mx:Component>  
+					<mx:HBox textAlign="center">  
+						<mx:Button id="lockBT" label="查看详情" width="50%" click="this.outerDocument.showFileDetailHandler(data)"/>  
+					</mx:HBox>  
+				</mx:Component>    
+			</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<util:GridPage id="gridPage" dataUrl="searchFile.ajax"/>
+</util:MyModule>

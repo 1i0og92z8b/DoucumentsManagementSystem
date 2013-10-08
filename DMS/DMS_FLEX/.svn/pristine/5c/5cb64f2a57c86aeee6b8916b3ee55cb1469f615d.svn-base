@@ -1,0 +1,637 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:code="http://code.google.com/p/flexlib/"
+				xmlns:local="*"
+				xmlns:jwolib="http://www.jwolib.com/2006/mxml"
+				fontSize="12" horizontalScrollPolicy="off" initialize="initApp();" layout="absolute">
+	<mx:Script>  
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.Global;
+			import DMS_Util.Public;
+			
+			import com.adobe.serialization.json.JSON;
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GUIPMyModuleLoader;
+			import com.bankcomm.IModuleData;
+			import com.bankcomm.ModuleData;
+			import com.bankcomm.MyModuleLoader;
+			import com.bankcomm.MyPanel;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.RoleConst;
+			import com.bankcomm.events.AppPageEvent;
+			import com.bankcomm.interfaces.IModuleUnloader;
+			
+			import flexlib.controls.tabBarClasses.SuperTab;
+			import flexlib.events.SuperTabEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.SWFLoader;
+			import mx.core.Container;
+			import mx.events.CloseEvent;
+			import mx.events.FlexEvent;
+			import mx.events.ItemClickEvent;
+			import mx.managers.BrowserManager;
+			import mx.managers.IBrowserManager;
+			import mx.modules.ModuleLoader;
+		
+			[Bindable]
+			[Embed(source="assets/door_in.png")]
+			private var loginSkin:Class;
+
+			[Bindable]
+			[Embed(source="assets/closeHead.png")]
+			private var upSkin:Class;
+
+			[Bindable]
+			[Embed(source="assets/openHead.png")]
+			private var downSkin:Class;
+
+			[Bindable]
+			[Embed(source="assets/feed.png")]
+			private var helpIcon:Class;
+
+			[Bindable]
+			[Embed(source="assets/house.png")]
+			private var homeIcon:Class;
+
+			[Bindable]
+			[Embed(source="assets/door-open-out.png")]
+			private var logoutIcon:Class;
+
+			//登录画面Logo
+			[Bindable]
+			[Embed(source='images/login/title.png')]
+			private var indexLogo:Class;
+
+			//背景图片
+			[Bindable]
+			[Embed(source="images/app_bg.jpg")]
+			private var bgSkin:Class;
+
+			[Embed(source="assets/document.png")]
+			private var document_icon:Class;
+
+			[Embed(source="assets/home.png")]
+			private var home_icon:Class;		
+			
+			[Embed(source="assets/error.png")]
+			private var errSkin:Class;
+					
+			[Embed(source="assets/information.png")]
+			private var infoSkin:Class;
+			
+			private var alert:Alert;
+
+			[Bindable]
+			private var isChange:Boolean=false;
+
+			[Bindable]
+			private var selectedNode:Object;
+
+			[Bindable]
+			private var stnTabs:ArrayCollection;
+
+			[Bindable]
+			private var showHome:Boolean=true;
+
+			//系统菜单树数据源
+			[Bindable]
+			private var sysMenuArr:ArrayCollection = new ArrayCollection();
+
+			//开发帮助、流程Demo显示开关
+			private var isHelpVisible:Boolean = true;
+
+			//开发帮助结点信息
+			private var sysHelpNode:Object = {"appid": "SYSHELP", "name": "开发帮助", "module": "SystemHelp/xxx_SysHelp.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "999999", "code": '888888'}
+
+		 
+			private function initApp():void
+			{
+				var browserManager:IBrowserManager=BrowserManager.getInstance();
+				browserManager.init("", "文档管理系统");
+				
+				//设置登录画面的logo
+				loginPanel.title.source=indexLogo;
+				loginPanel.loginSubmit = login;
+				loginPanel.user_name.addEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+				loginPanel.user_pwd.addEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+				
+				ExternalInterface.call("function browserFocus(){var f=document.getElementById('"+this.className+"');if (f) {f.tabIndex = 0;f.focus();}}");  
+
+				if (Global.debug)
+				{
+					debugBox.initDebug();
+				}
+				
+				workPanel.mx_internal::_showCloseButton=true;
+				workPanel.mx_internal::closeButton.toolTip="缩进状态栏";
+				workPanel.mx_internal::closeButton.buttonMode=true;
+				workPanel.mx_internal::closeButton.useHandCursor=true;
+				workPanel.setStyle("closeButtonSkin", upSkin);
+				workPanel.addEventListener(CloseEvent.CLOSE, function(event:CloseEvent):void
+				{
+					ChangeStateColumn()
+				})
+
+				divided.addEventListener(MouseEvent.DOUBLE_CLICK, function(e:MouseEvent):void
+				{
+					var theName:String=e.target.name.toString();
+					var found:int=theName.search(new RegExp("boxdivider", "i"));
+					if (found > -1)
+					{
+						var theDividerObject:Object=new Object();
+						if (e.target.hasOwnProperty("className") && e.target.className == "BoxDivider")
+							theDividerObject=e.target;
+						else
+							theDividerObject=e.target.parent;
+						for (var i:int=0; i < divided.numDividers; i++)
+						{
+							if (theDividerObject.name == divided.getDividerAt(i).name)
+							{
+								if (mp.width != 170)
+								{
+									mp.width = 170;
+								}
+								else
+								{
+									mp.width = 0;
+								}
+							}
+						}
+					} 
+				})
+			}
+
+			/**
+			 * 该函数用于验证用户登录信息
+			 */
+			private function login(e:Event):void
+			{
+				if (loginPanel.loginCheck())
+				{
+					//将登录按钮和按钮置为不可用
+					loginPanel.btnLogin.enabled=false;
+
+					//移除用户名和密码输入框的事件
+					loginPanel.user_name.removeEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+					loginPanel.user_pwd.removeEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+
+					loginPanel.loading.visible=true;
+					loginPanel.loading.play();
+
+					//设置报文主体部分
+					var reqBody:Object=new Object();
+					//设置报文主体部分中的用户名和密码
+					reqBody["userName"]=loginPanel.user_name.text;
+					reqBody["password"]=loginPanel.user_pwd.text;
+
+					//定义请求参数
+					var params:URLParameter=new URLParameter();
+					params.reqBody = reqBody;
+
+					//后台交互。
+					Connect.request(new ConnectParameter({url:"login.ajax", params: params.toParameter(), callback: function(r:Object, e:Event):void
+							{
+								var so:SharedObject=SharedObject.getLocal("defaultLogin");
+								if (loginPanel.remember.selected)
+								{
+									so.data.flag=true;
+									so.data.userid=loginPanel.user_name.text;
+									so.data.password=loginPanel.user_pwd.text;
+									try
+									{
+										so.flush();
+									}
+									catch (error:Error)
+									{
+										alert = Alert.show("本地不允许保存密码，保存密码失败！", "提示");
+										alert.titleIcon = errSkin;
+									}
+								}
+								else
+								{
+									so.clear();
+								}
+								so.close()
+
+								loginInfo[0].label=loginPanel.user_name.text;
+								userInfo.dataProvider=loginInfo;
+								
+								var rspBody:Object = r.RSP_BODY;
+								//var sessionbo:SessionBO=new SessionBO();
+								//sessionbo.setPropertyIsEnumerable(rspBody.userInfo,false);
+								if(rspBody.RESULT=="登陆成功"){
+									Alert.show("欢迎进入文档管理系统");
+									menuInit();
+								}
+								else {
+									Alert.show(rspBody.RESULT);
+									loginPanel.btnLogin.enabled=true;
+									loginPanel.user_name.addEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+									loginPanel.user_pwd.addEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+									loginPanel.loading.visible=false;
+									loginPanel.loading.stop
+									();
+									return;
+								}
+								
+								SessionBO.userInfo = rspBody.userInfo//{"userRo":rspBody.userInfo["userRole"],"userId":rspBody.userInfo["userId"]};
+								
+							}, failback: function(r:Object, e:Event):void
+							{
+								//此处为请求错误既后台信息验证失败后的操作
+								loginPanel.btnLogin.enabled=true;
+								loginPanel.user_name.addEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+								loginPanel.user_pwd.addEventListener(FlexEvent.ENTER, loginPanel.loginSubmit);
+								loginPanel.loading.visible=false;
+								loginPanel.loading.stop
+								();
+							}}));
+				}
+			}
+
+			private function menuInit():void
+			{  
+				var request:URLRequest = new URLRequest("dmsMenus.json");
+				var loader:URLLoader=new URLLoader();
+				loader.addEventListener(Event.COMPLETE, function(event:Event):void{
+					var r:Object=com.adobe.serialization.json.JSON.decode(String(loader.data),false);
+					var rsp_body:Object = r["RSP_BODY"];
+					var menuList:Array = new Array();
+					switch(SessionBO.userInfo["userRole"])
+					{
+						case RoleConst.ROLE_ADMIN:
+						{
+							menuList = rsp_body["adminMenuList"] as Array;
+							break;
+						}
+						case RoleConst.ROLE_DEPART_USER:
+						{
+							menuList = rsp_body["departUserMenuList"] as Array;
+							break;
+						}
+						case RoleConst.ROLE_COMPANY_USER:
+						{
+							menuList = rsp_body["companyUserMenuList"] as Array;
+							break;
+						}
+						default:
+						{
+							Alert.show("登录用户角色不存在。");
+							break;
+						}
+					}
+					
+					sysMenuArr = new ArrayCollection(menuList);
+					
+					removeElement(loginBox);
+					removeElement(debugBox);
+					main.visible=true;
+					loginPanel.loading.visible=false;
+					loginPanel.loading.stop();
+					if (showHome){
+						home();
+					}
+					addEventListeners();
+					if (sysMenuArr != null){
+						sysTree.openItems=sysMenuArr;
+					}
+				});
+				loader.load(request);
+			}
+			
+			private  function addEventListeners():void{
+				nav.addEventListener(AppPageEvent.CLOSE, function():void{ 
+					var o:Object = nav.selectedChild;
+					if (o.className == "Canvas")
+					{
+						((o as Canvas).getChildAt(0) as SWFLoader).source="";
+						((o as Canvas).getChildAt(0) as SWFLoader).load(null);
+					}
+					if(o.className == "MyPanel"){
+						if((o as MyPanel).numChildren>0){
+							o = (o as MyPanel).getChildAt(0);
+						}
+					}
+					if (o.className == "ModuleLoader")
+					{
+						if((o as ModuleLoader).child is IModuleUnloader){
+							((o as ModuleLoader).child as IModuleUnloader).unload();
+						}
+						(o as ModuleLoader).unloadModule();
+						(o as ModuleLoader).url=null;
+						(o as ModuleLoader).removeAllChildren();
+					}
+					if (o.className == "MyModuleLoader")
+					{
+						if((o as MyModuleLoader).child is IModuleUnloader){
+							((o as MyModuleLoader).child as IModuleUnloader).unload();
+						}
+						(o as MyModuleLoader).unloadModule();
+						(o as MyModuleLoader).url=null;
+						(o as MyModuleLoader).removeAllChildren();
+					}
+					if (o.className == "GUIPMyModuleLoader")
+					{
+						if((o as GUIPMyModuleLoader).child is IModuleUnloader){
+							((o as GUIPMyModuleLoader).child as IModuleUnloader).unload();
+						}
+						(o as GUIPMyModuleLoader).unloadModule();
+						(o as GUIPMyModuleLoader).url=null;
+						(o as GUIPMyModuleLoader).removeAllChildren();
+					}
+					try
+					{
+						new LocalConnection().connect("foo");
+						new LocalConnection().connect("foo");
+					}
+					catch (e:*)
+					{
+					}
+					nav.removeChildAt(nav.selectedIndex)
+				});
+				
+			}
+			
+			/**
+			 * 处理工作区导航容器中tab项关闭事件。
+			 */
+			private function tabCloseHandler(e:SuperTabEvent):void
+			{
+				var o:Object = nav.getChildAt(e.tabIndex);
+				Public.closeTab(o);
+			}
+
+			/**
+			 * 该函数用于控制页面框架顶部部分
+			 */
+			private function ChangeStateColumn():void
+			{
+				if (isChange)
+				{
+					ap.height=84;
+					apspacer.height=38;
+					barBox.height=40;
+					logoImage.visible=true;
+					logoImage.includeInLayout=true;
+					workPanel.mx_internal::closeButton.toolTip="展开状态栏";
+					workPanel.setStyle("closeButtonSkin", upSkin);
+					isChange=false;
+				}
+				else
+				{
+					ap.height=29;
+					logoImage.visible=false;
+					logoImage.includeInLayout=false;
+					workPanel.mx_internal::closeButton.toolTip="缩进状态栏";
+					workPanel.setStyle("closeButtonSkin", downSkin);
+					apspacer.height=0;
+					barBox.percentHeight=100;
+					isChange=true;
+				}
+			}
+
+
+			private function treeLabel(item:Object):String
+			{
+				if (!item.children && !item.leaf)
+					item.children=new ArrayCollection();
+				if (item.name)
+					return item.name ? StringUtil.trim(item.name) : item.name;
+				return "";
+			}
+
+			/**
+			 * 添加一个Tab项
+			 */
+			private function treeItemClick(item:Object):void
+			{
+				if(item.leaf && item.url)
+				{
+					return;
+				}
+				if(item.leaf && item.module)
+				{
+					var moduleData:IModuleData=new ModuleData();
+					moduleData.label=item.name;
+					moduleData.icon=item.icon;
+					moduleData.url=item.module;
+					moduleData.uid=item.id;
+					moduleData.systemId=item.appid;
+					var params:Object = new Object();
+					params.id = item.funcId;				 				
+					moduleData.params=params;
+					moduleData.callback=item.callback;				
+					loadModule(moduleData, nav, Global.IP);
+				}
+			}
+			
+			public function loadModule(m:IModuleData, c:Container, rootURL:String):void
+			{
+				Public.loadModule(m, c, rootURL)
+			}
+			
+			private function showTooltip(data:Object):String
+			{
+				if (data.leaf)
+				{
+					return data.name ? StringUtil.trim(data.name) : data.name;
+				}
+				else
+					return null;
+			}
+
+			private function clickButton(evt:ItemClickEvent):void
+			{
+				switch (evt.index)
+				{
+					case 1:
+						home();
+						return;
+					case 2:
+						help();
+						return;
+					case 3:
+						logout();
+						return;
+				}
+			}
+
+			private function logout():void
+			{
+				alert = Alert.show('是否退出文档管理系统？', '确认', 3, null, function(event:CloseEvent):void
+				{
+					if (event.detail == Alert.YES)
+					{
+						var params:URLParameter = new URLParameter();
+						params.reqBody={userName:SessionBO.userInfo["userName"]};
+						Connect.request(new ConnectParameter({url:"logout.ajax", params: params.toParameter(), callback: function(r:Object, e:Event):void
+								{
+									var rspBody:Object = r.RSP_BODY;
+									Alert.show(rspBody.RESULT);
+									navigateToURL(new URLRequest("index.html"), "_self");
+									SessionBO.userInfo=null;
+								}}));
+					}
+				});
+				alert.titleIcon = infoSkin;
+			}
+
+			private function home():void
+			{
+				if (!nav.getChildByName("home"))
+				{
+					var module:ModuleLoader=new ModuleLoader();
+					module.url="xxx_Dashboard/xxx_Dashboard.swf"
+					module.setStyle("closable", true);
+					module.label="系统首页";
+					module.icon=homeIcon;
+					module.name="home";
+					nav.addChild(module);
+					nav.selectedIndex=nav.getChildIndex(nav.getChildByName("home"));
+						//					callLater(function():void{
+						//						nav.setClosePolicyForTab(0,SuperTab.CLOSE_NEVER);	
+						//					});					
+				}
+				else
+				{
+					nav.selectedIndex=nav.getChildIndex(nav.getChildByName("home"));
+				}
+			}
+
+			private function help():void
+			{
+				if (!nav.getChildByName("help"))
+				{
+					var module:ModuleLoader=new ModuleLoader();
+					module.url="xxx_Help/xxx_Help.swf"
+					module.setStyle("closable", true);
+					module.label="系统帮助";
+					module.icon=helpIcon;
+					module.name="help";
+					nav.addChild(module);
+					nav.selectedIndex=nav.getChildIndex(nav.getChildByName("help"));
+				}
+				else
+				{
+					nav.selectedIndex=nav.getChildIndex(nav.getChildByName("help"));
+				}
+			}
+
+			protected function tCode_enterHandler():void
+			{
+				if (tCode.text == '')
+				{
+					return;
+				}
+				if (sysMenuArr == null)
+				{
+					alert = Alert.show("没有相应交易码！", "警告");
+					alert.titleIcon = errSkin;
+					return;
+				}
+
+				var aStore:Array = new Array();
+				retrieveData(aStore, sysMenuArr, 'code', tCode.text);
+				if (aStore.length == 1)
+				{
+					treeItemClick(aStore[0]);
+				}
+				else if (aStore.length == 0)
+				{
+					alert = Alert.show("没有相应交易码！", "警告");
+					alert.titleIcon = errSkin;
+				}
+				else
+				{
+					alert = Alert.show("错误交易码！", "警告");
+					alert.titleIcon = errSkin;
+				}
+			}
+
+			private function retrieveData(aStore:Array, dp:Object, property:String, value:Object):void
+			{
+				for (var i:int=0; i < dp.length; i++)
+				{
+					if (dp[i][property] == value)
+					{
+						aStore.push(dp[i]);
+					}
+					if (dp[i].hasOwnProperty("children") && dp[i].children != null && (dp[i].children is Array || dp[i].children is ArrayCollection))
+					{
+						retrieveData(aStore, dp[i].children, property, value);
+					}
+				}
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Style source="skins/flex_skins.css"/>
+	<mx:Style source="commons.css"/>
+	<mx:Array id="loginInfo">
+		<mx:Object label="登录名" icon="@Embed('assets/user.png')"/>
+		<mx:Object label="首页" icon="{homeIcon}" toolTip="系统首页"/>
+		<mx:Object label="帮助" icon="{helpIcon}" toolTip="系统帮助"/>
+		<mx:Object label="退出" icon="{logoutIcon}" toolTip="退出系统"/>
+	</mx:Array>
+	<mx:VBox id="loginBox" width="100%" height="100%" horizontalAlign="center" verticalAlign="middle"
+			 verticalGap="15">
+		<local:LoginPanel id="loginPanel" visible="true" width="100%" height="100%"
+						  horizontalCenter="0" verticalCenter="0"/>
+		<jwolib:FieldSet visible="false" includeInLayout="false"/>
+	</mx:VBox>
+	<local:IPDebug id="debugBox" visible="{Global.debug}" height="100%" horizontalAlign="left"
+				   includeInLayout="{Global.debug}"/>
+	<mx:VBox id="main" visible="false" x="0" y="0" width="100%" height="100%">
+		<mx:ApplicationControlBar id="ap" visible="true" width="100%" height="84" paddingTop="0">
+			<mx:Image id="logoImage" source="@Embed('images/bankcomm.png')"/>
+			<mx:Spacer width="100%"/>
+			<mx:VBox height="100%" horizontalAlign="right" paddingTop="0" verticalGap="0">
+				<mx:Spacer id="apspacer" height="38"/>
+				<mx:HBox id="barBox" height="40" horizontalGap="5" verticalAlign="middle">
+					<mx:HBox height="100%" horizontalGap="0" verticalAlign="middle">
+						<mx:Label color="white" fontWeight="bold" text="交易码："/>
+						<jwolib:TextInput id="tCode" width="139"
+										  change="if(tCode.text!=''){tCode.prompt=''}else tCode.prompt='点击输入, 回车确认'"
+										  clear="tCode.prompt='点击输入, 回车确认'" color="white"
+										  enter="tCode_enterHandler()"
+										  focusIn="tCode.setStyle('color',0x000000)"
+										  focusOut="tCode.setStyle('color',0xffffff)" maxChars="6"
+										  prompt="点击输入, 回车确认" restrict="0-9"/>
+					</mx:HBox>
+					<mx:LinkBar id="userInfo" color="white" contentBackgroundAlpha="0"
+								dataProvider="{loginInfo}" fontWeight="bold"
+								itemClick="clickButton(event)" toolTipField="toolTip"/>
+				</mx:HBox> 
+			</mx:VBox>
+		</mx:ApplicationControlBar>
+		<mx:Canvas width="100%" height="100%">
+			<mx:HDividedBox id="divided" width="100%" height="100%" doubleClickEnabled="true"
+							liveDragging="true">
+				<mx:Panel id="mp" width="170" height="100%" maxWidth="500" headerHeight="20"
+						  styleName="mainPanel" title="功能菜单">
+					<mx:Tree id="sysTree" width="100%" height="100%" dataProvider="{sysMenuArr}"
+							 dataTipFunction="showTooltip"
+							 itemClick="treeItemClick(Tree(event.currentTarget).selectedItem);"
+							 labelFunction="treeLabel" showDataTips="true" showRoot="false"
+							 toolTip="{data.name}"/>
+				</mx:Panel>
+				<mx:Panel id="workPanel" width="100%" height="100%" backgroundAlpha="1"
+						  headerHeight="20" styleName="mainPanel">
+					<code:SuperTabNavigator id="nav" width="100%" height="100%" backgroundAlpha="0"
+											closePolicy="{SuperTab.CLOSE_ROLLOVER}"
+											horizontalGap="0" minTabWidth="100" paddingBottom="0"
+											paddingLeft="0" paddingRight="0" paddingTop="0"
+											scrollSpeed="25"
+											startScrollingEvent="{MouseEvent.MOUSE_DOWN}"
+											stopScrollingEvent="{MouseEvent.MOUSE_UP}"
+											tabClose="tabCloseHandler(event)"/>
+				</mx:Panel>
+			</mx:HDividedBox>
+		</mx:Canvas>
+	</mx:VBox>
+</mx:Application>

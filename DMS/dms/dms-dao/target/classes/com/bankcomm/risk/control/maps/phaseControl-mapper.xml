@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.batch.control.IPhaseControlViewMapper">
+	<sql id="statesLoop">
+		STATE in
+		<foreach item="item" index="index" collection="states" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</sql>
+
+	<resultMap type="com.bankcomm.novem.entry.batch.control.PhaseControlViewEntry"
+		id="phaseControlMap">
+		<result property="phaseDefineId" column="PHASE_DEFINE_ID" />
+		<result property="phaseDesc" column="PHASE_DESC" />
+		<result property="phaseName" column="PHASE_NAME" />
+		<result property="phaseNo" column="PHASE_NO" />
+		<result property="prePhaseDefineId" column="PRE_PHASE_DEFINE_ID" />
+		<result property="phaseOrderId" column="PHASE_ORDER_ID" />
+	</resultMap>
+	<select id="queryPhaseByStates" resultMap="phaseControlMap">
+		SELECT * 
+		FROM KISK.PHASE_CONTROL_VIEW 
+		WHERE PHASE_DEFINE_ID IN 
+		(
+			SELECT A.PHASE_DEFINE_ID 
+			FROM KISK.STEP_DEFINE A
+			WHERE A.STATE IN
+			<foreach item="item" index="index" collection="states" open="("
+				separator="," close=")">
+				#{item}
+			</foreach>
+		) 
+	</select>
+</mapper> 

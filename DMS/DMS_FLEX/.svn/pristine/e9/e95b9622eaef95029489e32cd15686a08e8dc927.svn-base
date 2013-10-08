@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:VBox xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%">
+	<mx:Script>
+		<![CDATA[
+			import com.adobe.serialization.json.JSON;
+			import com.bankcomm.GuipPublic;
+			
+			import mx.collections.ArrayCollection;
+			
+			import DMS_Util.Global;
+
+			[Bindable]
+			private var dpIP:ArrayCollection;
+
+			private var defaultIP:String=null;
+
+			private function initDefaultIP():void
+			{
+				var nocache:Date=new Date();
+				var loader:URLLoader=new URLLoader(new URLRequest("debugConnect.json?_nocache=" + String(nocache.getTime())))
+				loader.addEventListener(Event.COMPLETE, function(event:Event):void
+				{
+					var r:Object=com.adobe.serialization.json.JSON.decode(String(loader.data));
+					dpIP=new ArrayCollection(r.IP as Array);
+					var defaultIPSO:SharedObject=SharedObject.getLocal("defaultIP");
+					if (defaultIPSO.data.IP)
+					{
+						for (var i:int=0; i < dpIP.length; i++)
+						{
+							if (dpIP.getItemAt(i).id == defaultIPSO.data.IP)
+							{
+								defaultIP=dpIP.getItemAt(i).id;
+								Global.IP=dpIP.getItemAt(i).url; //设置当前连接
+								comboIP.selectedItem=dpIP.getItemAt(i);
+								break;
+							}
+						}
+					}
+					defaultIPSO.flush();
+				});
+			}
+
+			private function changeIP():void
+			{
+				Global.IP=comboIP.selectedItem.url; //设置当前连接
+				labelIP.text=comboIP.selectedItem.url; //显示当前连接url
+				var defaultIPSO:SharedObject=SharedObject.getLocal("defaultIP");
+				defaultIPSO.data.IP=this.comboIP.selectedItem.id;
+				defaultIPSO.flush();
+				defaultIP=this.comboIP.selectedItem.id;
+				defaultIPSO.close();
+			}
+
+			public function initDebug():void
+			{
+				initDefaultIP();
+				GuipPublic.cacheType=0;
+			}
+		]]>
+	</mx:Script>
+	<mx:HBox width="100%" horizontalGap="2" verticalAlign="middle">
+		<mx:Label text="选择地址：" textAlign="left" fontWeight="bold" color="#FFFFFF"/>
+		<mx:ComboBox id="comboIP" width="100" height="23" dataProvider="{dpIP}" editable="false" labelField="name" change="changeIP();"/>
+	</mx:HBox>
+	<mx:VBox width="100%" horizontalAlign="right">
+		<mx:Label text="{comboIP.selectedItem.url}" id="labelIP" width="100%" textAlign="left" fontWeight="bold" color="white"/>
+	</mx:VBox>
+</mx:VBox>

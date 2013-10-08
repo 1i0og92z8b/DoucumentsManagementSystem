@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+  PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.bankcomm.novem.dao.user.IUserManageDaoMapper">
+
+	<resultMap type="com.bankcomm.novem.entry.user.UserEntry" id="UserMap">
+		<result property="userId" column="USER_ID"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="passWord" column="PASSWORD"/>
+		<result property="name" column="NAME"/>
+		<result property="sex" column="SEX"/>
+		<result property="email" column="EMAIL"/>
+		<result property="extNo" column="EXT_NO"/>
+		<result property="ifLogin" column="IF_LOGIN"/>
+		<result property="createTime" column="CREATE_TIME"/>
+		<result property="updateTime" column="UPDATE_TIME"/>
+		<result property="updator" column="UPDATOR"/>
+	</resultMap>
+	
+	<resultMap type="com.bankcomm.novem.bo.user.UserQueryBo" id="UserQueryMap">
+		<result property="userName" column="USER_NAME"/>
+		<result property="email" column="EMAIL"/>
+		<result property="extNo" column="EXT_NO"/>
+	</resultMap>
+	
+	<insert id="insertUser" parameterType="com.bankcomm.novem.entry.user.UserEntry">
+	  
+      insert into USER (USER_NAME, PASSWORD, SEX, EMAIL, EXT_NO ,NAME ,IF_LOGIN ,CREATE_TIME ,UPDATE_TIME ,UPDATOR)
+      values (#{userName}, #{passWord}, #{sex}, #{email}, #{extNo}, #{name} ,#{ifLogin} ,#{createTime} ,#{updateTime} ,#{updator})
+  	</insert>
+  
+  <delete id="deleteUser">
+		delete 
+		from USER
+		where
+		<foreach collection="list" item="userName" open="("
+			close=")" separator=",">
+			USER_NAME=#{userName}
+		</foreach>
+  </delete>	
+  
+  <update id="updateUser" parameterType="com.bankcomm.novem.entry.user.UserEntry" >
+		update USER set
+		PASSWORD = #{passWord},
+		NAME = #{name},
+		SEX = #{sex},
+		EMAIL = #{email},
+		EXT_NO= #{extNo},
+		UPDATE_TIME=#{updateTime}	
+		where USER_NAME = #{userName}
+  </update>
+	
+  <select id="queryUserInfo" parameterType="com.bankcomm.novem.bo.user.UserQueryBo" resultMap="UserMap">
+		select  USER_ID,USER_NAME,PASSWORD,NAME,SEX,EMAIL,EXT_NO
+		from USER
+		<where>
+		<if test="userName!=null">User_NAME = #{userName}</if>
+		<if test="email!=null">and EMAIL = #{email}</if>
+		<if test="extNo!=null">and EXT_NO = #{extNo}</if>
+		</where>
+  </select>
+  
+  <select id="queryUserList"  parameterType="com.bankcomm.novem.bo.user.UserQueryBo" resultMap="UserMap">
+  	select USER_ID,USER_NAME,PASSWORD,NAME,SEX,EMAIL,EXT_NO
+  	from USER
+  </select> 
+</mapper>

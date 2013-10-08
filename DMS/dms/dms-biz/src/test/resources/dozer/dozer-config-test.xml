@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mappings xmlns="http://dozer.sourceforge.net" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://dozer.sourceforge.net
+	http://dozer.sourceforge.net/schema/beanmapping.xsd">
+	<mapping>
+		<class-a>com.bankcomm.novem.biz.dozer.convert.TestClassWithBoList
+		</class-a>
+		<class-b>com.bankcomm.novem.biz.dozer.convert.TestMapWithBoList
+		</class-b>
+		<field>
+			<a>sheetBoList</a>
+			<b>sheetBoList</b>
+			<b-hint>java.util.Map</b-hint>
+		</field>
+	</mapping>
+</mappings>

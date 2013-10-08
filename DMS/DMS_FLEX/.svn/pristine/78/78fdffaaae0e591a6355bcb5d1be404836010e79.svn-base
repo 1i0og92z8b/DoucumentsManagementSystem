@@ -1,0 +1,229 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com" xmlns:components="com.bankcomm.dms.modules.category.components.*">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.FileFieldBo;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.components.*;
+			import com.bankcomm.dms.modules.file.components.CategoryPick;
+			import com.bankcomm.dms.modules.file.components.UpdateView;
+			
+			import flash.globalization.DateTimeFormatter;
+			
+			import mx.controls.Alert;
+			import mx.core.FlexGlobals;
+			import mx.events.CloseEvent;
+			import mx.events.DynamicEvent;
+			import mx.events.ItemClickEvent;
+			
+			private var catPick:CategoryPick = new CategoryPick();
+			
+			private function searchUploaded():void
+			{
+				gridPage.param = function():Object {
+					var PARAMS:Object = new Object();
+					PARAMS["userId"] = SessionBO.userInfo.userId;
+					return PARAMS;
+				};
+				PaginationUtil.gridPageInit(fileGrid,gridPage);
+			}
+			
+			private function itemClickHander(event:ItemClickEvent):void{
+				switch (event.index){
+					case 0:
+						batchDelete();
+						break;
+					case 1:
+						break;
+					case 2:
+						break;
+					case 3:
+						break;
+				}
+			}
+			
+			private function batchDelete():void
+			{
+				if(!fileGrid.selectedItems || fileGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					var params:URLParameter = new URLParameter();
+					var fileIdList:Array = new Array();
+					for each(var item:Object in fileGrid.selectedItems){
+						fileIdList.push(item["fileId"]);
+					}
+					
+					
+					params.reqBody = {"fileIdList":fileIdList};
+					
+					Connect.request(new ConnectParameter({url:"checkBatchDelete.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						searchUploaded();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认删除？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			protected function fileCategoryInput_clickHandler(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				GuipPublic.popUp(catPick,this,true);
+				FlexGlobals.topLevelApplication.addEventListener('displayCat',displayCat);				
+			}
+			
+			protected function displayCat(e:DynamicEvent):void
+			{
+				fileCategoryInput.text = catPick.catNode.categoryName;
+			}
+			
+			private function searchUploadedFiles():void{
+				
+				gridPage.param = function():Object{		
+//					var PARAMS:Object = new Object();
+//					PARAMS["fileName"] = "100";
+//					PARAMS["userId"] = "100";
+//					PARAMS["userId"] = "100";
+//					PARAMS["userId"] = "100";
+//					PARAMS["userId"] = "100";
+//					return PARAMS;
+					var fileFieldBo:FileFieldBo = new FileFieldBo();
+					var df:DateTimeFormatter;
+					var params:URLParameter = new URLParameter();
+					if(fileNameInput.text != null && StringUtil.trim(fileNameInput.text) != ""){
+						fileFieldBo.fileName = ExtentedStringUtil.symbolTranslation(StringUtil.trim(fileNameInput.text));
+					}
+					if(keywordsInput.text != null && StringUtil.trim(keywordsInput.text) != ""){
+//						fileFieldBo.keywords = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keywordsInput.text));
+					}
+					if(startDate.selectedDate != null ){
+						fileFieldBo.startDate = startDate.text + " 00:00:00"
+					}
+					if(endDate.selectedDate != null ){
+						fileFieldBo.endDate = endDate.text + " 23:59:59"
+					}
+					if(fileCategoryInput.text != null) {
+						fileFieldBo.categoryId = catPick.catNode.categoryId;
+					}
+					fileFieldBo.userId = SessionBO.userInfo.userId;
+					return fileFieldBo;					
+				};
+				PaginationUtil.gridPageInit(fileGrid,gridPage);
+			}
+			
+			public function downloadFile(fileId:int):void
+			{
+				var fileDownload:FileDownload = new FileDownload();
+//				fileNameq ++;
+//				var userId:String = SessionBO.userInfo.userId;
+				fileDownload.downloadFile("下载文件" + ".txt",fileId.toString(),SessionBO.userInfo.userId);
+			}
+			
+			public function updateFile(data:Object):void
+			{
+				// TODO Auto-generated method stub
+				var updateView:UpdateView = new UpdateView();
+				GuipPublic.popUp(updateView,this,true);
+				var e:DynamicEvent = new DynamicEvent('getFileInfo');
+				var o:Object = new Object();				
+				o.fileId = data.fileId;
+				o.fileName = data.fileName;
+				o.keywords = data.keywords;
+				o.fileDesc = data.fileDesc;
+				o.fileCategory = data.categoryId;
+				e.obj = o;
+				updateView.dispatchEvent(e);
+			}
+			
+			public function deleteFile(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				var callbackFunc:Function = function():void{
+					
+					var fileDelete:FileDelete = new FileDelete();
+					fileDelete.deleteFile(fileId);
+					searchUploaded();
+				};
+				
+				Alert.show("是否确认删除文件？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+		]]>
+	</mx:Script>
+	<mx:Array id="btnDp">
+		<mx:Object label="批量删除" icon="@Embed('assets/page_delete.png')"/>
+	</mx:Array>
+	<mx:HBox width="100%" horizontalGap="0" paddingTop="5" paddingBottom="2">
+		<mx:ButtonBar id="bar" dataProvider="{btnDp}" itemClick="itemClickHander(event)"/>
+		<mx:Spacer width="100%"/>
+		<util:MySearchTextInput id="fileNameInput" width="200" prompt="文件名"
+								txChange="fileNameInput.showClearButton = (fileNameInput.text != '')"
+								clear="fileNameInput.showClearButton = false;searchUploadedFiles()" enter="searchUploadedFiles()"
+								showClearButton="false" maxChars="50"/>
+		<mx:Spacer width="10%"/>
+		<util:MySearchTextInput id="keywordsInput" width="200" prompt="关键字"
+								txChange="keywordsInput.showClearButton = (keywordsInput.text != '')"
+								clear="keywordsInput.showClearButton = false;searchUploadedFiles()" enter="searchUploadedFiles()"
+								showClearButton="false" maxChars="50"/>
+		<util:MySearchTextInput id="fileCategoryInput" width="200" prompt="分类"
+								txChange="fileCategoryInput.showClearButton = (fileCategoryInput.text != '')"
+								clear="fileCategoryInput.showClearButton = false;searchUploadedFiles()" enter="searchUploadedFiles()"
+								showClearButton="false" maxChars="50"
+								click="fileCategoryInput_clickHandler(event)"/>
+		<mx:FormItem label="上传时间">
+			<mx:DateField id="startDate" width="150" formatString="YYYY-MM-DD"/>
+		</mx:FormItem>
+		<mx:FormItem label="——">
+			<mx:DateField id="endDate"  width="150" formatString="YYYY-MM-DD"/>
+		</mx:FormItem>
+		<mx:Button width="23" height="23" click="searchUploadedFiles()" cornerRadius="0" toolTip="搜索" 
+				   icon="@Embed('assets/magnifier.png')"/>
+	</mx:HBox>	
+	<bankcomm:DoubleClickCheckDataGrid id="fileGrid" width="100%" height="100%" creationComplete="searchUploaded()" dataProvider="{gridPage.dataProvider}">
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名	" />
+			<mx:DataGridColumn dataField="categoryPath" headerText="分类" />
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间" />
+			<mx:DataGridColumn dataField="downloadCounts" headerText="下载次数" />	
+			<mx:DataGridColumn headerText="操作">
+				<mx:itemRenderer>
+					<mx:Component>						
+						<mx:HBox horizontalAlign="left" paddingLeft="10" horizontalGap="20">
+							<mx:Button label="下载" paddingLeft="10" click="outerDocument.downloadFile(data.fileId)"/>
+							<mx:Button label="更新" paddingLeft="10" click="outerDocument.updateFile(data)"/>
+							<mx:Button label="删除" paddingRight="10" click="outerDocument.deleteFile(data.fileId)"/>							
+						</mx:HBox>
+						
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<util:GridPage id="gridPage" dataUrl="queryUploadedFiles.ajax" />
+</util:MyModule>

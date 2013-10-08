@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20130922</version>
+    <author> </author>
+    <description>Home</description>
+    <file>com/bankcomm/dms/modules/home/DMS_HomeModule.swf</file>
+    <dict>state</dict>
+</module>

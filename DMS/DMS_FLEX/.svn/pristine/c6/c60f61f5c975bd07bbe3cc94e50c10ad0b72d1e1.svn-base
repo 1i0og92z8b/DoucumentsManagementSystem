@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:bankcomm="http://www.bankcomm.com"
+				xmlns:components="com.bankcomm.dms.modules.category.components.*"
+				width="100%" height="100%" layout="vertical" verticalAlign="middle"
+				paddingBottom="10" paddingTop="10">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.CategoryBo;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.modules.category.components.CategoryView;
+			import com.bankcomm.dms.modules.category.components.CategoryTree;
+			
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+		
+			public var parentId:int;
+			
+			[Bindable]
+			public var parentName:String;
+			
+			[Bindable]
+			public var isLeaf:int;
+			
+			[Bindable]
+			public var updator:int=0;
+			
+			[Bindable]
+			public var categoryPath:String;
+			
+			[Bindable]
+			public var categoryState:Boolean;
+			
+			[Bindable]
+			public var treeCat:Object;
+			
+			private var categoryBo:CategoryBo;
+			
+			public function insertCategory():void{
+				
+				
+				/**以下给定请求参数categoryBo，
+				 * 其中categoryName和categoryDesc从文本输入框中获取**/
+				categoryBo=new CategoryBo();
+
+				categoryBo.isLeaf=false;
+				categoryBo.categoryState=true;
+				categoryBo.modifyUser=SessionBO.userInfo["userId"];
+				
+				categoryBo.categoryPath=categoryPath+"."+"X"; 
+				//这个X是指插入分类后在数据库表中的categoryId？考虑该怎么获取，前台还是后台？
+				
+				categoryBo.parentId=parentId;
+ 				categoryBo.categoryName=categoryName.text;
+				categoryBo.categoryDesc=categoryDesc.text; 
+				
+				var params:URLParameter=new URLParameter();
+				
+				var reqBody:Object=new Object;
+				reqBody["categoryBo"]=categoryBo;
+				
+				params.reqBody=reqBody;
+				
+				var obj:Object=new Object();
+				obj.url="insertCategory.ajax";
+				obj.params=params.toParameter();
+				var callbackFunc:Function=function(r:Object,e:Event):void{
+					//回调函数
+					var rspBody:Object=r["RSP_BODY"];
+ 					var map:Object=rspBody["map"];
+					if (map["flag"]==false){
+						Alert.show(map["message"],"提示");
+						return;
+					}  
+				 	treeCat.initRoot(); 
+					/* dispatchEvent(new Event("refresh")); */
+					dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+
+				};
+				obj.callback=callbackFunc;
+				//请求后台，调用insertCategory()方法
+				Connect.request(new ConnectParameter(obj));
+			}
+			
+			//点击重置按钮，将文本输入框重置
+			private function reset():void{
+				categoryName.text="";
+				categoryDesc.text="";
+			}
+		
+			
+		]]>
+	</mx:Script>
+	
+
+	<mx:HBox>
+		<mx:Label width="180" text="分类名称" id="t1"/>
+		<mx:TextInput id="categoryName" width="192"/>
+	</mx:HBox>		
+	<mx:HBox>
+		<mx:Label width="180" text="上级分类" id="t2"/>
+		<mx:TextInput editable="false" width="192" text="{parentName}"/>
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Label width="180" text="分类描述" id="t3"/>
+		<mx:TextArea editable="true" id="categoryDesc" width="192"/>
+	</mx:HBox>
+	
+	<mx:HBox textAlign="center" width="230">
+		<mx:Button id="btnConfirm" label="确定" click="insertCategory()" visible="true" includeInLayout="true"/>
+		<mx:Button id="btnReset" label="重置" click="reset()" visible="true" includeInLayout="true"/>
+		<mx:Button id="btnCancel" label="取消" click="this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+	</mx:HBox>
+	
+</mx:TitleWindow>

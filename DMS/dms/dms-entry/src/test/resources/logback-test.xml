@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="false">
+	<contextName>RISK_DAO_TEST</contextName>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>DENY</onMatch>
+			<onMismatch>ACCEPT</onMismatch>
+		</filter>
+		<encoder>
+			<pattern>[%-5level] %date{HH:mm:ss.SSS} %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="ERR_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+		<target>System.err</target>
+		<encoder>
+			<pattern>[%-5level] %date{HH:mm:ss.SSS} %logger{36} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<root level="DEBUG">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="ERR_CONSOLE" />
+	</root>
+
+	<logger name="org.apache.commons.beanutils.converters" level="INFO" />
+	<logger name="org.apache.commons.beanutils.ConvertUtils" level="INFO" />
+
+</configuration>

@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20100713</version>
+    <author>黄恒安</author>
+    <description>Demo</description>
+    <file>com/bankcomm/dms/modules/demo/DMS_DemoModule.swf</file>
+    <dict>state</dict>
+</module>

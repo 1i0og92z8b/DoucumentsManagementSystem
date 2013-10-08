@@ -1,0 +1,39 @@
+{
+  "RSP_BODY": {
+    "TRAN_ID": "",
+    "TRAN_PROCESS": "",
+    "adminMenuList":[
+    	{"appid": "dms_demo", "name": "Demo", "module": "config/statistics/DMS_Statistics_RecentUploadedFileModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "1001", "code": "888888"}
+    	,{"appid": "dms_demo", "name": "搜索模块", "module": "config/search/DMS_FileSearchModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "2001", "code": "888888"}
+    	,{"appid": "dms_home", "name": "首页", "module": "config/home/DMS_HomeModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "999999", "code": "3001"}
+    	,{"appid": "dms_userManage", "name": "用户管理", "module": "config/user/DMS_UserManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "4001", "code": "888888"}
+    	,{"appid": "dms_categoryManage", "name": "分类管理", "module": "config/category/DMS_CategoryManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "5001", "code": "888888"}
+    	,{"name": "文件管理","leaf":false,"children":[
+			{"appid": "dms_fileUpload", "name": "文件上传", "module": "config/file/DMS_UploadModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "6001", "code": "888888"}
+			,{"appid": "dms_manageUploaded", "name": "已上传文件管理", "module": "config/file/DMS_ManageUploadedFilesModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "6002", "code": "888888"}
+      	]}  	
+    	,{"name": "权限管理","leaf":false,"children":[
+			{"appid": "dms_fileCheck", "name": "文件审核", "module": "config/check/DMS_FileCheckModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "7001", "code": "888888"}
+			,{"appid": "dms_categoryPermission", "name": "分类权限控制", "module": "config/check/DMS_CategoryPermissionModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "7002", "code": "888888"}
+      	]}
+      	,{"name": "回收站管理","leaf":false,"children":[
+		    {"appid": "dms_unpassFileManage", "name": "审核未通过文件管理", "module": "config/recycle/DMS_unpassFileManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "8001", "code": "888888"}
+	      	,{"appid": "dms_deleteFileManage", "name": "已删除文件管理", "module": "config/recycle/DMS_deleteFileManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "8002", "code": "888888"}
+      ]}
+      ]
+      ,"departUserMenuList": [
+		{"appid": "dms_home", "name": "首页", "module": "config/home/DMS_HomeModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "1001", "code": "888888"}
+		,{"appid": "dms_userManage", "name": "用户管理", "module": "config/user/DMS_UserManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "2001", "code": "888888"}
+		,{"appid": "dms_categoryManage", "name": "分类管理", "module": "config/category/DMS_CategoryManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "3001", "code": "888888"}
+		,{"appid": "dms_fileManage", "name": "文件管理", "module": "config/file/DMS_FileManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "4001", "code": "888888"}
+    ]
+    ,"companyUserMenuList": [
+      {"appid": "dms_home", "name": "首页", "module": "config/home/DMS_HomeModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "1001", "code": "888888"}
+      ,{"appid": "dms_userManage", "name": "用户管理", "module": "config/user/DMS_UserManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "2001", "code": "888888"}
+      ,{"appid": "dms_fileManage", "name": "文件管理", "module": "config/file/DMS_FileManageModule.vxml", "leaf": true, "nodeaction": "", "nodetype": 3, "id": "3001", "code": "888888"}
+    ]
+  },
+  "RSP_HEAD": {
+    "TRAN_SUCCESS": "1"
+  }
+}

@@ -1,0 +1,20 @@
+<x:beans xmlns:x="http://www.springframework.org/schema/beans"
+	xmlns="http://www.bocom.com/schema/jump-core" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-2.0-m1.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+						http://www.bocom.com/schema/jump-core http://www.bocom.com/schema/jump-core-1.0.xsd">
+
+
+<!-- 	<x:import resource="classpath*:/config/jumpprocess/**/*.xml"/> -->
+<x:import resource="classpath*:/config/jumpprocess/demo/*.xml"/>
+<x:import resource="classpath*:/config/jumpprocess/user/*.xml"/>
+<x:import resource="classpath*:/config/jumpprocess/search/*.xml"/>
+<x:import resource="classpath*:/config/jumpprocess/statistics/*.xml"/>
+<x:import resource="classpath*:/config/jumpprocess/file/*.xml"/>
+<x:import resource="classpath*:/config/jumpprocess/category/*.xml"/>
+<x:import resource="classpath*:/config/jumpprocess/permission/*.xml"/>	
+<x:import resource="classpath*:/config/jumpprocess/recycle/*.xml"/>		
+<x:import resource="classpath*:/config/jumpprocess/home/*.xml"/>		
+</x:beans>

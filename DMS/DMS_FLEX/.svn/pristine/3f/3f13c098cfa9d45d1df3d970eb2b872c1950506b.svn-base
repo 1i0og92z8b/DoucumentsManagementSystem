@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:bankcomm="http://www.bankcomm.com"
+				xmlns:components="com.bankcomm.dms.modules.category.components.*"
+				width="100%" height="100%" layout="vertical" verticalAlign="middle"
+				paddingBottom="10" paddingTop="10">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.CategoryBo;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.modules.category.components.*;
+			
+			import mx.events.CloseEvent;
+			
+			[Bindable]
+			public var categoryId:int;
+			
+ 			[Bindable]
+			private var chosenId:int; 
+			
+			[Bindable]
+			public var categoryName:String;
+			
+			[Bindable]
+			public var categoryDesc:String;
+			
+			[Bindable]
+			private var categoryBo:CategoryBo;
+			
+			public function updateCategory():void{
+				/**以下给定请求参数categoryBo，
+				 * 其中categoryName和categoryDesc从文本输入框中获取**/
+				
+				categoryBo=new CategoryBo();				
+				
+				categoryBo.categoryId=categoryId;
+				chosenId=catTree.currentNodeId;
+
+				categoryBo.categoryName=catName.text;
+				categoryBo.categoryDesc=catDesc.text; 
+				
+				var params:URLParameter=new URLParameter();
+				
+				var reqBody:Object=new Object;
+				reqBody["categoryBo"]=categoryBo;
+				
+				params.reqBody=reqBody;
+				
+				var obj:Object=new Object();
+				obj.url="updateCategory.ajax";
+				obj.params=params.toParameter();
+				var callbackFunc:Function=function(r:Object,e:Event):void{
+					//添加回调函数
+				};
+				obj.callback=callbackFunc;
+				
+				//请求后台，调用insertCategory()方法
+				Connect.request(new ConnectParameter(obj));
+				
+			}
+			
+			//点击重置按钮，将文本输入框重置
+			private function reset():void{
+				catName.text="";
+				catDesc.text="";
+			}
+						
+		]]>
+	</mx:Script>
+	
+<mx:Panel width="300" height="40%">
+	<mx:HBox>
+		<mx:Label width="30%" text="分类名称" id="t1"/>
+		<mx:TextInput text="{categoryName}" editable="true" id="catName"/>
+	</mx:HBox>		
+	<mx:HBox>
+		<mx:Label width="30%" text="上级分类" id="t2"/>
+		<components:CategoryTree id="catTree" width="230" height="100%"/>
+	</mx:HBox>
+	<mx:HBox>
+		<mx:Label width="30%" text="分类描述" id="t3"/>
+		<mx:TextArea text="{categoryDesc}" editable="true" id="catDesc"/>
+	</mx:HBox>
+	
+	<mx:HBox>
+		<mx:Button id="btnConfirm" label="新增" click="updateCategory()" visible="true" includeInLayout="true"/>
+		<mx:Button id="btnReset" label="重置" click="reset()"/>
+		<mx:Button id="btnCancel" label="关闭" click="this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+	</mx:HBox>
+</mx:Panel>
+
+</mx:TitleWindow>

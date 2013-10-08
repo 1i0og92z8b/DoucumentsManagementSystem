@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20100713</version>
+    <author>唐昊</author>
+    <description>FileSearch</description>
+    <file>com/bankcomm/dms/modules/search/DMS_FileSearchModule.swf</file>
+    <dict>state</dict>
+</module>

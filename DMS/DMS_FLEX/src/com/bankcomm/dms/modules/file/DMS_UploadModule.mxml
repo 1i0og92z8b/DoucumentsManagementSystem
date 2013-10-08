@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<s:Module xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		  xmlns:s="library://ns.adobe.com/flex/spark" 
+		  xmlns:mx="library://ns.adobe.com/flex/mx" width="100%" height="100%" xmlns:components="com.bankcomm.dms.modules.category.components.*">
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	
+	<fx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.Global;
+			
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.components.FileDownload;
+			import com.bankcomm.dms.modules.file.components.CategoryPick;
+			import com.bankcomm.dms.modules.file.components.UpdateView;
+			
+			import mx.containers.TabNavigator;
+			import mx.controls.Alert;
+			import mx.controls.SWFLoader;
+			import mx.core.FlexGlobals;
+			import mx.events.DynamicEvent;
+			import mx.formatters.DateFormatter;
+			
+			public static var IP:String="http://localhost:8088/dms-action/";
+			private var fileRef:FileReference = new FileReference();
+			private var fileName:String;
+			public var fileObj:Object = new Object();
+			public var file:Object = new Object();
+			private var catPick:CategoryPick = new CategoryPick();
+			private var categoryId:String = new String();
+					
+			public function getCurTime():String
+			{
+				var formatter:DateFormatter = new DateFormatter();
+				formatter.formatString = "YYYY-MM-DD HH:MM:SS";
+				return formatter.format(new Date());
+			}
+			
+			public function getFileInfo():Object {
+				var obj:Object = new Object();
+				obj.fileName = fileName;
+				obj.keywords = fileKeywords.text;
+				obj.categoryId = categoryId;
+				obj.userId = SessionBO.userInfo["userId"];
+				obj.uploadTime = null;
+				if(SessionBO.userInfo.userRole=="companyUser")
+				{
+					obj.fileState = '1';
+				}
+				else
+				{
+					obj.fileState = '0';
+				}
+				obj.fileDesc = fileDesc.text;
+				obj.filePath = "filePathString";
+				obj.fullName = fileObj.fileName;
+				obj.ceateTime = null;
+				obj.updateTime = null;
+				obj.updator = SessionBO.userInfo["userId"];
+				return obj;
+			}
+			
+			private function pickFile():void
+			{
+				if(fileKeywords.text=="" || fileDesc.text=="" || fileCategoryInput.text=="")
+				{
+					Alert.show("请输入关键字、文件描述、文件分类！");
+					return;
+				}
+				fileRef.addEventListener(Event.SELECT, selectHandler);
+				fileRef.addEventListener(Event.COMPLETE, completeHandler);
+				fileRef.addEventListener(ProgressEvent.PROGRESS, progressHandler);
+				fileRef.addEventListener("ioError", ioerrorHandler);
+				try {
+					var success:Boolean = fileRef.browse();
+				}
+				catch(error:Error) {
+					trace("Unable to browse for files." + error.toString());
+				}
+			}
+			
+			private function selectHandler(event:Event):void
+			{
+				var request:URLRequest = new URLRequest(Global.IP + "uploadFile.ajax");
+				try {
+					var currentTime:Date = new Date();
+					fileObj.fileName = currentTime.getTime() + fileRef.type;
+					fileName = fileRef.name;
+					file = getFileInfo();
+				}
+				catch(error:Error)
+				{
+					trace("Unable to upload file." + error.toString());
+				}
+			}
+			
+			private function completeHandler(event:Event):void {
+				Alert.show("上传成功！");
+				fileKeywords.text = "";
+				fileDesc.text = "";
+				fileCategoryInput.text = "";
+			}
+			
+			private function progressHandler(event:ProgressEvent):void {
+				lbProgress.text = "已上传" + (event.bytesLoaded/1024).toFixed(2) + " K. 共" + (event.bytesTotal/1024).toFixed(2) + " K";
+				var proc:uint = event.bytesLoaded/event.bytesTotal * 100;
+				uploadProgress.setProgress(proc, 100);
+				uploadProgress.label = "当前进度： " + " " + proc + "%";
+			}
+			
+			private function ioerrorHandler(event:Event):void{
+				trace("Unable to upload file."+event.toString());
+			}
+			
+			private function submit():void
+			{
+				var request:URLRequest = new URLRequest(Global.IP + "uploadFile.ajax");
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"fileInfo":file};
+				//params.reqBody = {"fileName":file.fileName,"keywords":file.keywords,"categoryId":file.categoryId,"userId":file.userId,"fileState":file.fileState,"fileDesc":file.fileDesc,"fullName":file.fullName,"updator":file.updator};
+				request.data = params.toParameter();			
+				fileRef.upload(request);
+			}
+			
+			protected function getCatName(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				GuipPublic.popUp(catPick,this,true);
+				FlexGlobals.topLevelApplication.addEventListener('displayCat',displayCat);				
+			}
+			
+			protected function displayCat(e:DynamicEvent):void
+			{
+				fileCategoryInput.text = catPick.catNode.categoryName;
+				categoryId = catPick.catNode.categoryId;
+			}
+			
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="60%" horizontalCenter="0" verticalCenter="0">
+		<s:HGroup width="100%" height="100">
+			<s:Label width="10%" text="关键字:" paddingTop="10" />
+			<s:TextArea id="fileKeywords" width="60%" height="100%" borderVisible="true" />
+			<s:Label width="30%" height="100%" verticalAlign="bottom" text="30字以内，关键字之间以逗号间隔"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="200">
+			<s:Label width="10%" text="介绍:" paddingTop="10" />
+			<s:TextArea id="fileDesc" width="60%" height="100%" borderVisible="true" />
+			<s:Label width="30%" height="100%" verticalAlign="bottom" text="500字以内" />
+		</s:HGroup>
+		<s:HGroup width="100%" height="100">
+			<s:Label width="10%" text="分类:" paddingTop="0" />
+			<s:TextInput id="fileCategoryInput" width="200" prompt="分类" click="getCatName(event)"/> 
+		</s:HGroup>		
+		<s:HGroup width="100%" height="100">
+			<s:Label width="10%" text="附件:" paddingBottom="10" />
+			<mx:ProgressBar x="10" y="40" width="60%" minimum="0" mode="manual" maximum="100" id="uploadProgress" label="当前进度：0%" />
+			<s:Label width="321" x="146" y="98" id="lbProgress" />
+			<s:Button width="80" height="25" label="选择文件" horizontalCenter="100" click="pickFile()" />
+		</s:HGroup>
+		<s:HGroup width="100%" height="50">
+			<s:Button width="80" height="25" x="100" y="20" label="确认上传" click="submit()" />
+			<s:Button width="80" height="25" x="200" y="20" label="取消上传" />
+			
+			
+		</s:HGroup>
+	</s:VGroup>
+	
+</s:Module>

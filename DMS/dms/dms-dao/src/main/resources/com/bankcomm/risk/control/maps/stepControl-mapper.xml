@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.batch.control.IStepControlViewMapper">
+	<sql id="statesLoop">
+		STATE IN
+		<foreach item="item" index="index" collection="states" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</sql>
+
+	<resultMap type="com.bankcomm.novem.entry.batch.control.StepControlViewEntry"
+		id="stepControlMap">
+		<result property="phaseDefineId" column="PHASE_DEFINE_ID" />
+		<result property="preStepDefineId" column="PRE_STEP_DEFINE_ID" />
+		<result property="state" column="STATE" />
+		<result property="stepDefineId" column="STEP_DEFINE_ID" />
+		<result property="stepDesc" column="STEP_DESC" />
+		<result property="stepName" column="STEP_NAME" />
+		<result property="stepNo" column="STEP_NO" />
+		<result property="stepOrderId" column="STEP_ORDER_ID" />
+		<!--<result property="phaseNo" column="PHASE_NO" />
+		<result property="prePhaseDefineId" column="PRE_PHASE_DEFINE_ID" />
+		 <result property="preStepNo" column="PRE_STEP_NO" />
+		<result property="preStepName" column="PRE_STEP_NAME" />
+		<result property="preState" column="PRE_STATE" /> -->
+	</resultMap>
+	<select id="queryStepByState" resultMap="stepControlMap">
+		SELECT * FROM KISK.STEP_CONTROL_VIEW
+		WHERE	
+		<include refid="statesLoop" />
+	</select>
+	
+	<select id="queryMaxStepIdByState" resultType="java.lang.Long">
+		SELECT max(STEP_DEFINE_ID) from KISK.STEP_DEFINE
+		WHERE STATE = #{state}
+	</select>
+</mapper> 

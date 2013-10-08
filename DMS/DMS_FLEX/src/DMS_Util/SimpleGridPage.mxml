@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:HBox xmlns:mx="http://www.adobe.com/2006/mxml" initialize="init()" xmlns:controls="com.controls.*" 
+		 width="100%" horizontalAlign="left" verticalAlign="middle" bottom="0" backgroundColor="#FFFFFF">
+	<mx:Spacer width="1"/>
+	<mx:LinkButton id="dfirst" width="20" enabled="false" icon="@Embed('assets/page-first-disabled.gif')"/>
+	<mx:LinkButton id="dpre" width="20" enabled="false" icon="@Embed('assets/page-prev-disabled.gif')"/>
+	<mx:LinkButton width="20" id="first" includeInLayout="false" visible="false" icon="@Embed('assets/page-first.gif')" toolTip="首页" click="loadData(1)"/>
+	<mx:LinkButton width="20" id="pre" includeInLayout="false" visible="false" icon="@Embed('assets/page-prev.gif')" toolTip="上页" click="loadData(curpage-1)"/>
+	<mx:Image source="@Embed('assets/grid-split.gif')"/>
+	<mx:Label text="第"/>
+	<mx:NumericStepper id="inputpage" width="47" stepSize="1" minimum="1" cornerRadius="0" disabledColor="#000000" />
+	<mx:Label text="页 / 共 0 页" id="pagedetail"/>
+	<mx:Image source="@Embed('assets/grid-split.gif')"/>
+	<mx:LinkButton width="20" id="dnext" enabled="false" icon="@Embed('assets/page-next-disabled.gif')"/>
+	<mx:LinkButton width="20" id="dlast" enabled="false" icon="@Embed('assets/page-last-disabled.gif')"/>
+	<mx:LinkButton width="20" id="next" includeInLayout="false" visible="false" icon="@Embed('assets/page-next.gif')" toolTip="下页" click="loadData(curpage+1)"/>
+	<mx:LinkButton width="20" id="last" includeInLayout="false" visible="false" toolTip="末页" icon="@Embed('assets/page-last.gif')" click="loadData(totalpage)"/>
+	<mx:LinkButton width="20" id="res" toolTip="刷新" icon="@Embed('assets/refresh.gif')" click="loadData(inputpage.value)"/>
+	<controls:Spinner size="20" autoPlay="false" id="dres" numTicks="10" enabled="false" speed="300" includeInLayout="false" visible="false"/>
+	<mx:Image source="@Embed('assets/grid-split.gif')"/>
+	<mx:Spacer width="100%"/>
+	<mx:Label text="当前显示 0 - 0 ，共 0 条 " id="totaldetail"/>
+	
+	<mx:Script>
+		<![CDATA[
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			
+			import mx.collections.ArrayCollection;
+			
+			[Bindable]
+			public var dataUrl:String='list.do';
+			
+			[Bindable]
+			public var dataRoot:String='list';
+			
+			public var param:Function=function():Object
+			{
+				return {}
+			};
+			
+			[Bindable]
+			public var curpage:int=1;
+			
+			[Bindable]
+			public var totalCount:int=0;
+			
+			//当前的页码
+			private var totalpage:int;
+			
+			//一共的页数
+			public var pagesize:int=10;
+			
+			//表示每页记录的条数
+			private var variables:URLVariables=new URLVariables();
+			
+			private function init():void
+			{
+				inputpage.addEventListener(KeyboardEvent.KEY_DOWN, function(e:KeyboardEvent):void
+				{
+					if (e.keyCode == 13)
+						loadData(inputpage.value)
+				});
+			}
+			
+			[Bindable]
+			public var dataProvider:ArrayCollection = new ArrayCollection();
+			
+			private function getInfo(v:URLVariables):void
+			{
+				totaldetail.text="数据加载中…… ";
+				res.visible=false;
+				res.includeInLayout=false;
+				dres.visible=true;
+				dres.includeInLayout=true;
+				dres.play();
+				next.visible=false;
+				last.visible=false;
+				next.includeInLayout=false;
+				last.includeInLayout=false;
+				dnext.visible=true;
+				dlast.visible=true;
+				dnext.includeInLayout=true;
+				dlast.includeInLayout=true;
+				inputpage.enabled=false;
+				Connect.request(new ConnectParameter({url: Global.IP+dataUrl, params: v, callback: function(r:Object, e:Event):void
+				{
+					var rspBody:Object=r["RSP_BODY"];
+					curpage=rspBody.PAGE_COND.start / pagesize + 1;
+					totalCount=rspBody.PAGE_COND.count;
+					totalpage=Math.ceil(totalCount / pagesize);
+					pagedetail.text="页 / 共 " + totalpage + " 页";
+					if (curpage == totalpage)
+						//totaldetail.text="显示 " + ((curpage - 1) * pagesize + 1) + " - " + ((curpage - 1) * pagesize + ((totalCount % pagesize) == 0 ? pagesize : (totalCount % pagesize))) + " ，共 " + totalCount + " 条 ";
+						totaldetail.text="共 " + totalCount + " 条 ";
+					else if (curpage > totalpage)
+						//totaldetail.text="显示 0 - 0 ，共 0 条 ";
+						totaldetail.text="共 0 条 ";
+					else
+						//totaldetail.text="显示 " + ((curpage - 1) * pagesize + 1) + " - " + (curpage) * pagesize + " ，共 " + totalCount + " 条 ";
+						totaldetail.text="共 " + totalCount + " 条 ";
+					inputpage.value=curpage;
+					inputpage.maximum=totalpage;
+					if (inputpage.maximum * 1 > 99)
+						inputpage.width=55;
+					else
+						inputpage.width=47;
+					if (curpage <= 1)
+					{
+						pre.visible=false;
+						first.visible=false;
+						pre.includeInLayout=false;
+						first.includeInLayout=false;
+						dpre.visible=true;
+						dfirst.visible=true;
+						dpre.includeInLayout=true;
+						dfirst.includeInLayout=true;
+					}
+					else
+					{
+						pre.visible=true;
+						first.visible=true;
+						pre.includeInLayout=true;
+						first.includeInLayout=true;
+						dpre.visible=false;
+						dfirst.visible=false;
+						dpre.includeInLayout=false;
+						dfirst.includeInLayout=false;
+					}
+					if (curpage >= totalpage)
+					{
+						next.visible=false;
+						last.visible=false;
+						next.includeInLayout=false;
+						last.includeInLayout=false;
+						dnext.visible=true;
+						dlast.visible=true;
+						dnext.includeInLayout=true;
+						dlast.includeInLayout=true;
+					}
+					else
+					{
+						next.visible=true;
+						last.visible=true;
+						next.includeInLayout=true;
+						last.includeInLayout=true;
+						dnext.visible=false;
+						dlast.visible=false;
+						dnext.includeInLayout=false;
+						dlast.includeInLayout=false;
+					}
+					dataProvider=new ArrayCollection(rspBody[dataRoot] as Array);
+					res.visible=true;
+					res.includeInLayout=true;
+					dres.visible=false;
+					dres.includeInLayout=false;
+					dres.stop();
+					inputpage.enabled=true;
+					dispatchEvent(new Event("loadComplete"));
+				},failback:function(r:Object,e:Event):void{
+					dataProvider=new ArrayCollection();
+					res.visible=true;
+					res.includeInLayout=true;
+					dres.visible=false;
+					dres.includeInLayout=false;
+					dres.stop();
+					inputpage.enabled=true;
+					totaldetail.text="数据加载异常！";
+				}
+				}));
+			}
+			
+			public function loadData(page:int=1):void
+			{
+				if(page == 0)
+				{
+					page = 1;
+				}
+				var urlparam:URLParameter = new URLParameter();
+				urlparam.reqBody = {PAGE_COND: {start: (page - 1) * pagesize + 1, limit: pagesize}, PARAMS: param()};
+				urlparam.trainID = "";
+				urlparam.trainProcess = "";
+				variables=urlparam.toParameter();
+				getInfo(variables);
+			}
+		]]>
+	</mx:Script>
+</mx:HBox>

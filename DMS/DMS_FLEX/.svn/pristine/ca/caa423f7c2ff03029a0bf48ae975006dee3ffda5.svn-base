@@ -1,0 +1,70 @@
+package com.bankcomm.dms.bo
+{
+	public class UserBO
+	{
+		private var _userId:int;
+		private var _userName:String;
+		private var _passWord:String;
+		private var _fullName:String;
+		private var _sex:String;
+		private var _email:String;
+		private var _extNo:String;
+		//private var _userRole:String;
+		
+		public function get userId():int{
+			return _userId;
+		}
+		public function set userId(value:int):void{
+			this._userId=value;
+		}
+		
+		public function get userName():String{
+			return _userName;
+		}
+		public function set userName(value:String):void{
+			this._userName=value;
+		}
+		
+		public function get passWord():String{
+			return _passWord;
+		}
+		public function set passWord(value:String):void{
+			this._passWord=value;
+		}
+		
+		public function get fullName():String{
+			return _fullName;
+		}
+		public function set fullName(value:String):void{
+			this._fullName=value;
+		}
+		
+		public function get sex():String{
+			return _sex;
+		}
+		public function set sex(value:String):void{
+			this._sex=value;
+		}
+		
+		public function get email():String{
+			return _email;
+		}
+		public function set email(value:String):void{
+			this._email=value;
+		}
+		
+		public function get extNo():String{
+			return _extNo;
+		}
+		public function set extNo(value:String):void{
+			this._extNo=value;
+		}
+		
+		//public function get userRole():String{
+			//return _userRole;
+		//}
+		//public function set userRole(value:String):void{
+			//this._userRole=value;
+		//}
+	}
+}

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.file.IFileDownloadMapper">
+
+<insert id="insertRec" parameterType="com.bankcomm.novem.bo.file.DownloadRecBo" useGeneratedKeys="true" keyProperty="seqID">
+	insert into DOWNLOAD_REC
+	<trim prefix="(" suffix=")" suffixOverrides="," >
+		<if test="fileId!=null" >FILE_ID,</if>
+		<if test="userId!=null" >USER_ID,</if>
+		<if test="downloadTime!=null" >DOWNLOAD_TIME,</if>
+		<if test="createTime!=null">CREATE_TIME,</if>
+		<if test="updateTime!=null">UPDATE_TIME,</if>
+		<if test="modifyUser!=null">UPDATOR</if>
+	</trim>
+	values
+	<trim prefix="(" suffix=")" suffixOverrides="," >
+		<if test="fileId!=null" >#{fileId:INTEGER},</if>
+		<if test="userId!=null" >#{userId:INTEGER},</if>
+		<if test="downloadTime!=null" >#{downloadTime:TIMESTAMP},</if>
+		<if test="createTime!=null">#{createTime:TIMESTAMP},</if>
+		<if test="updateTime!=null">#{updateTime:TIMESTAMP},</if>
+		<if test="modifyUser!=null">#{modifyUser:INTEGER}</if>
+	</trim>
+</insert>
+
+<update id="updateCounts" parameterType="com.bankcomm.novem.bo.file.DownloadCountsBo">
+	update DOWNLOAD_COUNTS set
+	FILE_DOWNLOAD_COUNTS = FILE_DOWNLOAD_COUNTS + 1,
+	UPDATE_TIME = #{updateTime},
+	UPDATOR = #{modifyUser}
+	where FILE_ID = #{fileId}	
+</update>
+
+<insert id="insertCounts" parameterType="com.bankcomm.novem.bo.file.DownloadCountsBo">
+	insert into DOWNLOAD_COUNTS 
+	(FILE_ID, FILE_DOWNLOAD_COUNTS, CREATE_TIME, UPDATE_TIME, UPDATOR) 
+	 values
+	 (#{fileId}, 1, #{createTime}, #{updateTime}, #{modifyUser})
+</insert>
+
+</mapper>

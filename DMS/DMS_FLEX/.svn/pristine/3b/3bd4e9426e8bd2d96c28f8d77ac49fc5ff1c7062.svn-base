@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:bankcomm="http://www.bankcomm.com"
+				xmlns:components="com.bankcomm.dms.modules.category.components.*"
+				width="400" height="500" layout="vertical" verticalAlign="middle"
+				paddingBottom="10" paddingTop="10">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.CategoryBo;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.RoleConst;
+			
+			import mx.events.CloseEvent;
+			import mx.controls.Alert;
+			
+			[Bindable]
+			public var categoryId:int;
+			
+			[Bindable]
+			public var parentName:String;
+			
+			[Bindable]
+			public var categoryName:String;
+			
+			[Bindable]
+			public var categoryDesc:String;
+			
+			[Bindable]
+			public var userId:int;
+			
+			[Bindable]
+			public var userRole:String;
+			
+			[Bindable]
+			public var parentId:int;
+			
+			[Bindable]
+			public var treeCat:Object;
+			
+			
+
+			public function deleteCategory():void{
+				
+				userRole=SessionBO.userInfo["userRole"];
+				
+				if(!categoryId||categoryId<1){
+					Alert.show("请选择一个分类，再进行删除。","提示");
+					return;
+//					this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				}
+				
+				if(userRole==RoleConst.ROLE_DEPART_USER && parentId==0){
+					Alert.show("当前分类为ROOT，不可删除！请重新选择。","提示");
+					return;
+				}else if(userRole==RoleConst.ROLE_DEPART_USER && parentId==1 && categoryId==2)
+				{
+					Alert.show("当前分类为“未分类”，不可删除！请重新选择。","提示");
+					return;
+//					this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				}else if(userId!=SessionBO.userInfo["userId"]){
+					Alert.show("当前分类含有非本人创建分类，不可删除！请重新选择。","提示");
+					return;
+//					this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				} 
+				
+				
+				
+				
+				var params:URLParameter=new URLParameter();
+				
+				var reqBody:Object=new Object;
+				reqBody["categoryId"]=categoryId;
+				
+				params.reqBody=reqBody;
+				
+				Connect.request(new ConnectParameter({url:"deleteCategory.ajax",params:params.toParameter(),
+					callback:function(r:Object,e:Event):void{
+						//回调函数
+						var rspBody:Object=r["RSP_BODY"];
+ 						var map:Object=rspBody["map"];
+						if (map["flag"]==false){
+							Alert.show(map["message"],"提示");
+							return;
+						} 
+						treeCat.initRoot(); 
+						dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+					}})); 
+				
+			}
+		]]>
+	</mx:Script>
+
+		<mx:HBox>
+			<mx:Label width="180" text="分类名称" id="t1"/>
+			<mx:TextInput editable="true" width="192" text="{categoryName}"/>
+		</mx:HBox>		
+		<mx:HBox>
+			<mx:Label width="180" text="上级分类" id="t2"/>
+			<mx:TextInput editable="false" width="192" text="{parentName}"/>
+		</mx:HBox>
+		<mx:HBox>
+			<mx:Label width="180" text="分类描述" id="t3"/>
+			<mx:TextArea editable="true" width="192" text="{categoryDesc}"/>
+		</mx:HBox>
+		
+		<mx:HBox textAlign="center" width="230">
+			<mx:Button id="btnConfirm" label="删除" click="deleteCategory()" visible="true" includeInLayout="true"/>
+			<mx:Button id="btnCancel" label="取消" click="this.dispatchEvent(new CloseEvent(CloseEvent.CLOSE))"/>
+		</mx:HBox>
+	
+</mx:TitleWindow>

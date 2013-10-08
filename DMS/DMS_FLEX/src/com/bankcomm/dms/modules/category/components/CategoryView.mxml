@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Module xmlns:mx="http://www.adobe.com/2006/mxml"
+		   xmlns:bankcomm="http://www.bankcomm.com">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.CategoryBo;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			[Bindable]
+			public var categoryId:int;//这里的categoryId怎么跟树上的ID联系起来？
+			//答案：从树上取，在显示树是保存树每个节点的ID
+			
+			[Bindable]
+			public var categoryBo:CategoryBo=new CategoryBo();
+			
+			public function viewCategory():void{
+				if(!categoryId||categoryId<1)
+					return;
+				
+				var params:URLParameter=new URLParameter();
+				
+				var reqBody:Object=new Object;
+				reqBody["categoryId"]=categoryId;
+				
+				params.reqBody=reqBody;
+				
+				//				var obj:Object = new Object();
+				//				obj.url ="viewCategory.ajax";
+				//				obj.params = params.toParameter();
+				//				var callbackFunc = function(r:Object,e:Event):void{
+				//					var rspBody:Object=r["RSP_BODY"];
+				//					categoryBo=rspBody["result"];
+				//				};
+				//				obj.callback = callbackFunc;
+				//				
+				//				Connect.request(new ConnectParameter(obj));
+				/**以上注释代码与下等同，即前台向后台发送请求**/				
+				
+				Connect.request(new ConnectParameter(
+					{
+						url:"viewCategory.ajax"
+						,params:params.toParameter()
+						,callback:function(r:Object,e:Event):void{
+							var rspBody:Object=r["RSP_BODY"];
+							categoryBo=rspBody["result"];
+						}
+					}
+				));
+			}
+		]]>
+	</mx:Script>
+	
+</mx:Module>
+<!--<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:bankcomm="http://www.bankcomm.com"
+				width="100%" height="100%" layout="vertical" verticalAlign="middle"
+				paddingBottom="10" paddingTop="10">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.CategoryBo;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			[Bindable]
+			public var categoryId:int;//这里的categoryId怎么跟树上的ID联系起来？
+			//答案：从树上取，在显示树是保存树每个节点的ID
+			
+			[Bindable]
+			public var categoryBo:CategoryBo=new CategoryBo();
+			
+			public function viewCategory():void{
+				if(!categoryId||categoryId<1)
+					return;
+				
+				var tree:CategoryTree
+				
+				var params:URLParameter=new URLParameter();
+				
+				var reqBody:Object=new Object;
+				reqBody["categoryId"]=categoryId;
+				
+				params.reqBody=reqBody;
+				
+//				var obj:Object = new Object();
+//				obj.url ="viewCategory.ajax";
+//				obj.params = params.toParameter();
+//				var callbackFunc = function(r:Object,e:Event):void{
+//					var rspBody:Object=r["RSP_BODY"];
+//					categoryBo=rspBody["result"];
+//				};
+//				obj.callback = callbackFunc;
+//				
+//				Connect.request(new ConnectParameter(obj));
+/**以上注释代码与下等同，即前台向后台发送请求**/				
+				
+				Connect.request(new ConnectParameter(
+				{
+					url:"viewCategory.ajax"
+					,params:params.toParameter()
+					,callback:function(r:Object,e:Event):void{
+					var rspBody:Object=r["RSP_BODY"];
+					categoryBo=rspBody["result"];
+					}
+				}
+				));
+			}
+				
+		]]>
+	</mx:Script>
+
+	<mx:VBox>
+		<mx:DataGrid width="100%" height="100%" dataProvider="{categoryBo}" id="categoryViewGrid">
+			<mx:columns>
+				<mx:DataGridColumn dataField="categoryName" headerText="名称"/>
+				<mx:DataGridColumn dataField="categoryPath" headerText="路径"/>
+				<mx:DataGridColumn dataField="modifyUser" headerText="创建人"/>
+				<mx:DataGridColumn dataField="createTime" headerText="创建时间"/>
+				<mx:DataGridColumn dataField="categoryDesc" headerText="描述"/>
+			</mx:columns>
+		</mx:DataGrid>
+	</mx:VBox>
+	
+</mx:TitleWindow>
+-->

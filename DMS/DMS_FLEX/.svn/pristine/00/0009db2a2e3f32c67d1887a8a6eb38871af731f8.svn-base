@@ -1,0 +1,39 @@
+{
+  "RSP_BODY": {
+    "TRAN_ID": "",
+    "TRAN_PROCESS": "",
+    "acctState": [
+      {
+        "data": "0",
+        "label": "关"
+      },
+      {
+        "data": "1",
+        "label": "开"
+      }
+    ],
+    "state": [
+      {
+        "data": "0",
+        "label": "男"
+      },
+      {
+        "data": "1",
+        "label": "女"
+      }
+    ],
+    "UserState": [
+      {
+        "data": "0",
+        "label": "用户状态0"
+      },
+      {
+        "data": "1",
+        "label": "用户状态1"
+      }
+    ]
+  },
+  "RSP_HEAD": {
+    "TRAN_SUCCESS": "1"
+  }
+}

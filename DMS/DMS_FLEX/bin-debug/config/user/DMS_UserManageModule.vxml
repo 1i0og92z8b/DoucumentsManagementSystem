@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20130925</version>
+    <author>季博骏</author>
+    <description>UserManage</description>
+    <file>com/bankcomm/dms/modules/user/DMS_UserManageModule.swf</file>
+    <dict>state</dict>
+</module>

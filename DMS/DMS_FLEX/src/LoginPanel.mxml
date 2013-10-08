@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Box xmlns:mx="http://www.adobe.com/2006/mxml" width="100%" height="100%"
+		styleName="Login" horizontalAlign="center" verticalAlign="middle" xmlns:bankcomm="http://www.bankcomm.com" creationComplete="init()">	
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.Global;
+			
+			import com.bankcomm.Connect;
+			import com.bankcomm.IConnectParameter;
+			import com.bankcomm.URLParameter;
+			
+			import mx.controls.Alert;
+			import mx.validators.Validator;
+			
+			private var loginUrl:String = Global.IP + "login.ajax";
+
+			private function init():void
+			{
+				user_name.setFocus();
+				var so:SharedObject = SharedObject.getLocal("defaultLogin");
+				if (so.data.flag == true)
+				{
+					remember.selected = true;
+					if (so.data.userid)
+						user_name.text = so.data.userid;
+					if (so.data.password)
+						user_pwd.text = so.data.password;
+				}
+				else
+				{
+					reset();
+				}
+				so.close();
+			}
+
+			public function loginCheck():Boolean
+			{
+				var array:Array = [usernameValidator, userpwdValidator];
+				return Validator.validateAll(array).length == 0;
+			}
+
+			public var loginSubmit:Function = function(e:Event):void
+			{
+			}
+
+			public function reset():void
+			{
+				user_name.text = "";
+				user_pwd.text = "";
+				remember.selected = false;
+			}
+			
+//			protected function btnLogin_clickHandler():void
+//			{
+//				
+//				var param:URLParameter = new URLParameter();//请求路径			
+//				param.reqBody={userName:user_name.text,password:user_pwd.text}	//请求参数
+//				var obj:Object = new Object();
+//				obj.url = loginUrl;
+//				obj.params = param.toParameter();
+//				obj.callback = function(r:Object,e:Event):void{
+//					var rspBody:Object = r.RSP_BODY;//成功响应的回调函数
+//					if(rspBody.RESULT != "登陆成功"){
+//						Alert.show(rspBody.RESULT);
+//					}
+//					else{
+//						Alert.show("欢迎进入");
+//						loginSubmit(null);
+//					}
+//					
+//				}
+//				
+//				var ConnectParam:IConnectParameter = new ConnectParameter(obj);
+//				Connect.request(ConnectParam);
+//			}
+
+		]]>
+	</mx:Script>
+	<mx:StringValidator id="usernameValidator" source="{user_name}" property="text"  required="true" maxLength="12"  tooLongError="用户名不符合规范（需要低于12位）" requiredFieldError="{resourceManager.getString('language','userNameValid')}！"/>
+	<mx:StringValidator id="userpwdValidator" source="{user_pwd}" property="text" required="true"  maxLength="12"  tooLongError="密码不符合规范（需要低于12位）" requiredFieldError="{resourceManager.getString('language','passwordValid')}！"/>
+	<mx:Canvas>
+		<mx:Image source="@Embed('images/login/Login_Background.png')" x="0" y="0"/>
+		<mx:Image source="@Embed('images/login/building.png')" x="168" y="119"/>
+		<mx:Image source="@Embed('images/login/LOGO.png')" x="240" y="94"/>
+		<mx:Image id="title" source="@Embed('images/login/title.png')" x="537" y="104"/>
+		<bankcomm:Spinner visible="false" speed="400" size="24" id="loading" autoPlay="false" tickColor="#FFFFFF" x="460" y="278"/>
+		<mx:VBox  x="354" y="180" verticalGap="0">
+			<mx:HBox horizontalGap="0">
+				<mx:VBox verticalGap="2" paddingTop="10">
+					<mx:HBox>
+						<mx:TextInput styleName="LoginTextInput" id="user_name" paddingTop="4" fontSize="14" width="258" height="29"/>
+					</mx:HBox>
+					<mx:Spacer height="13"/>
+					<mx:HBox>
+						<mx:TextInput styleName="LoginTextInput" id="user_pwd" paddingTop="6" fontSize="14" displayAsPassword="true" width="258" height="29"/>
+					</mx:HBox>
+				</mx:VBox>
+				<mx:Spacer width="30"/>
+				<mx:Button id="btnLogin"  styleName="LoginBtn" buttonMode="true" click="loginSubmit(event)"/>
+			</mx:HBox>
+			<mx:HBox paddingLeft="9" paddingTop="13" verticalAlign="middle">
+				<mx:CheckBox id="remember" fontSize="14" color="#ffffff" styleName="LoginCheckBox"/>
+			</mx:HBox>
+		</mx:VBox>
+	</mx:Canvas>
+</mx:Box>

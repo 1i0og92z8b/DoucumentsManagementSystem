@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.batch.sqltrack.ISqlTrackMapper">
+
+	<resultMap type="com.bankcomm.novem.entry.batch.sqltrack.SqlTrackEntry"
+		id="sqlTrackMap">
+		<result property="sqlTraId" column="sql_tra_id" />
+		<result property="sqlName" column="sql_name" />
+		<result property="startTime" column="start_time" />
+		<result property="endTime" column="end_time" />
+		<result property="sqlPara" column="sql_para" />
+		<result property="stepNo" column="step_no" />
+		<result property="pid" column="pid" />
+		<result property="resultCount" column="result_count" />
+		<result property="remark" column="remark" />
+	</resultMap>
+
+	<select id="querySqlTrackListByTraIds" resultMap="sqlTrackMap">
+		SELECT *
+		FROM KISK.SQL_TRACK
+		WHERE SQL_TRA_ID IN
+		<foreach item="item" index="index" collection="sqlTraIds" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+	
+	
+	<select id="querySqlTrackListByStepNos" resultMap="sqlTrackMap">
+		SELECT *
+		FROM KISK.SQL_TRACK
+		WHERE start_time between #{startTime} and #{queryTime} 
+		AND STEP_NO IN
+		<foreach item="item" index="index" collection="stepNos" open="("
+			separator="," close=")">
+			#{item}
+		</foreach>
+	</select>
+
+</mapper> 

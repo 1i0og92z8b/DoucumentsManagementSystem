@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+  PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.bankcomm.novem.dao.user.IUserLogDaoMapper">
+	<resultMap type="com.bankcomm.novem.bo.user.UserBo" id="UserMap">
+		<result property="userId" column="USER_ID"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="name" column="NAME"/>
+		<result property="sex" column="SEX"/>
+		<result property="email" column="EMAIL"/>
+		<result property="extNo" column="EXT_NO"/>
+		<result property="ifLogin" column="IF_LOGIN"/>
+	</resultMap>
+	
+	<resultMap type="com.bankcomm.novem.bo.user.UserLogBo" id="UserLogMap">
+		<result property="userName" column="USER_NAME"/>
+		<result property="password" column="PASSWORD"/>
+	</resultMap>
+	
+	<resultMap type="com.bankcomm.novem.bo.user.UserLoginReturnInfoBo" id="UserLoginReturnInfoMap">
+		<result property="userId" column="USER_ID"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="password" column="PASSWORD"/>
+		<result property="logState" column="LOG_STATE"/>
+		<result property="userRole" column="USER_ROLE"/>
+	</resultMap>
+	
+	<select id="checkUsername" parameterType="com.bankcomm.novem.bo.user.UserLogBo" resultMap="UserLoginReturnInfoMap">
+  	select USER_ID ,USER_NAME
+  	from USER where USER_NAME=#{userName}
+  </select> 
+  
+  <select id="checkPassword" parameterType="com.bankcomm.novem.bo.user.UserLogBo" resultMap="UserLoginReturnInfoMap">
+  	select USER_ID, USER_NAME, PASSWORD
+  	from USER where USER_NAME=#{userName} and PASSWORD=#{password}
+  	select USER_ROLE
+  	from USER_ROLE_REL where USER_ID=(select USER_ID from USER where USER_NAME=#{userName} and PASSWORD=#{password})
+  </select>
+  
+  <update id="setLog" parameterType="com.bankcomm.novem.bo.user.UserLogBo">
+  update USER set IF_LOGIN=1
+  where USER_NAME=#{userName}
+  </update>
+  
+  <update id="logout" parameterType="com.bankcomm.novem.bo.user.UserLogBo">
+  	update USER set IF_LOGIN=0
+    where USER_NAME=#{userName}
+  </update> 
+ </mapper>

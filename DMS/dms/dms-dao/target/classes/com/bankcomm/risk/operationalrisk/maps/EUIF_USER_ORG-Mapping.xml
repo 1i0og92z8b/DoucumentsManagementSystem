@@ -1,0 +1,441 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="EUIF_AUTH_USREORG">
+	<select id="selectOrgByOrgCode" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			ORG_ID as orgId, 
+			APP_ID as appId, 
+			PARENT_ORG_ID as parentOrgId, 
+			AREA_CODE as areaCode, 
+			ORG_CODE as orgCode, 
+			ORG_NAME as orgName, 
+			ORG_LEVEL as orgLevel, 
+			ORG_SEQ as orgSeq, 
+			ORG_TYPE as orgType, 
+			STATUS as status, 
+			IN_COUNTRY as inCountry, 
+			ORG_CATAGORY as orgCatagory, 
+			MEMO as memo, 
+			SORT_NO as sortNo, 
+			PARENT_ORG_CODE as parentOrgCode, 
+			ORG_EN_NAME as orgEnName, 
+			SHORT_NAME as shortName, 
+			TREE_TYPE as treeType, 
+			PBC_NO as pbcNo, 
+			TREE_ID as treeId,
+			TREE_CODE as treeCode,
+			COMPANY_CODE as companyCode,
+			HX_ORG_CODE as hxOrgCode,
+			LAST_ORG_CODE
+		from KISK.AP_ORG 
+		where ORG_CODE = #{orgCode:VARCHAR} and (TREE_TYPE='00' or TREE_TYPE='03')
+	</select>
+	<select id="selectOrgByOrgId" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			ORG_ID as orgId, 
+			APP_ID as appId, 
+			PARENT_ORG_ID as parentOrgId, 
+			AREA_CODE as areaCode, 
+			ORG_CODE as orgCode, 
+			ORG_NAME as orgName, 
+			ORG_LEVEL as orgLevel, 
+			ORG_SEQ as orgSeq, 
+			ORG_TYPE as orgType, 
+			STATUS as status, 
+			IN_COUNTRY as inCountry, 
+			ORG_CATAGORY as orgCatagory, 
+			MEMO as memo, 
+			SORT_NO as sortNo, 
+			PARENT_ORG_CODE as parentOrgCode, 
+			ORG_EN_NAME as orgEnName, 
+			SHORT_NAME as shortName, 
+			TREE_TYPE as treeType, 
+			PBC_NO as pbcNo, 
+			TREE_ID as treeId,
+			TREE_CODE as treeCode,
+			COMPANY_CODE as companyCode,
+			HX_ORG_CODE as hxOrgCode,
+			LAST_ORG_CODE
+		from KISK.AP_ORG 
+		where ORG_ID = #{orgId:DECIMAL} 
+		<if test="treeCode!=null">
+			And TREE_CODE = #{treeCode}
+		</if>
+		<if test="treeCode==null">
+			and (TREE_TYPE='00' or TREE_TYPE='03')
+		</if>
+	</select>
+	<select id="selectValidOrgByOrgId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			ORG_ID as orgId, 
+			APP_ID as appId, 
+			PARENT_ORG_ID as parentOrgId, 
+			AREA_CODE as areaCode, 
+			ORG_CODE as orgCode, 
+			ORG_NAME as orgName, 
+			ORG_LEVEL as orgLevel, 
+			ORG_SEQ as orgSeq, 
+			ORG_TYPE as orgType, 
+			STATUS as status, 
+			IN_COUNTRY as inCountry, 
+			ORG_CATAGORY as orgCatagory, 
+			MEMO as memo, 
+			SORT_NO as sortNo, 
+			PARENT_ORG_CODE as parentOrgCode, 
+			ORG_EN_NAME as orgEnName, 
+			SHORT_NAME as shortName, 
+			TREE_TYPE as treeType, 
+			PBC_NO as pbcNo, 
+			TREE_ID as treeId,
+			TREE_CODE as treeCode,
+			COMPANY_CODE as companyCode,
+			HX_ORG_CODE as hxOrgCode,
+			LAST_ORG_CODE
+		from KISK.AP_ORG 
+		where ORG_ID = #{orgId:DECIMAL} and (TREE_TYPE='00' or TREE_TYPE='03')
+		and STATUS = '1'
+	</select>
+	<select id="selectLowerOrgByOrgId" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			ORG_ID as orgId, 
+			APP_ID as appId, 
+			PARENT_ORG_ID as parentOrgId, 
+			AREA_CODE as areaCode, 
+			ORG_CODE as orgCode, 
+			ORG_NAME as orgName, 
+			ORG_LEVEL as orgLevel, 
+			ORG_SEQ as orgSeq, 
+			ORG_TYPE as orgType, 
+			STATUS as status, 
+			IN_COUNTRY as inCountry, 
+			ORG_CATAGORY as orgCatagory, 
+			MEMO as memo, 
+			SORT_NO as sortNo, 
+			PARENT_ORG_CODE as parentOrgCode, 
+			ORG_EN_NAME as orgEnName, 
+			SHORT_NAME as shortName, 
+			TREE_TYPE as treeType, 
+			PBC_NO as pbcNo, 
+			TREE_ID as treeId,
+			TREE_CODE as treeCode,
+			COMPANY_CODE as companyCode,
+			HX_ORG_CODE as hxOrgCode,
+			LAST_ORG_CODE
+		from KISK.AP_ORG 
+		where PARENT_ORG_ID = #{orgId:DECIMAL} 
+		<if test="treeCode!=null">
+			And TREE_CODE = #{treeCode}
+		</if>
+		<if test="treeCode==null">
+			and (TREE_TYPE='00' or TREE_TYPE='03')
+		</if>
+		order by ORG_TYPE,ORG_CODE 
+	</select>
+	<select id="selectHigherOrgByOrgId" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			B.ORG_ID as orgId, 
+			B.APP_ID as appId, 
+			B.PARENT_ORG_ID as parentOrgId, 
+			B.AREA_CODE as areaCode, 
+			B.ORG_CODE as orgCode, 
+			B.ORG_NAME as orgName, 
+			B.ORG_LEVEL as orgLevel, 
+			B.ORG_SEQ as orgSeq, 
+			B.ORG_TYPE as orgType, 
+			B.STATUS as status, 
+			B.IN_COUNTRY as inCountry, 
+			B.ORG_CATAGORY as orgCatagory, 
+			B.MEMO as memo, 
+			B.SORT_NO as sortNo, 
+			B.PARENT_ORG_CODE as parentOrgCode, 
+			B.ORG_EN_NAME as orgEnName, 
+			B.SHORT_NAME as shortName, 
+			B.TREE_TYPE as treeType, 
+			B.PBC_NO as pbcNo, 
+			B.TREE_ID as treeId,
+			B.TREE_CODE as treeCode,
+			B.COMPANY_CODE as companyCode,
+			B.HX_ORG_CODE as hxOrgCode,
+			B.LAST_ORG_CODE 
+		from KISK.AP_ORG A,KISK.AP_ORG B 
+		where A.PARENT_ORG_ID = B.ORG_ID 
+		<if test="treeCode!=null">
+			And B.TREE_CODE = #{treeCode} and A.TREE_CODE = B.TREE_CODE
+		</if>
+		<if test="treeCode==null">
+			and (A.TREE_TYPE='00' or A.TREE_TYPE='03') and (B.TREE_TYPE='00' or B.TREE_TYPE='03')
+		</if>
+		and A.ORG_ID = #{orgId:DECIMAL}  
+	</select>
+	<select id="selectOrgByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			A.ORG_ID as orgId, 
+			A.APP_ID as appId, 
+			A.PARENT_ORG_ID as parentOrgId, 
+			A.AREA_CODE as areaCode, 
+			A.ORG_CODE as orgCode, 
+			A.ORG_NAME as orgName, 
+			A.ORG_LEVEL as orgLevel, 
+			A.ORG_SEQ as orgSeq, 
+			A.ORG_TYPE as orgType, 
+			A.STATUS as status, 
+			A.IN_COUNTRY as inCountry, 
+			A.ORG_CATAGORY as orgCatagory, 
+			A.MEMO as memo, 
+			A.SORT_NO as sortNo, 
+			A.PARENT_ORG_CODE as parentOrgCode, 
+			A.ORG_EN_NAME as orgEnName, 
+			A.SHORT_NAME as shortName, 
+			A.TREE_TYPE as treeType, 
+			A.PBC_NO as pbcNo, 
+			A.TREE_ID as treeId,
+			A.TREE_CODE as treeCode,
+			A.COMPANY_CODE as companyCode,
+			A.HX_ORG_CODE as hxOrgCode,
+			A.LAST_ORG_CODE
+		from KISK.AP_ORG A,KISK.AP_USER B 
+		where A.ORG_ID = B.APP_ORG_ID and (A.TREE_TYPE='00' or A.TREE_TYPE='03')
+		and B.USER_ID = #{userId:DECIMAL} 
+	</select>
+	<select id="selectValidOrgByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			A.ORG_ID as orgId, 
+			A.APP_ID as appId, 
+			A.PARENT_ORG_ID as parentOrgId, 
+			A.AREA_CODE as areaCode, 
+			A.ORG_CODE as orgCode, 
+			A.ORG_NAME as orgName, 
+			A.ORG_LEVEL as orgLevel, 
+			A.ORG_SEQ as orgSeq, 
+			A.ORG_TYPE as orgType, 
+			A.STATUS as status, 
+			A.IN_COUNTRY as inCountry, 
+			A.ORG_CATAGORY as orgCatagory, 
+			A.MEMO as memo, 
+			A.SORT_NO as sortNo, 
+			A.PARENT_ORG_CODE as parentOrgCode, 
+			A.ORG_EN_NAME as orgEnName, 
+			A.SHORT_NAME as shortName, 
+			A.TREE_TYPE as treeType, 
+			A.PBC_NO as pbcNo, 
+			A.TREE_ID as treeId,
+			A.TREE_CODE as treeCode,
+			A.COMPANY_CODE as companyCode,
+			A.HX_ORG_CODE as hxOrgCode,
+			A.LAST_ORG_CODE
+		from KISK.AP_ORG A,KISK.AP_USER B 
+		where A.ORG_ID = B.APP_ORG_ID and (A.TREE_TYPE='00' or A.TREE_TYPE='03')
+		and B.USER_ID = #{userId:DECIMAL} 
+		and A.STATUS = '1'
+	</select>
+	<select id="selectUserByLoginName" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApUser">
+		Select 
+			APP_ID as appId, 
+			USER_ID as userId, 
+			ORG_ID as orgId, 
+			APP_ORG_ID as appOrgId, 
+			USER_CODE as      userCode, 
+			LOGIN_NAME as loginName, 
+			AUTH_MODE as authMode, 
+			USER_TYPE as userType,
+			C_NAME as cName, 
+			SPELL_NAME as spellName, 
+			FIRST_NAME as firstName, 
+			MIDDLE_NAME as middleName,
+			LAST_NAME as      lastName, 
+			GENDER as gender, 
+			USER_ID_TYPE as userIdType, 
+			USER_ID_NO as userIdNo, 
+			USER_LEVEL as      userLevel, 
+			USER_EFFECTIVE_DATE as userEffectiveDate, 
+			APP_USER_STATUS as appUserStatus,      
+			USER_STATUS as userStatus, 
+			USER_EXPIRE_DATE as userExpireDate, 
+			KIND_GROUP as kindGroup,
+			TELLER_LEVEL as tellerLevel 
+		from KISK.AP_USER 
+		where LOGIN_NAME = #{userName:VARCHAR}
+	</select>
+	<select id="selectValidUserByLoginName" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApUser">
+		Select 
+			APP_ID as appId, 
+			USER_ID as userId, 
+			ORG_ID as orgId, 
+			APP_ORG_ID as appOrgId, 
+			USER_CODE as      userCode, 
+			LOGIN_NAME as loginName, 
+			AUTH_MODE as authMode, 
+			USER_TYPE as userType,  
+			C_NAME as cName, 
+			SPELL_NAME as spellName, 
+			FIRST_NAME as firstName, 
+			MIDDLE_NAME as middleName,
+			LAST_NAME as      lastName, 
+			GENDER as gender, 
+			USER_ID_TYPE as userIdType, 
+			USER_ID_NO as userIdNo, 
+			USER_LEVEL as      userLevel, 
+			USER_EFFECTIVE_DATE as userEffectiveDate, 
+			APP_USER_STATUS as appUserStatus,      
+			USER_STATUS as userStatus, 
+			USER_EXPIRE_DATE as userExpireDate, 
+			KIND_GROUP as kindGroup,
+			TELLER_LEVEL as tellerLevel  
+		from KISK.AP_USER  
+		where LOGIN_NAME = #{userName:VARCHAR} 
+		and APP_USER_STATUS = '1' 
+		and USER_STATUS = '1' 
+	</select>
+	<select id="selectUserByUserCode" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApUser">
+		Select 
+			APP_ID as appId, 
+			USER_ID as userId, 
+			ORG_ID as orgId, 
+			APP_ORG_ID as appOrgId, 
+			USER_CODE as      userCode, 
+			LOGIN_NAME as loginName, 
+			AUTH_MODE as authMode, 
+			USER_TYPE as userType, 
+			C_NAME as cName, 
+			SPELL_NAME as spellName, 
+			FIRST_NAME as firstName, 
+			MIDDLE_NAME as middleName,
+			LAST_NAME as      lastName, 
+			GENDER as gender, 
+			USER_ID_TYPE as userIdType, 
+			USER_ID_NO as userIdNo, 
+			USER_LEVEL as      userLevel, 
+			USER_EFFECTIVE_DATE as userEffectiveDate, 
+			APP_USER_STATUS as appUserStatus,      
+			USER_STATUS as userStatus, 
+			USER_EXPIRE_DATE as userExpireDate, 
+			KIND_GROUP as kindGroup,
+			TELLER_LEVEL as tellerLevel 
+		from KISK.AP_USER  
+		where USER_CODE = #{userCode:VARCHAR} 
+		and APP_USER_STATUS = '1' 
+		and USER_STATUS = '1' 
+	</select>
+	
+	<select id="selectUserListByOrgId" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApUser">
+		Select 
+			APP_ID as appId, 
+			USER_ID as userId, 
+			ORG_ID as orgId, 
+			APP_ORG_ID as appOrgId, 
+			USER_CODE as      userCode, 
+			LOGIN_NAME as loginName, 
+			AUTH_MODE as authMode, 
+			USER_TYPE as userType, 
+			C_NAME as cName, 
+			SPELL_NAME as spellName, 
+			FIRST_NAME as firstName, 
+			MIDDLE_NAME as middleName,
+			LAST_NAME as      lastName, 
+			GENDER as gender, 
+			USER_ID_TYPE as userIdType, 
+			USER_ID_NO as userIdNo, 
+			USER_LEVEL as      userLevel, 
+			USER_EFFECTIVE_DATE as userEffectiveDate, 
+			APP_USER_STATUS as appUserStatus,      
+			USER_STATUS as userStatus, 
+			USER_EXPIRE_DATE as userExpireDate, 
+			KIND_GROUP as kindGroup,
+			TELLER_LEVEL as tellerLevel 
+		from KISK.AP_USER  
+		where APP_ORG_ID in ( Select ORG_ID from AP_ORG where ORG_SEQ like '%${orgseq}%' and (TREE_TYPE='00' or TREE_TYPE='03')) 
+		and APP_USER_STATUS = '1' 
+		and USER_STATUS = '1' 
+	</select>
+	
+	<select id="selectUserListByRoleIdAndOrgId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApUser">
+		Select 
+			A.APP_ID as appId, 
+			A.USER_ID as userId, 
+			ORG_ID as orgId, 
+			APP_ORG_ID as appOrgId, 
+			USER_CODE as      userCode, 
+			LOGIN_NAME as loginName, 
+			AUTH_MODE as authMode, 
+			USER_TYPE as userType, 
+			C_NAME as cName, 
+			SPELL_NAME as spellName, 
+			FIRST_NAME as firstName, 
+			MIDDLE_NAME as middleName,
+			LAST_NAME as      lastName, 
+			GENDER as gender, 
+			USER_ID_TYPE as userIdType, 
+			USER_ID_NO as userIdNo, 
+			USER_LEVEL as      userLevel, 
+			USER_EFFECTIVE_DATE as userEffectiveDate, 
+			APP_USER_STATUS as appUserStatus,      
+			USER_STATUS as userStatus, 
+			USER_EXPIRE_DATE as userExpireDate, 
+			KIND_GROUP as kindGroup,
+			TELLER_LEVEL as tellerLevel 
+		from KISK.AP_USER  A,KISK.AP_USER_ROLE B  
+		where  A.USER_ID=B.USER_ID and B.ROLE_ID=#{roleId} and A.APP_ORG_ID in ( Select ORG_ID from AP_ORG where ORG_SEQ like '%${orgseq}%' and (TREE_TYPE='00' or TREE_TYPE='03'))
+		and APP_USER_STATUS = '1' 
+		and USER_STATUS = '1' 
+	</select>
+	
+	<select id="selectOrgByOrgSeq" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApOrg">
+		Select 
+			ORG_ID as orgId, 
+			APP_ID as appId, 
+			PARENT_ORG_ID as parentOrgId, 
+			AREA_CODE as areaCode, 
+			ORG_CODE as orgCode, 
+			ORG_NAME as orgName, 
+			ORG_LEVEL as orgLevel, 
+			ORG_SEQ as orgSeq, 
+			ORG_TYPE as orgType, 
+			STATUS as status, 
+			IN_COUNTRY as inCountry, 
+			ORG_CATAGORY as orgCatagory, 
+			MEMO as memo, 
+			SORT_NO as sortNo, 
+			PARENT_ORG_CODE as parentOrgCode, 
+			ORG_EN_NAME as orgEnName, 
+			SHORT_NAME as shortName, 
+			TREE_TYPE as treeType, 
+			PBC_NO as pbcNo, 
+			TREE_ID as treeId,
+			TREE_CODE as treeCode,
+			COMPANY_CODE as companyCode,
+			HX_ORG_CODE as hxOrgCode,
+			LAST_ORG_CODE
+		from KISK.AP_ORG 
+		where ORG_ID in ( ${orgseq} ) order by ORG_SEQ
+	</select>
+	<select id="selectUserListByRoleId" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApUser">
+		Select 
+			A.APP_ID as appId, 
+			A.USER_ID as userId, 
+			ORG_ID as orgId, 
+			APP_ORG_ID as appOrgId, 
+			USER_CODE as      userCode, 
+			LOGIN_NAME as loginName, 
+			AUTH_MODE as authMode, 
+			USER_TYPE as userType, 
+			C_NAME as cName, 
+			SPELL_NAME as spellName, 
+			FIRST_NAME as firstName, 
+			MIDDLE_NAME as middleName, 
+			LAST_NAME as      lastName, 
+			GENDER as gender, 
+			USER_ID_TYPE as userIdType, 
+			USER_ID_NO as userIdNo, 
+			USER_LEVEL as      userLevel, 
+			USER_EFFECTIVE_DATE as userEffectiveDate, 
+			APP_USER_STATUS as appUserStatus,      
+			USER_STATUS as userStatus, 
+			USER_EXPIRE_DATE as userExpireDate, 
+			KIND_GROUP as kindGroup,
+			TELLER_LEVEL as tellerLevel 
+		from KISK.AP_USER  A,KISK.AP_USER_ROLE B  
+		where  A.USER_ID=B.USER_ID and B.ROLE_ID=#{roleId} 
+		and APP_USER_STATUS = '1' 
+		and USER_STATUS = '1' 
+	</select>
+</mapper>

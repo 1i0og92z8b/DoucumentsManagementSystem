@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20130922</version>
+    <author>song.rui</author>
+    <description>FileCheck</description>
+    <file>com/bankcomm/dms/modules/check/DMS_FileCheckModule.swf</file>
+    <dict>state</dict>
+</module>

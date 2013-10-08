@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import mx.core.IToolTip;
+			import mx.managers.ToolTipManager;
+			import flash.events.MouseEvent;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			
+			public var xpos:String
+			
+			public var ypos:String 
+			
+			[Bindable] 
+			public var xypos:String 
+			
+			private var tt:IToolTip;
+			
+			public var rowindex: int;	
+			
+			
+			private function tooltipinit():void {
+				toolTipCreate();
+				systemManager.addEventListener(MouseEvent.MOUSE_MOVE, onMouseMove);				
+			}	
+			
+			public var str: String
+			
+			private function onMouseMove(event:MouseEvent):void {
+				rowindex  = Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition;
+				if ((rowindex>(gridPage.dataProvider.length-1))||(rowindex<0)||(topDownloadedFileDataGrid.contentMouseX<0))
+				{
+					toolTipDestroy();					 
+				}
+				else
+				{	
+					if (tt)
+					{
+						tt.move(event.stageX + 10, event.stageY + 10);
+						str="您现在所在行的文件id是 "+gridPage.dataProvider.getItemAt(rowindex)["fileId"];
+						tt.text=str;
+						event.updateAfterEvent();
+					}
+					else
+					{
+						toolTipCreate();
+						str="您现在所在行的文件id是 "+gridPage.dataProvider.getItemAt(rowindex)["fileId"];
+						tt.text=str;
+						event.updateAfterEvent();
+					}					
+				}					
+			}
+			
+			private function toolTipDestroy():void {
+				if (tt) {
+					ToolTipManager.destroyToolTip(tt);
+					tt = null;
+				}
+			}			
+			
+			private function toolTipCreate():void {
+				if (tt) {
+					toolTipDestroy();
+				}
+				tt = ToolTipManager.createToolTip("尚未初始化", topDownloadedFileDataGrid.contentMouseX, topDownloadedFileDataGrid.contentMouseY );
+			}		
+			
+			private function updatexpos():void
+			{
+				xpos = "当前X坐标是"+ mouseX.toString();
+			}
+			
+			private function updateypos():void
+			{
+				ypos = "当前Y坐标是"+ mouseY.toString();
+			}
+			
+			private function updatexypos():void
+			{
+				updatexpos();
+				updateypos();
+				xypos = xpos + "    " + ypos;
+			}
+			
+			private function query():void{
+				
+				tooltipinit();
+				
+				var params:URLParameter = new URLParameter();
+				
+				PaginationUtil.gridPageInit(topDownloadedFileDataGrid,gridPage);
+			}	
+			
+			private function downloadBatch():void{
+				if(!topDownloadedFileDataGrid.selectedItems || topDownloadedFileDataGrid.selectedItems.length < 1){
+					Alert.show("请选择至少一个文件进行下载","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					var dfileList:Array = new Array();
+					for each(var file:Object in topDownloadedFileDataGrid.selectedItems){
+						dfileList.push(file);
+					}
+					var str:String ="您要下载的文件ID是： ";	
+					for each (var f:Object in dfileList)
+					{str=str+f["fileId"]+"  ";}
+					Alert.show(str);
+					//showFileid();
+				}
+				
+				Alert.show("是否确认下载全部选中文件?","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}},null,2);					
+			}
+			
+			//private function sh():void{Alert.show("row number "+(Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition).toString());}
+			//private function showFileid():void{Alert.show("文件id是 "+gridPage.dataProvider.getItemAt(Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition)["fileId"]);}		
+			private function showRownum():void{Alert.show("现在所在行是第"+(1+Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition).toString()+"行 ");}
+		]]>
+	</mx:Script>
+	
+	
+	
+	<bankcomm:DoubleClickCheckDataGrid id="topDownloadedFileDataGrid" width="100%" height="100%"
+									   creationComplete="query()" mouseMove="updatexypos()" doubleClick="showRownum()"
+									   dataProvider="{gridPage.dataProvider}">
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+			<mx:DataGridColumn dataField="userName" headerText="用户名"/>
+			<mx:DataGridColumn dataField="categoryName" headerText="所属分类"/>
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+			<mx:DataGridColumn dataField="fullName" headerText="文件全名"/>
+			<mx:DataGridColumn dataField="updateTime" headerText="更新时间"/>
+			<mx:DataGridColumn dataField="downloadCounts" headerText="下载量"/>
+			<mx:DataGridColumn >
+				<mx:itemRenderer> 
+					<mx:Component>            
+						<mx:Button label="文件下载" click="showFileid()"> 
+							<mx:Script>
+								<![CDATA[
+									import DMS_Util.ConnectParameter;
+									import DMS_Util.ExtentedStringUtil;
+									import DMS_Util.PaginationUtil;
+									
+									import com.adobe.utils.StringUtil;
+									import com.bankcomm.Connect;
+									import com.bankcomm.GuipPublic;
+									import com.bankcomm.URLParameter;
+									import com.bankcomm.dms.bo.StatisticsBO;
+									import com.bankcomm.dms.cnst.InterfaceModeConst;
+									
+									import mx.controls.Alert;
+									import mx.events.CloseEvent;
+									import mx.events.ItemClickEvent;
+									
+									private function showRownum():void{Alert.show("现在所在行是第"+(1+Math.floor(this.parentDocument.topDownloadedFileDataGrid.contentMouseY/this.parentDocument.topDownloadedFileDataGrid.rowHeight)-1 + this.parentDocument.topDownloadedFileDataGrid.verticalScrollPosition).toString()+"行 ");}
+									private function showFileid():void{Alert.show("您要下载的文件下载量是 "+this.parentDocument.gridPage.dataProvider.getItemAt(Math.floor(this.parentDocument.topDownloadedFileDataGrid.contentMouseY/this.parentDocument.topDownloadedFileDataGrid.rowHeight)-1 + this.parentDocument.topDownloadedFileDataGrid.verticalScrollPosition)["downloadCounts"]);}	
+								]]>
+							</mx:Script>							
+						</mx:Button>
+					</mx:Component> 
+				</mx:itemRenderer> 
+			</mx:DataGridColumn>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<mx:Button label="下载选中文件" click="downloadBatch()" cornerRadius="0"/>
+	<mx:Label text="{xypos}"/>
+	<util:GridPage id="gridPage" dataUrl="topDownloadedFile.ajax"/>
+</util:MyModule>

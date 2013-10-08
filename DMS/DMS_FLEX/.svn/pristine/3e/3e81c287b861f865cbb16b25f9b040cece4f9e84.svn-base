@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Tree xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="400" height="300" 
+		 dataProvider="{catList}" initialize="initRoot()" itemClick="itemClickHandler(event)" labelField="categoryName">
+	<fx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			
+			import com.bankcomm.Connect;
+			import com.bankcomm.dms.events.CustomEvent;
+			import com.bankcomm.dms.modules.category.QueryCategory;
+			import com.bankcomm.dms.modules.category.Vo.CategoryVo;
+			
+			import mx.collections.ArrayCollection;
+			import mx.events.FlexEvent;
+			import mx.events.ListEvent;
+			
+			[Bindable]
+			private var catList:ArrayCollection=new ArrayCollection();
+			
+			[Bindable]
+			private var rootNode:Object;
+			
+			[Bindable]
+			public var  currentNodeId:int = 0;//定义一个公用变量——当前节点ID
+			
+			[Bindable]
+			public var currentNode:Object = null;//定义类型为Object的当前节点，存储的实际为categoryBo信息
+			
+			[Bindable]
+			public var currentUser:int;//定义当前节点的创建人/更新人
+			
+			[Bindable]
+			public var subCategoryArr:Array;
+			
+			/**
+			 * 分类树根组件初始化
+			 * */
+			public function initRoot():void{
+				//请求树根节点，调用后台的queryRoot()方法
+				Connect.request(new ConnectParameter({url:"queryRoot.ajax",params:null,
+					callback:function(r:Object,e:Event):void{
+						var rsp_body:Object=r["RSP_BODY"];
+						rootNode=rsp_body["root"];
+						catList = new ArrayCollection([rootNode]);//点击树上某个分类的传入参数
+					}}));
+			}
+			
+			/**
+			 * 鼠标单击处理函数
+			 * */
+			private function itemClickHandler(event:ListEvent):void{
+				//				var categoryVo:CategoryVo=event.itemRenderer.data as CategoryVo;
+				currentNode = event.itemRenderer.data;//获取当前节点的信息
+				currentNodeId = currentNode.categoryId;//将当前节点的categoryId返回给公用变量
+				currentUser=currentNode.modifyUser;//获取当前节点的更新人
+				
+				var categoryVo:CategoryVo=new CategoryVo(event.itemRenderer.data);//新建当前节点的CategoryVo
+				
+				if(categoryVo.isLeaf==true && categoryVo.children==null){//若非叶子节点且children不为空，查询子树
+					
+					var queryCategory:QueryCategory=new QueryCategory(categoryVo);
+					
+					queryCategory.connect(function(list:Array = null):void{
+						currentNode.children = list;
+						currentNode.isLeaf = false; 
+						catList.refresh();			
+						this.dataProvider = catList;
+						if(currentNode.isLeaf == false){
+							expandItem(currentNode,true);
+							
+							subCategoryArr = list;
+							
+							var  obj:Object = new Object();
+							obj["subCategoryArr"] = list;
+							
+							dispatchEvent(new CustomEvent("refreshSubs",list)); 
+						}
+						else{
+							var  obj2:Object = new Object();
+							obj2["subCategoryArr"] = subCategoryArr;
+							dispatchEvent(new CustomEvent("refreshSubs",list));
+						}
+/* 						if(categoryVo.isLeaf==false){
+						expandItem(categoryVo,true);
+						}  */
+					});
+				}
+			} 
+		]]>	
+	</fx:Script>
+	
+	
+	<fx:Declarations>
+		<!-- Place non-visual elements (e.g., services, value objects) here -->
+	</fx:Declarations>
+	
+</mx:Tree>

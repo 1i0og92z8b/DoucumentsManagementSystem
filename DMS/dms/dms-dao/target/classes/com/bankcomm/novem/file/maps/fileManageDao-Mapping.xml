@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.file.IFileManageMapper">
+
+<!-- <insert id="insertFile" parameterType="com.bankcomm.novem.bo.file.FileUploadBo" useGeneratedKeys="true" keyProperty="fileID">
+	insert into FILE
+	<trim prefix="(" suffix=")" suffixOverrides="," >
+		<if test="fileName!=null" >FILE_NAME,</if>
+		KEYWORDS,
+		<if test="categoryId!=null" >CATEGORY_ID,</if>
+		<if test="userId!=null" >USER_ID,</if>
+		<if test="uploadTime!=null" >UPLOAD_TIME,</if>
+		<if test="fileState!=null" >FILE_STATE,</if>
+		FILE_DESC,
+		<if test="filePath!=null" >FILE_PATH,</if>
+		<if test="fullName!=null" >FULL_NAME,</if>
+		<if test="createTime!=null">CREATE_TIME,</if>
+		<if test="updateTime!=null">UPDATE_TIME,</if>
+		<if test="modifyUser!=null">UPDATOR</if>
+	</trim>
+	values
+	<trim prefix="(" suffix=")" suffixOverrides="," >
+		<if test="fileName!=null" >#{fileName:VARCHAR},</if>
+		#{keywords:VARCHAR},
+		<if test="categoryId!=null" >#{categoryId:INTEGER},</if>
+		<if test="userId!=null" >#{userId:INTEGER},</if>
+		<if test="uploadTime!=null" >#{uploadTime:TIMESTAMP},</if>
+		<if test="fileState!=null" >#{fileState:CHAR},</if>
+		#{fileDesc:VARCHAR},
+		<if test="filePath!=null" >#{filePath:VARCHAR},</if>
+		<if test="fullName!=null" >#{fullName:VARCHAR},</if>
+		<if test="createTime!=null">#{createTime:TIMESTAMP},</if>
+		<if test="updateTime!=null">#{updateTime:TIMESTAMP},</if>
+		<if test="modifyUser!=null">#{modifyUser:INTEGER}</if>
+	</trim>
+</insert> -->
+
+<insert id="insertFile" parameterType="com.bankcomm.novem.bo.file.FileUploadBo">
+	insert into FILE 
+	 (FILE_NAME, KEYWORDS, CATEGORY_ID, USER_ID, UPLOAD_TIME, FILE_STATE, FILE_DESC, FILE_PATH, FULL_NAME, CREATE_TIME, UPDATE_TIME, UPDATOR) 
+	 values
+	 (#{fileName}, #{keywords}, #{categoryId}, #{userId}, #{uploadTime}, #{fileState}, #{fileDesc}, #{filePath}, #{fullName}, #{createTime}, #{updateTime}, #{modifyUser})
+</insert>
+
+<update id="updateFile" parameterType="com.bankcomm.novem.bo.file.FileUpdateBo">
+	update FILE set
+	KEYWORDS = #{keywords},
+	FILE_DESC = #{fileDesc},
+	CATEGORY_ID = #{categoryId},
+	<!-- FILE_PATH = #{filePath}, -->
+	UPDATE_TIME = #{updateTime},
+	UPDATOR = #{modifyUser}
+	where FILE_ID = #{fileId}	
+</update>
+
+<update id="updateFileByState" parameterType="com.bankcomm.novem.bo.file.FileUpdateStateBo">
+	update FILE set
+	FILE_STATE = #{fileState},
+	UPDATE_TIME = #{updateTime},
+	UPDATOR = #{modifyUser}
+	where FILE_ID = #{fileId}	
+</update>
+
+<update id="updateFileByCat" parameterType="com.bankcomm.novem.bo.file.FileUpdateCatBo">
+	update FILE set
+	CATEGORY_ID = #{categoryId},
+	FILE_PATH = #{filePath},
+	UPDATE_TIME = #{updateTime},
+	UPDATOR = #{modifyUser}
+	where FILE_ID = #{fileId}	
+</update>
+
+<delete id="deleteFile" parameterType="int">
+	delete from FILE
+	where FILE_ID = #{fileId}
+</delete>
+
+<delete id="deleteFiles" parameterType="List">
+	delete from FILE
+	where FILE_ID in 
+	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+		#{item}
+	</foreach>
+</delete>
+
+
+</mapper>

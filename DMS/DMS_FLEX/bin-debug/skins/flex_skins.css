@@ -1,0 +1,267 @@
+@namespace mx "http://www.adobe.com/2006/mxml";  
+@namespace dashboard "com.dashboard.view.*";
+@namespace components "com.hillelcoren.components.*";
+@namespace bankcomm "com.bankcomm.*";
+@namespace checklist "com.flextoolbox.controls.*";
+@namespace noti "com.notifications.*";
+
+/*---------------------------------LoginPanel Style-----------------------------------*/
+
+.LoginBtn
+{
+	upSkin:Embed(source='../images/login/button.png');
+	overSkin:Embed(source='../images/login/button2.png');
+	downSkin:Embed(source='../images/login/button2.png');
+	disabledSkin:Embed(source='../images/login/button3.png');
+}
+
+.LoginTextInput
+{
+	border-skin:ClassReference("skins.TextInputBorderSkin");
+	fillColors:#FFFFFF,#FFFFFF;
+	fillAlphas:1,1;
+	cornerRadius:5;
+}
+
+.LoginCheckBox
+{	
+	downIcon: Embed("../images/login/checkBox/selected.png");
+	overIcon: Embed("../images/login/checkBox/unSelected.png");
+	selectedDisabledIcon: Embed("../images/login/checkBox/selectedDisable.png");
+	selectedDownIcon: Embed("../images/login/checkBox/selected.png");
+	selectedOverIcon: Embed("../images/login/checkBox/selected.png");
+	selectedUpIcon: Embed("../images/login/checkBox/selected.png");
+	upIcon: Embed("../images/login/checkBox/unSelected.png");		
+	color: #000000;
+	textSelectedColor: #000000;
+	textRollOverColor: #000000;
+}
+
+/*-----------------------------END-------------------------------------------*/
+
+bankcomm|MyDateField
+{
+	backgroundDisabledColor:#ffffff
+}
+
+checklist|CheckBoxList
+{
+	backgroundDisabledColor:#ffffff
+}
+
+/* ---------------------------------------------------------------------------------- */
+
+/* css for pod */
+.maximizeRestoreButton
+{
+	up-skin:        	Embed("assets/maximize_up.png");
+	over-skin:      	Embed("assets/maximize_over.png");
+	down-skin:      	Embed("assets/maximize_up.png");
+	selected-up-skin:   Embed("assets/restore_up.png");
+	selected-over-skin: Embed("assets/restore_over.png");
+	selected-down-skin: Embed("assets/restore_up.png");
+}
+
+.minimizeButton
+{
+	up-skin:        Embed("assets/minimize_up.png");
+	over-skin:      Embed("assets/minimize_over.png");
+	down-skin:      Embed("assets/minimize_up.png");
+}
+
+dashboard|Pod
+{
+	padding-top: 12px;
+	padding-left: 10px;
+	padding-right: 10px;
+	padding-bottom: 10px;
+	rounded-bottom-corners: false;
+	border-thickness: 1px;
+	border-style: solid;
+	border-color: #999999;
+	header-colors: #ABC8E7, #ABC8E7;
+	highlight-alphas: .9, 0;
+	background-color: #ffffff;
+	corner-radius: 6px;
+	header-height: 22px;
+	shadow-direction: right;
+	drop-shadow-color: #999999;
+	background-alpha:1;
+}
+
+.podTitle
+{
+	font-size: 11px;
+	font-family: Tahoma;
+}
+
+dashboard|DragHighlight
+{
+	border-color: #CCCCCC;
+	border-thickness: 3px;
+	border-style: solid;
+	background-color: #F3F3F3;
+}
+
+.leftArrowButton
+{
+	up-skin:		Embed("assets/left_arrow_up.gif");
+	over-skin:		Embed("assets/left_arrow_over.gif");
+	down-skin:		Embed("assets/left_arrow_up.gif");
+	disabled-skin:	Embed("assets/left_arrow_disabled.gif");
+}
+
+.rightArrowButton
+{
+	up-skin:		Embed("assets/right_arrow_up.gif");
+	over-skin:		Embed("assets/right_arrow_over.gif");
+	down-skin:		Embed("assets/right_arrow_up.gif");
+	disabled-skin:	Embed("assets/right_arrow_disabled.gif");
+}
+
+
+/* ---------------------------------------------------------------------------------- */
+
+/* css for AutoComplete */
+components|AutoComplete
+{
+	selected-item-style-name: macMail;
+}
+
+
+.none 
+{
+	over-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	up-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	down-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-over-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-up-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-down-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 0;
+	font-weight: normal;
+	selected-font-weight: bold;
+	show-comma: yes;
+}
+
+.underline
+{
+	over-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	up-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	down-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-over-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-up-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-down-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 0;
+	text-decoration: underline;
+	font-weight: normal;
+	selected-font-weight: bold;
+	show-comma: yes;
+}
+
+.macMail 
+{
+	over-skin: ClassReference("com.hillelcoren.assets.skins.MacMailSkin");
+	up-skin: ClassReference("com.hillelcoren.assets.skins.MacMailSkin");
+	down-skin: ClassReference("com.hillelcoren.assets.skins.MacMailSkin");
+	selected-over-skin : ClassReference("com.hillelcoren.assets.skins.MacMailSkin");
+	selected-up-skin: ClassReference("com.hillelcoren.assets.skins.MacMailSkin");
+	selected-down-skin : ClassReference("com.hillelcoren.assets.skins.MacMailSkin");
+	padding-top: 0;
+	padding-bottom: 0;
+	text-selected-color: #FFFFFF;
+	padding-left: 8;
+	padding-right: 8;
+	font-weight: normal; 
+}
+
+.facebook 
+{
+	over-skin: ClassReference("com.hillelcoren.assets.skins.FacebookSkin");
+	up-skin: ClassReference("com.hillelcoren.assets.skins.FacebookSkin");
+	down-skin: ClassReference("com.hillelcoren.assets.skins.FacebookSkin");
+	selected-over-skin : ClassReference("com.hillelcoren.assets.skins.FacebookSkin");
+	selected-up-skin : ClassReference("com.hillelcoren.assets.skins.FacebookSkin");
+	selected-down-skin : ClassReference("com.hillelcoren.assets.skins.FacebookSkin");        
+	padding-top: 0;
+	padding-bottom: 0;
+	text-selected-color: #FFFFFF;
+	padding-left: 2;
+	padding-right: 5;
+	font-weight: normal;                
+}
+
+.actionsMenuButton
+{
+	over-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	up-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	down-skin: ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-over-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-up-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	selected-down-skin : ClassReference("com.hillelcoren.assets.skins.BlankSkin");
+	padding-top: 0;
+	padding-bottom: 0;
+	padding-left: 0;
+	padding-right: 4;			
+}
+
+
+/* ---------------------------------------------------------------------------------- */
+
+/* css for Notification */
+noti|Notification
+{
+	titleStyleName: myTitleStyle;
+	messageStyleName: myMessageStyle;
+	backgroundStyleName: notificationBackground;
+	closeButtonIcon: Embed('assets/bullet_purple.png');
+	paddingTop: 5;
+	paddingBottom: 5;
+	paddingLeft: 5;
+	paddingRight: 5;
+	horizontalGap: 10;
+	verticalGap: 10;
+	/*creationCompleteEffect: myWipeD;
+	removedEffect: myWipeU;*/
+}
+
+.notificationBackground
+{
+	colorsConfiguration: 2,2;
+	positioning: percentage;
+	gradientType: linear,radial;
+	fillColors: #6267DB, #FFFFFF,#95A2F1, #FFFFFF;
+	fillAlphas:  1,1,1,0;
+	gradientRatio: 0,255,0,119;
+	angle: 90,0;
+	offsetX: 0,50;
+	offsetY: 0,-45;
+	spreadMethod: pad,pad;
+	interpolationMethod: rgb,linearRGB;
+	focalPointRatio: 0,0;
+	cornerRadius: 9;
+	borderThickness: 1;
+	borderColors: #2C2C7B, #FFFFFF;
+	borderAlphas: 1,1;
+	bordergradientRatio: 0,255;
+	borderAngle: -90;
+}
+
+.myTitleStyle
+{
+	fontSize: 11;
+	fontWeight: bold;
+	color: #2c2c7b;
+}
+
+.myMessageStyle
+{
+	border-alpha:0;
+	fontStyle: bold;
+	content-background-alpha:0;
+}

@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<actionScriptProperties analytics="false" mainApplicationPath="index.mxml" projectUUID="ff19a7ed-3e59-49c6-8c3f-ef9016191634" version="10">
+  <compiler additionalCompilerArguments="-locale en_US -keep-all-type-selectors" autoRSLOrdering="true" copyDependentFiles="true" flexSDK="Flex 4.6.0" fteInMXComponents="false" generateAccessible="true" htmlExpressInstall="true" htmlGenerate="true" htmlHistoryManagement="true" htmlPlayerVersionCheck="true" includeNetmonSwc="false" outputFolderPath="bin-debug" removeUnusedRSL="true" sourceFolderPath="src" strict="true" targetPlayerVersion="0.0.0" useApolloConfig="false" useDebugRSLSwfs="true" verifyDigests="true" warn="true">
+    <compilerSourcePath/>
+    <libraryPath defaultLinkType="0">
+      <libraryPathEntry kind="4" path="">
+        <excludedEntries>
+          <libraryPathEntry kind="3" linkType="1" path="${PROJECT_FRAMEWORKS}/libs/flex.swc" useDefaultLinkType="false"/>
+        </excludedEntries>
+      </libraryPathEntry>
+      <libraryPathEntry kind="1" linkType="1" path="libs"/>
+    </libraryPath>
+    <sourceAttachmentPath/>
+  </compiler>
+  <applications>
+    <application path="index.mxml"/>
+  </applications>
+  <modules>
+    <module destPath="com/bankcomm/dms/modules/DMS_UserManageModule.swf" optimize="false" sourcePath="src/com/bankcomm/dms/modules/DMS_UserManageModule.mxml"/>
+    <module application="src/index.mxml" destPath="com/bankcomm/dms/modules/demo/DMS_DemoModule.swf" optimize="false" sourcePath="src/com/bankcomm/dms/modules/demo/DMS_DemoModule.mxml"/>
+    <module application="src/index.mxml" destPath="com/bankcomm/dms/modules/search/DMS_FileSearchModule.swf" optimize="false" sourcePath="src/com/bankcomm/dms/modules/search/DMS_FileSearchModule.mxml"/>
+    <module application="src/index.mxml" destPath="com/bankcomm/dms/modules/check/DMS_FileCheckModule.swf" optimize="false" sourcePath="src/com/bankcomm/dms/modules/check/DMS_FileCheckModule.mxml"/>
+    <module application="src/index.mxml" destPath="com/bankcomm/dms/modules/file/DMS_UploadModule.swf" optimize="false" sourcePath="src/com/bankcomm/dms/modules/file/DMS_UploadModule.mxml"/>
+    <module application="src/index.mxml" destPath="com/bankcomm/dms/modules/user/DMS_UserManageModule.swf" optimize="false" sourcePath="src/com/bankcomm/dms/modules/user/DMS_UserManageModule.mxml"/>
+    <module application="src/index.mxml" destPath="com/bankcomm/dms/modules/file/DMS_ManageUploadedFilesModule.swf" optimize="true" sourcePath="src/com/bankcomm/dms/modules/file/DMS_ManageUploadedFilesModule.mxml"/>
+  </modules>
+  <buildCSSFiles/>
+  <flashCatalyst validateFlashCatalystCompatibility="false"/>
+</actionScriptProperties>

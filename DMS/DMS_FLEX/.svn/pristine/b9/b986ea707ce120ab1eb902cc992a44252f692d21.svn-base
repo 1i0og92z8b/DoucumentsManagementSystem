@@ -1,0 +1,200 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:fx="http://ns.adobe.com/2009/mxml"
+			   xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:s="library://ns.adobe.com/flex/spark"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com">
+	<mx:Script>
+		<![CDATA[
+			import com.bankcomm.dms.modules.user.componets.UserManageDetail2;
+			import com.bankcomm.dms.modules.user.componets.UserManageDetail1;
+			import com.bankcomm.dms.bo.UserBO;
+			import com.bankcomm.dms.bo.SessionBO;
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.modules.user.componets.UserManageDetail;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			
+			private function search():void{
+				gridPage.param = function():Object{
+					var PARAMS:Object = new Object();
+					
+					if(keyInput.text != null && StringUtil.trim(keyInput.text) != ""){
+						PARAMS["keyword"] = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keyInput.text));
+					}
+					return PARAMS;
+				};
+				PaginationUtil.gridPageInit(userGrid,gridPage);
+			}
+			
+			private function itemClickHander(event:ItemClickEvent):void{
+				switch (event.index){
+					case 0:
+						addHandler();
+						break;
+					case 1:
+						updateHandler();
+						break;
+					case 2:
+						updatePasswordHandler();
+						break;
+					case 3:
+						deleteHandler();
+						break;
+				}
+			}
+			
+			//添加用户信息
+			private function addHandler():void{
+				var detail:UserManageDetail= new UserManageDetail();
+				detail.title="添加用户信息";
+				detail.MODE = InterfaceModeConst.MODE_ADD;
+				detail.addEventListener("refresh",function():void{
+					searchHandler();
+					detail.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				});
+				GuipPublic.popUp(detail);
+			}
+			
+			//更新用户信息
+			private function updateHandler():void{
+				if(!userGrid.selectedItems || userGrid.selectedItems.length != 1){
+					Alert.show("请选择一条记录进行更新！","提示");
+					return;
+				}
+				var detail:UserManageDetail1= new UserManageDetail1();
+				detail.title="更新用户信息";
+				detail.userId = userGrid.selectedItem["userId"];
+				detail.addEventListener("refresh",function():void{
+					searchHandler();
+					detail.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				});
+				GuipPublic.popUp(detail);
+			}
+			
+			//更新密码
+			private function updatePasswordHandler():void{
+				var detail:UserManageDetail2= new UserManageDetail2();
+				detail.title="修改密码";
+				detail.userId = SessionBO.userInfo.userId;
+				detail.userName=SessionBO.userInfo.userName;
+				detail.addEventListener("refresh",function():void{
+					searchHandler();
+					detail.dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+				});
+				GuipPublic.popUp(detail);
+				
+			}
+			
+			//删除用户信息
+			private function deleteHandler():void{
+				if(!userGrid.selectedItems || userGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行删除！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					var params:URLParameter = new URLParameter();
+					var userNameList:Array = new Array();
+					for each(var item:Object in userGrid.selectedItems){
+						userNameList.push(item["userName"]);
+					}
+					
+					
+					params.reqBody = {"userNameList":userNameList};
+					
+					Connect.request(new ConnectParameter({url:"delete.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						search();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认删除？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+				
+			}
+			
+			//搜索用户信息
+			private function searchHandler():void{
+				
+				gridPage.param = function():Object{			
+					var userBo:UserBO = new UserBO();
+					var params:URLParameter = new URLParameter();
+					if(keyInput.text != null && StringUtil.trim(keyInput.text) != ""){
+						userBo.userName = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keyInput.text));
+					}
+					if(emailInput.text != null && StringUtil.trim(emailInput.text) != ""){
+						userBo.email = ExtentedStringUtil.symbolTranslation(StringUtil.trim(emailInput.text));
+					}
+					if(extNoInput.text != null && StringUtil.trim(extNoInput.text) != ""){
+						userBo.extNo = ExtentedStringUtil.symbolTranslation(StringUtil.trim(extNoInput.text));
+					}
+					return userBo;
+					
+				};
+				
+				PaginationUtil.gridPageInit(userGrid,gridPage);
+
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:Array id="btnDp">		
+		<mx:Object label="添加用户信息" icon="@Embed('assets/page_add.png')"/>
+		<mx:Object label="更新用户信息" icon="@Embed('assets/page_edit.png')"/>
+		<mx:Object label="修改密码" icon="@Embed('assets/page_edit.png')"/>
+		<mx:Object label="删除用户信息" icon="@Embed('assets/page_delete.png')"/>			
+	</mx:Array>
+	<mx:HBox width="100%" horizontalGap="0" paddingTop="5" paddingBottom="2">
+		<mx:ButtonBar id="bar" dataProvider="{btnDp}" itemClick="itemClickHander(event)"/>
+		<mx:Spacer width="100%"/>
+		
+		<util:MySearchTextInput id="keyInput" width="150" prompt="用户名"
+								txChange="keyInput.showClearButton = (keyInput.text != '')"
+								clear="keyInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="12"/>
+		<mx:Spacer width="5%"/>
+		<util:MySearchTextInput id="emailInput" width="150" prompt="邮箱"
+								txChange="emailInput.showClearButton = (emailInput.text != '')"
+								clear="emailInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="12"/>
+		<mx:Spacer width="5%"/>
+		<util:MySearchTextInput id="extNoInput" width="150" prompt="分机号"
+								txChange="extNoInput.showClearButton = (extNoInput.text != '')"
+								clear="extNoInput.showClearButton = false;searchHandler()" enter="searchHandler()"
+								showClearButton="false" maxChars="12"/>
+		<mx:Spacer width="5%"/>
+		<mx:Button width="23" height="23" click="searchHandler()" cornerRadius="0" toolTip="查询"
+				   icon="@Embed('assets/magnifier.png')"/>
+	</mx:HBox>
+	<bankcomm:DoubleClickCheckDataGrid id="userGrid" width="100%" height="100%"
+									   creationComplete="searchHandler()"
+									   dataProvider="{gridPage.dataProvider}">
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="userId" headerText="ID"/>
+			<mx:DataGridColumn dataField="userName" headerText="用户名"/>
+			<mx:DataGridColumn dataField="fullName" headerText="姓名"/>
+			<mx:DataGridColumn dataField="sex" headerText="性别"/>
+			<mx:DataGridColumn dataField="email" headerText="邮箱"/>
+			<mx:DataGridColumn dataField="extNo" headerText="分机号"/>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<util:GridPage id="gridPage" dataUrl="queryAll.ajax"/>
+</util:MyModule>

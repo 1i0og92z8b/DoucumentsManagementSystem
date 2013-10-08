@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+  PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.bankcomm.novem.dao.user.IUserManageDaoMapper">
+
+	<resultMap type="com.bankcomm.novem.entry.user.UserEntry" id="UserMap">
+		<result property="userId" column="USER_ID"/>
+		<result property="userName" column="USER_NAME"/>
+		<result property="passWord" column="PASSWORD"/>
+		<result property="fullName" column="NAME"/>
+		<result property="sex" column="SEX"/>
+		<result property="email" column="EMAIL"/>
+		<result property="extNo" column="EXT_NO"/>
+		<result property="ifLogin" column="IF_LOGIN"/>
+		<result property="createTime" column="CREATE_TIME"/>
+		<result property="updateTime" column="UPDATE_TIME"/>
+		<result property="updator" column="UPDATOR"/>
+	</resultMap>
+	
+	<resultMap type="com.bankcomm.novem.bo.user.UserQueryBo" id="UserQueryMap">
+		<result property="userName" column="USER_NAME"/>
+		<result property="email" column="EMAIL"/>
+		<result property="extNo" column="EXT_NO"/>
+	</resultMap>
+	
+	<resultMap type="com.bankcomm.novem.bo.user.UserRoleBo" id="UserRoleMap">
+		<result property="userId" column="USER_ID"/>
+		<result property="userRole" column="USER_ROLE"/>
+		<result property="createTime" column="CREATE_TIME"/>
+		<result property="updateTime" column="UPDATE_TIME"/>
+		<result property="updator" column="UPDATOR"/>
+	</resultMap>
+	
+	<sql id="publicWhere">
+
+	</sql> 
+
+
+	<select id="queryCount" resultType="int" 
+		parameterType="com.bankcomm.novem.bo.user.UserQueryBo">
+		SELECT COUNT(1)
+		FROM USER
+		WHERE 1=1
+		<include refid="publicWhere"/>
+		WITH UR
+	</select>
+	
+	<insert id="insertUser" parameterType="com.bankcomm.novem.entry.user.UserEntry" useGeneratedKeys="true" keyProperty="USER_ID">
+	  <selectKey resultType="Integer" keyProperty="USER_ID" order="AFTER">
+			select identity_val_local() as userId from SYSIBM.SYSDUMMY1
+		</selectKey>
+      insert into USER (USER_NAME, PASSWORD, SEX, EMAIL, EXT_NO ,NAME ,IF_LOGIN ,CREATE_TIME ,UPDATE_TIME ,UPDATOR)
+      values (#{userName}, #{passWord}, #{sex}, #{email}, #{extNo}, #{fullName} ,#{ifLogin} ,#{createTime} ,#{updateTime} ,#{updator})
+  	</insert>
+  
+  <delete id="deleteUser">
+		delete 
+		from USER
+		where USER_NAME in
+		<foreach collection="list" item="userName" open="("
+			close=")" separator=",">
+			#{userName}
+		</foreach>
+  </delete>	
+  
+  <update id="updateUser" parameterType="com.bankcomm.novem.entry.user.UserEntry" >
+		update USER 
+		<set>
+		<if test="userName!=null">User_NAME = #{userName},</if>
+		<if test="passWord!=null">PASSWORD = #{passWord},</if>
+		<if test="fullName!=null">NAME = #{fullName},</if>
+		<if test="sex!=null">SEX = #{sex},</if>
+		<if test="email!=null">EMAIL = #{email},</if>
+		<if test="extNo!=null">EXT_NO = #{extNo},</if>
+		<if test="updateTime!=null">UPDATE_TIME=#{updateTime}</if>
+		</set>	
+		where USER_ID = #{userId}
+  </update>
+	
+  <select id="queryUserInfo" parameterType="Integer" resultMap="UserMap">
+		select  USER_NAME,PASSWORD,NAME,SEX,EMAIL,EXT_NO
+		from USER
+		where User_ID = #{userId}
+  </select>
+  
+  <select id="queryUserList"  parameterType="com.bankcomm.novem.bo.user.UserQueryBo" resultMap="UserMap">
+  	select USER_ID,USER_NAME,PASSWORD,NAME,SEX,EMAIL,EXT_NO
+  	from USER
+  	<where>
+		<if test="userName!=null">User_NAME = #{userName}</if>
+		<if test="email!=null">and EMAIL = #{email}</if>
+		<if test="extNo!=null">and EXT_NO = #{extNo}</if>
+		</where>
+  </select> 
+  
+  <!--<update id="updatePassWord" parameterType="com.bankcomm.novem.entry.user.UserEntry">
+  	update USER
+  	<set>
+  	<if test="passWord!=null">PASSWORD = #{passWord}</if>
+  	</set>
+  	where USER_ID =#{userId}
+  </update>-->
+  
+  <insert id="insertUserRole" parameterType="com.bankcomm.novem.bo.user.UserRoleBo">
+      insert into USER_ROLE_REL (USER_ID ,USER_ROLE ,CREATE_TIME ,UPDATE_TIME ,UPDATOR)
+      values (#{userId}, #{userRole} ,#{createTime} ,#{updateTime} ,#{updator})
+  	</insert>
+  	
+  	<update id="updateUserRole" parameterType="com.bankcomm.novem.bo.user.UserRoleBo" >
+		update USER_ROLE_REL 
+		<set>
+		<if test="userRole!=null">USER_ROLE = #{userRole},</if>
+		<if test="updateTime!=null">UPDATE_TIME=#{updateTime}</if>
+		</set>	
+		where USER_ID = #{userId}
+  </update>
+  
+  <delete id="deleteUserRole">
+		delete 
+		from USER_ROLE_REL
+		where USER_ID in
+		<foreach collection="list" item="userId" open="("
+			close=")" separator=",">
+			#{userId}
+		</foreach>
+  </delete>	
+  
+</mapper>

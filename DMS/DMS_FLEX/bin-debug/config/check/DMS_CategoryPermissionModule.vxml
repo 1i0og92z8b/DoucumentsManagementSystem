@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20130922</version>
+    <author>song.rui</author>
+    <description>CategoryPermission</description>
+    <file>com/bankcomm/dms/modules/check/DMS_CategoryPermissionModule.swf</file>
+    <dict>state</dict>
+</module>

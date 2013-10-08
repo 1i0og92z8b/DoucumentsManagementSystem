@@ -1,0 +1,24 @@
+<x:beans xmlns:x="http://www.springframework.org/schema/beans"
+	xmlns="http://www.bocom.com/schema/jump-core" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-2.0-m1.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+						http://www.bocom.com/schema/jump-core http://www.bocom.com/schema/jump-core-1.0.xsd">
+
+
+	<!-- 获取初始化的机构列表 -->
+	<process id="organizationQueryOrgTree" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="organizationAction" operations="queryOrgTree"/>
+		</actions>
+	</process>	
+	
+		<!-- 获得省分行列表 -->
+	<process id="provinceBranchQueryList" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="organizationAction" operations="queryProvinceBranchList"/>
+		</actions>
+	</process>	
+	
+</x:beans>

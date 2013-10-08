@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:TitleWindow xmlns:fx="http://ns.adobe.com/mxml/2009" 
+		 xmlns:s="library://ns.adobe.com/flex/spark" 
+		 xmlns:mx="library://ns.adobe.com/flex/mx" width="800" height="600"
+		 xmlns:components="com.bankcomm.dms.modules.category.components.*"
+		 showCloseButton="true"
+		 initialize="init()" >
+	<fx:Declarations>
+		<!-- 将非可视元素（例如服务、值对象）放在此处 -->
+	</fx:Declarations>
+	<fx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.Global;
+			
+			import com.bankcomm.Connect;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			
+			import mx.events.CloseEvent;
+			import mx.events.DynamicEvent;
+			import com.bankcomm.GuipPublic;
+			import mx.core.FlexGlobals;
+			
+			private var catPick:CategoryPick = new CategoryPick();
+			private var categoryId:String = new String();
+			
+			private var fileId:String = new String();
+			
+			private var obj:Object = new Object();
+			
+			private var updateUrl:String = Global.IP + "updateFileInfo.ajax";
+			
+			private function init():void
+			{
+				addEventListener('getFileInfo', getFileInfo);	
+			}
+			
+			private function getFileInfo(e:DynamicEvent):void
+			{
+				fileId = e.obj.fileId;
+				fileName.text = e.obj.fileName;
+				fileKeywords.text = e.obj.keywords;
+				fileDesc.text = e.obj.fileDesc;
+				//调用该组件的模块需要传递文件分类名而不是分类ID
+				fileCategory.text = e.obj.fileCategory;
+			}
+			
+			private function getNewFileInfo():Object
+			{
+				var obj:Object = new Object();
+				obj.fileId = fileId;
+				obj.keywords = fileKeywords.text;
+				obj.fileDesc = fileDesc.text;
+				obj.categoryId = categoryId;
+				obj.filePath = null;
+				obj.createTime = null;
+				obj.updateTime = null;
+				obj.modifyUser = SessionBO.userInfo["userId"];
+				return obj;
+			}
+			
+			private function submit():void
+			{
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"fileInfo":getNewFileInfo()};
+				Connect.request(new ConnectParameter({url:"updateFileInfo.ajax",params:params.toParameter(),callback:close()}));				
+			}
+			
+			private function close():void{
+				dispatchEvent(new CloseEvent(CloseEvent.CLOSE));
+			}
+			
+			protected function getCatName(event:MouseEvent):void
+			{
+				// TODO Auto-generated method stub
+				GuipPublic.popUp(catPick,this,true);
+				FlexGlobals.topLevelApplication.addEventListener('displayCat',displayCat);				
+			}
+			
+			protected function displayCat(e:DynamicEvent):void
+			{
+				fileCategory.text = catPick.catNode.categoryName;
+				categoryId = catPick.catNode.categoryId;
+			}
+		]]>
+	</fx:Script>
+	
+	<s:VGroup width="60%" horizontalCenter="0" verticalCenter="0">
+		<s:HGroup width="100%">
+			<s:Label width="10%" text="文件名:" paddingTop="10" />
+			<s:TextInput id="fileName" width="60%" borderVisible="true" />
+		</s:HGroup>
+		<s:HGroup width="100%">
+			<s:Label width="10%" text="关键字:" paddingTop="10" />
+			<s:TextArea id="fileKeywords" width="60%" height="100%" borderVisible="true" />
+			<s:Label width="30%" height="100%" verticalAlign="bottom" text="30字以内，关键字之间以逗号间隔"/>
+		</s:HGroup>
+		<s:HGroup width="100%" height="200">
+			<s:Label width="10%" text="介绍:" paddingTop="10" />
+			<s:TextArea id="fileDesc" width="60%" height="100%" borderVisible="true" />
+			<s:Label width="30%" height="100%" verticalAlign="bottom" text="500字以内" />
+		</s:HGroup>
+		<s:HGroup width="100%" height="100">
+			<s:Label width="10%" text="分类:" paddingTop="0" />
+			<s:TextInput id="fileCategory" width="200" prompt="分类" click="getCatName(event)"/> 
+		</s:HGroup>
+		<s:HGroup width="100%" height="50">
+			<s:Button width="80" height="25" x="100" y="20" label="更新" click="submit()" />
+			<s:Button width="80" height="25" x="200" y="20" label="取消" click="close()" />
+		</s:HGroup>
+	</s:VGroup>
+</mx:TitleWindow>

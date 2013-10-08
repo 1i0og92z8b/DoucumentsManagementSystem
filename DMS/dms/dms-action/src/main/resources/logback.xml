@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration scan="true" scanPeriod="30 seconds" debug="false">
+
+	<contextName>RISK</contextName>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.LevelFilter">
+			<level>ERROR</level>
+			<onMatch>DENY</onMatch>
+			<onMismatch>ACCEPT</onMismatch>
+		</filter>
+		<encoder>
+			<pattern>[%-5level] [%thread] %date %logger{80} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<appender name="ERROR_CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+			<level>ERROR</level>
+		</filter>
+		<target>System.err</target>
+		<encoder>
+			<pattern>[%-5level] [%thread] %date %logger{80} - %msg%n
+			</pattern>
+		</encoder>
+	</appender>
+
+	<root level="DEBUG">
+		<appender-ref ref="CONSOLE" />
+		<appender-ref ref="ERROR_CONSOLE" />
+	</root>
+
+	<logger name="org.apache.commons.beanutils.converters" level="INFO" />
+	<logger name="org.apache.commons.beanutils.ConvertUtils" level="INFO" />
+	<logger name="org.dozer" level="INFO" />
+
+	<logger name="java.sql.ResultSet" level="INFO" />
+	<logger name="org.mybatis.spring" level="INFO" />
+
+	<logger name="org.springframework" level="INFO" />
+	<logger
+		name="org.springframework.beans.factory.support.DefaultListableBeanFactory"
+		level="ERROR">
+		<!--这里必须配置成error，如果配置成info，此处会输出大量的bean初始化信息，eclipse的console在做正则表达式的分析时会消耗大量cpu资源 -->
+	</logger>
+
+</configuration>

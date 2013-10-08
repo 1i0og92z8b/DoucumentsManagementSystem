@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			
+			private function query():void{
+				var params:URLParameter = new URLParameter();
+						
+				PaginationUtil.gridPageInit(topDownloaderDataGrid,gridPage);
+			}		
+		
+		]]>
+	</mx:Script>
+	
+	
+	<bankcomm:DoubleClickCheckDataGrid id="topDownloaderDataGrid" width="100%" height="100%"
+									   creationComplete="query()"
+									   dataProvider="{gridPage.dataProvider}">
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="userId" headerText="用户ID"/>
+			<mx:DataGridColumn dataField="userName" headerText="用户名"/>
+			<mx:DataGridColumn dataField="name" headerText="真实姓名"/>
+			<mx:DataGridColumn dataField="sex" headerText="性别"/>
+			<mx:DataGridColumn dataField="email" headerText="Email地址"/>
+			<mx:DataGridColumn dataField="extNo" headerText="分机号"/>
+			<mx:DataGridColumn dataField="counts" headerText="下载文件次数"/>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<util:GridPage id="gridPage" dataUrl="topDownloader.ajax"/>
+</util:MyModule>

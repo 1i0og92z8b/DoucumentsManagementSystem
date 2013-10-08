@@ -1,0 +1,361 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="EUIF_AUTHORITY">
+	<select id="selectRoleByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApRole">
+		with tmp_ROLEID(ROLE_ID) as(
+			Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId:DECIMAL}			
+		)
+		select 
+			distinct a.ROLE_ID as roleId, 
+			a.APP_ID as appId, 
+			a.ROLE_CODE as roleCode, 
+			a.ROLE_NAME as roleName,
+      		a.ROLE_TYPE as roleType, 
+      		a.ROLE_DESC as roleDesc, 
+      		a.LAST_UPDATE as lastUpdate, 
+      		a.UPDATOR as updator,
+      		a.STATUS as status 
+		from KISK.AP_ROLE a inner join tmp_ROLEID on a.ROLE_ID = tmp_ROLEID.ROLE_ID
+	</select>
+	<select id="selectValidRoleByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApRole">
+		with tmp_ROLEID(ROLE_ID) as(
+			Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId:DECIMAL}			
+		)
+		select 
+			distinct a.ROLE_ID as roleId, 
+			a.APP_ID as appId, 
+			a.ROLE_CODE as roleCode, 
+			a.ROLE_NAME as roleName,
+      		a.ROLE_TYPE as roleType, 
+      		a.ROLE_DESC as roleDesc, 
+      		a.LAST_UPDATE as lastUpdate, 
+      		a.UPDATOR as updator,
+      		a.STATUS as status 
+		from KISK.AP_ROLE a inner join tmp_ROLEID on a.ROLE_ID = tmp_ROLEID.ROLE_ID 
+		where a.STATUS = '1'
+	</select>
+	<select id="selectFuncByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApFunc">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId}
+			) B where A.ROLE_ID=B.ROLE_ID 
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02'
+		)
+		select distinct a.FUNC_ID as funcId, 
+			a.APP_ID as appId, 
+			a.FUNC_CODE as funcCode, 
+			a.FUNC_NAME as funcName,
+	        a.SHORT_CUT as shortCut, 
+	        a.FUNC_DESC as funcDesc, 
+	        a.FUNC_ACTION as funcAction,
+	        a.FUNC_ACTOR as funcActor,
+	        a.PARA_INFO as paraInfo, 
+	        a.IS_CHECK as isCheck, 
+	        a.FUNC_TYPE as funcType, 
+	        a.IS_MENU as isMenu, 
+	        a.LAST_UPDATE as lastUpdate, 
+	        a.UPDATOR as updator, 
+	        a.STATUS as status, 
+	        a.OPEN_MODE as openMode 
+		from KISK.AP_FUNC a inner join tmp_FUNCID on a.FUNC_ID = tmp_FUNCID.FUNC_ID and a.STATUS = '1'
+	</select>
+	
+	<select id="selectOperFuncByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApFunc">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select A.ROLE_ID FROM KISK.AP_USER_ROLE A,AP_ROLE B  where A.ROLE_ID=B.ROLE_ID and A.USER_ID=#{userId} and ROLE_TYPE like '%01') B where A.ROLE_ID=B.ROLE_ID 
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02'
+		)
+		select distinct a.FUNC_ID as funcId, 
+			a.APP_ID as appId, 
+			a.FUNC_CODE as funcCode, 
+			a.FUNC_NAME as funcName,
+	        a.SHORT_CUT as shortCut, 
+	        a.FUNC_DESC as funcDesc, 
+	        a.FUNC_ACTION as funcAction,
+	        a.FUNC_ACTOR as funcActor,
+	        a.PARA_INFO as paraInfo, 
+	        a.IS_CHECK as isCheck, 
+	        a.FUNC_TYPE as funcType, 
+	        a.IS_MENU as isMenu, 
+	        a.LAST_UPDATE as lastUpdate, 
+	        a.UPDATOR as updator, 
+	        a.STATUS as status, 
+	        a.OPEN_MODE as openMode 
+		from KISK.AP_FUNC a inner join tmp_FUNCID on a.FUNC_ID = tmp_FUNCID.FUNC_ID and a.STATUS = '1'
+	</select>
+	
+	<select id="selectAuthFuncByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApFunc">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select A.ROLE_ID FROM KISK.AP_USER_ROLE A,AP_ROLE B  where A.ROLE_ID=B.ROLE_ID and A.USER_ID=#{userId} and ROLE_TYPE like '%02') B where A.ROLE_ID=B.ROLE_ID 
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02'
+		)
+		select distinct a.FUNC_ID as funcId, 
+			a.APP_ID as appId, 
+			a.FUNC_CODE as funcCode, 
+			a.FUNC_NAME as funcName,
+	        a.SHORT_CUT as shortCut, 
+	        a.FUNC_DESC as funcDesc, 
+	        a.FUNC_ACTION as funcAction,
+	        a.FUNC_ACTOR as funcActor,
+	        a.PARA_INFO as paraInfo, 
+	        a.IS_CHECK as isCheck, 
+	        a.FUNC_TYPE as funcType, 
+	        a.IS_MENU as isMenu, 
+	        a.LAST_UPDATE as lastUpdate, 
+	        a.UPDATOR as updator, 
+	        a.STATUS as status, 
+	        a.OPEN_MODE as openMode 
+		from KISK.AP_FUNC a inner join tmp_FUNCID on a.FUNC_ID = tmp_FUNCID.FUNC_ID and a.STATUS = '1'
+	</select>
+	
+	<select id="selectMenuByUserID" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApMenu">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId}) B where A.ROLE_ID=B.ROLE_ID
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02' 
+		)
+		select distinct a.MENU_ID as menuId, 
+			a.APP_ID as appId, 
+			a.P_MENU_ID as pMenuId, 
+			a.MENU_CODE as menuCode,
+	      	a.MENU_NAME_CH as menuNameCh, 
+	      	a.MENU_NAME_EN as menuNameEn,
+	      	a.MENU_NAME_SHORT as menuNameShort, 
+	      	a.FUNC_ID as funcId, 
+	      	a.IS_LEAF as isLeaf,
+	      	a.LEVEL as level, 
+	      	a.SEQ as seq, 
+	      	a.DISPLAY_ORDER as displayOrder, 
+	      	a.OPEN_MODE as openMode, 
+	      	a.UPDATOR as updator, 
+	      	a.LAST_UPDATE as lastUpdate, 
+	      	a.STATUS as status 
+		from KISK.AP_MENU a inner join tmp_FUNCID on a.FUNC_ID = tmp_FUNCID.FUNC_ID and a.STATUS = '1'
+	</select>
+	
+	<select id="selectTopMenuByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApMenu">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId}) B where A.ROLE_ID=B.ROLE_ID 
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02'
+		),tmp_TOPMENU( MENU_ID, P_MENU_ID) as
+		(select m1.MENU_ID, m1.P_MENU_ID from KISK.AP_MENU m1 inner join tmp_FUNCID on m1.FUNC_ID = tmp_FUNCID.FUNC_ID and m1.STATUS = '1'
+		    union all
+		    select m.MENU_ID, m.P_MENU_ID from KISK.AP_MENU m, tmp_TOPMENU  where m.MENU_ID = tmp_TOPMENU.P_MENU_ID and m.STATUS = '1')
+		select distinct a.MENU_ID as menuId, 
+			a.APP_ID as appId, 
+			a.P_MENU_ID as pMenuId, 
+			a.MENU_CODE as menuCode,
+	      	a.MENU_NAME_CH as menuNameCh, 
+	      	a.MENU_NAME_EN as menuNameEn, 
+	      	a.MENU_NAME_SHORT as menuNameShort,
+	      	a.FUNC_ID as funcId, 
+	      	a.IS_LEAF as isLeaf,
+	      	a.LEVEL as level, 
+	      	a.SEQ as seq, 
+	      	a.DISPLAY_ORDER as displayOrder, 
+	      	a.OPEN_MODE as openMode, 
+	      	a.UPDATOR as updator, 
+	      	a.LAST_UPDATE as lastUpdate, 
+	      	a.STATUS as status 
+		from KISK.AP_MENU a inner join tmp_TOPMENU on a.MENU_ID = tmp_TOPMENU.MENU_ID and a.STATUS = '1' 
+		order by a.SEQ
+	</select>
+	
+	<select id="selectLowerMenuByMenuId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApMenu">
+		select distinct a.MENU_ID as menuId, 
+			a.APP_ID as appId, 
+			a.P_MENU_ID as pMenuId, 
+			a.MENU_CODE as menuCode,
+	      	a.MENU_NAME_CH as menuNameCh, 
+	      	a.MENU_NAME_EN as menuNameEn, 
+	      	a.MENU_NAME_SHORT as menuNameShort,
+	      	a.FUNC_ID as funcId, 
+	      	a.IS_LEAF as isLeaf,
+	      	a.LEVEL as level, 
+	      	a.SEQ as seq, 
+	      	a.DISPLAY_ORDER as displayOrder, 
+	      	a.OPEN_MODE as openMode, 
+	      	a.UPDATOR as updator, 
+	      	a.LAST_UPDATE as lastUpdate, 
+	      	a.STATUS as status 
+		from KISK.AP_MENU a where a.STATUS = '1' and a.P_MENU_ID = #{menuId}
+		order by a.DISPLAY_ORDER
+	</select>
+	
+	<select id="isUserHasRole" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApRole">
+		with tmp_ROLEID(ROLE_ID) as(
+			Select ROLE_ID FROM AP_USER_ROLE where USER_ID=#{userId}
+		)
+		select distinct a.ROLE_ID as roleId, 
+			a.APP_ID as appId, 
+			a.ROLE_CODE as roleCode, 
+			a.ROLE_NAME as roleName,
+      		a.ROLE_TYPE as roleType, 
+      		a.ROLE_DESC as roleDesc, 
+      		a.LAST_UPDATE as lastUpdate, 
+      		a.UPDATOR as updator,
+      		a.STATUS as status  
+		from KISK.AP_ROLE a inner join tmp_ROLEID on a.ROLE_ID = tmp_ROLEID.ROLE_ID 
+		<if test="roleId!=null">
+			And a.ROLE_ID = #{roleId}
+		</if>
+		<if test="roleCode!=null">
+			And a.ROLE_CODE = #{roleCode}
+		</if>
+		
+	</select>
+	
+	<select id="isUserHasFunc" parameterType="java.util.HashMap" resultType="com.bocom.jump.component.euif.model.ApFunc">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId}) B where A.ROLE_ID=B.ROLE_ID 
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02'
+		)
+		select distinct a.FUNC_ID as funcId, 
+			a.APP_ID as appId, 
+			a.FUNC_CODE as funcCode, 
+			a.FUNC_NAME as funcName,
+	        a.SHORT_CUT as shortCut, 
+	        a.FUNC_DESC as funcDesc, 
+	        a.FUNC_ACTION as funcAction,
+	        a.FUNC_ACTOR as funcActor,
+	        a.PARA_INFO as paraInfo, 
+	        a.IS_CHECK as isCheck, 
+	        a.FUNC_TYPE as funcType, 
+	        a.IS_MENU as isMenu, 
+	        a.LAST_UPDATE as lastUpdate, 
+	        a.UPDATOR as updator, 
+	        a.STATUS as status, 
+	        a.OPEN_MODE as openMode 
+		from KISK.AP_FUNC a inner join tmp_FUNCID on a.FUNC_ID = tmp_FUNCID.FUNC_ID and a.STATUS = '1' 
+		<if test="funcId!=null">
+			and a.FUNC_ID = #{funcId}
+		</if>
+		<if test="funcCode!=null">
+			and a.FUNC_CODE = #{funcCode}
+		</if>
+	</select>
+	
+	<select id="selectApplicationsByUserId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApApplication">
+		with tmp_FUNCID(FUNC_ID) as(
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='01'
+			UNION 
+			Select FUNC_ID from KISK.AP_ROLE_FUNC A,(Select ROLE_ID FROM KISK.AP_USER_ROLE where USER_ID=#{userId}) B where A.ROLE_ID=B.ROLE_ID 
+			EXCEPT
+			Select FUNC_ID from KISK.AP_USER_FUNC where USER_ID=#{userId} and RELATION_TYPE='02'
+		)
+		select distinct a.APP_ID as appId, 
+			a.APP_NAME as appName, 
+			a.APP_CODE as appCode, 
+			a.APP_DESC as appDesc, 
+			a.APP_TYPE as appType, 
+			a.APP_PEFFECTIVEDATE as appPeffectivedate, 
+			a.APP_EXPIREDATE as appExpiredate,
+		    a.APP_STATUS as appStatus, 
+		    a.APP_IPADDR as appIpaddr, 
+		    a.APP_IPPORT as appIpport, 
+		    a.IN_TIPS as inTips,
+		    a.IN_GUIP as inGuip, 
+		    a.CHECK_REQ as checkReq, 
+		    a.CHECK_ORDER as checkOrder, 
+		    a.USER_ID as userId,
+		    a.IS_ORG_HAS_ROLE as isOrgHasRole, 
+		    a.MAINTAIN_COREATTR as maintainCoreattr, 
+		    a.CLONE_ORG as cloneOrg,
+		    a.OPEN_APP as openApp,
+		    a.MUL_DOMAIN as mulDomain,
+		    a.ICON_PATH as iconPath,
+		    a.SYSTEM_CODE as systemCode
+		from KISK.AP_APPLICATION a, KISK.AP_FUNC b ,tmp_FUNCID 
+		where  a.APP_ID=b.FUNC_ACTOR and b.FUNC_ID = tmp_FUNCID.FUNC_ID and b.STATUS = '1'
+	</select>
+	
+	<select id="selectMenuByMenuCode" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApMenu">
+		select distinct a.MENU_ID as menuId, 
+			a.APP_ID as appId, 
+			a.P_MENU_ID as pMenuId, 
+			a.MENU_CODE as menuCode,
+	      	a.MENU_NAME_CH as menuNameCh, 
+	      	a.MENU_NAME_EN as menuNameEn, 
+	      	a.MENU_NAME_SHORT as menuNameShort,
+	      	a.FUNC_ID as funcId, 
+	      	a.IS_LEAF as isLeaf,
+	      	a.LEVEL as level, 
+	      	a.SEQ as seq, 
+	      	a.DISPLAY_ORDER as displayOrder, 
+	      	a.OPEN_MODE as openMode, 
+	      	a.UPDATOR as updator, 
+	      	a.LAST_UPDATE as lastUpdate, 
+	      	a.STATUS as status 
+		from KISK.AP_MENU a where a.MENU_CODE = #{menuCode}
+	</select>
+	
+	<select id="selectFuncByFuncCode" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApFunc">
+		select distinct a.FUNC_ID as funcId, 
+			a.APP_ID as appId, 
+			a.FUNC_CODE as funcCode, 
+			a.FUNC_NAME as funcName,
+	        a.SHORT_CUT as shortCut, 
+	        a.FUNC_DESC as funcDesc, 
+	        a.FUNC_ACTION as funcAction,
+	        a.FUNC_ACTOR as funcActor,
+	        a.PARA_INFO as paraInfo, 
+	        a.IS_CHECK as isCheck, 
+	        a.FUNC_TYPE as funcType, 
+	        a.IS_MENU as isMenu, 
+	        a.LAST_UPDATE as lastUpdate, 
+	        a.UPDATOR as updator, 
+	        a.STATUS as status, 
+	        a.OPEN_MODE as openMode 
+		from KISK.AP_FUNC a  where a.FUNC_CODE = #{funcCode}
+	</select>
+	
+	<select id="selectRoleByRoleCode" parameterType="java.lang.String" resultType="com.bocom.jump.component.euif.model.ApRole">
+		select 
+			distinct a.ROLE_ID as roleId, 
+			a.APP_ID as appId, 
+			a.ROLE_CODE as roleCode, 
+			a.ROLE_NAME as roleName,
+      		a.ROLE_TYPE as roleType, 
+      		a.ROLE_DESC as roleDesc, 
+      		a.LAST_UPDATE as lastUpdate, 
+      		a.UPDATOR as updator,
+      		a.STATUS as status 
+		from KISK.AP_ROLE a where a.ROLE_CODE = #{roleCode}
+	</select>
+	
+	<select id="selectFuncByFuncId" parameterType="java.lang.Long" resultType="com.bocom.jump.component.euif.model.ApFunc">
+		select  a.FUNC_ID as funcId, 
+			a.APP_ID as appId, 
+			a.FUNC_CODE as funcCode, 
+			a.FUNC_NAME as funcName,
+	        a.SHORT_CUT as shortCut, 
+	        a.FUNC_DESC as funcDesc, 
+	        a.FUNC_ACTION as funcAction,
+	        a.FUNC_ACTOR as funcActor,
+	        a.PARA_INFO as paraInfo, 
+	        a.IS_CHECK as isCheck, 
+	        a.FUNC_TYPE as funcType, 
+	        a.IS_MENU as isMenu, 
+	        a.LAST_UPDATE as lastUpdate, 
+	        a.UPDATOR as updator, 
+	        a.STATUS as status, 
+	        a.OPEN_MODE as openMode 
+		from KISK.AP_FUNC a  where a.FUNC_ID = #{funcId}
+	</select>
+</mapper>

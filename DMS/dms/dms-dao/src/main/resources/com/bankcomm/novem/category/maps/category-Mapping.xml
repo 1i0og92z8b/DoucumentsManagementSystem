@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bankcomm.novem.dao.category.ICategoryMapper">
+	
+	<update id="updateCategory" parameterType="com.bankcomm.novem.bo.category.CategoryBo">
+		update CATEGORY set
+		CATEGORY_NAME = #{categoryName},
+		PARENT_ID = #{parentId},
+		IS_LEAF=#{isLeaf},
+		CATEGORY_PATH = #{categoryPath},
+		CATEGORY_DESC = #{categoryDesc},
+		CATEGORY_STATE=#{categoryState},
+		UPDATOR = #{modifyUser}
+		where CATEGORY_ID = #{categoryId}
+	</update>
+
+	<insert id="insertCategory" parameterType="com.bankcomm.novem.bo.category.CategoryBo">
+			insert into CATEGORY(CATEGORY_NAME, PARENT_ID, IS_LEAF, CATEGORY_PATH,
+			CATEGORY_DESC, CATEGORY_STATE,CREATE_TIME,UPDATE_TIME, UPDATOR)
+			values(#{categoryName}, #{parentId}, #{isLeaf}, #{categoryPath},
+			#{categoryDesc}, #{categoryState},current timestamp,current timestamp, #{modifyUser})
+	</insert>
+
+	
+<!-- 	<insert id="insertCategory" parameterType="com.bankcomm.novem.bo.category.CategoryBo" -->
+<!-- 			useGeneratedKeys="true" keyProperty="CATEGORY_ID"> -->
+<!-- 			<selectKey resultType="int" keyProperty="categoryId" order="AFTER"> -->
+<!-- 				select identity_val_local() as categoryId from SYSIBM.SYSDUMMY1 -->
+<!-- 			</selectKey> -->
+<!-- 			insert into CATEGORY(CATEGORY_NAME, PARENT_ID, IS_LEAF, CATEGORY_PATH, -->
+<!-- 			CATEGORY_DESC, CATEGORY_STATE,CREATE_TIME,UPDATE_TIME, UPDATOR) -->
+<!-- 			values(#{categoryName}, #{parentId}, #{isLeaf}, #{categoryPath}, -->
+<!-- 			#{categoryDesc}, #{categoryState},current timestamp,current timestamp, #{modifyUser}) -->
+<!-- 	</insert> -->
+	
+
+	
+	<update id="updateCategoryState" parameterType="com.bankcomm.novem.bo.category.CategoryStateBo">
+		update CATEGORY set
+		CATEGORY_STATE = #{categoryState}
+		where CATEGORY_ID = #{categoryId}
+	</update>
+	
+	
+	
+	<select id="isCategoryNameExist" resultType="int" parameterType="com.bankcomm.novem.bo.category.CategoryNameBo">
+		select count(*) from CATEGORY
+		where PARENT_ID=#{categoryId}
+        <if test="categoryName != null">
+	       and CATEGORY_NAME = #{categoryName}
+        </if> 
+	</select>	
+	
+
+
+	<select id="isCategoryDeletable" parameterType="int" resultType="int">
+		select PARENT_ID from CATEGORY
+		where CATEGORY_ID = #{categoryId}
+	</select>
+
+	<delete id="deleteCategory" parameterType="int">
+		delete from CATEGORY
+		where CATEGORY_ID = #{categoryId}
+	</delete>
+	
+
+	<resultMap type="com.bankcomm.novem.bo.category.CategoryBo" id="categoryResultMap">
+		<id property="categoryId" column="CATEGORY_ID"/>
+		<result property="categoryName" column="CATEGORY_NAME"/>
+		<result property="parentId" column="PARENT_ID"/>
+		<result property="isLeaf" column="IS_LEAF"/>
+		<result property="categoryPath" column="CATEGORY_PATH"/>
+		<result property="categoryState" column="CATEGORY_STATE"/>
+		<result property="categoryDesc" column="CATEGORY_DESC"/>
+		<result property="createTime" column="CREATE_TIME"/>
+		<result property="updateTime" column="UPDATE_TIME"/>
+		<result property="modifyUser" column="UPDATOR"/>
+	</resultMap>
+	
+	
+	
+	
+	
+	<select id="queryRoot" resultMap="categoryResultMap">
+	SELECT * FROM CATEGORY
+	WHERE PARENT_ID=0
+	</select>
+	
+	<select id="queryCategory" parameterType="int" resultMap="categoryResultMap">
+	SELECT * FROM CATEGORY
+	WHERE PARENT_ID=#{categoryId}
+	</select>
+	
+	<select id="viewCategory" parameterType="int" resultMap="categoryResultMap">
+	SELECT * FROM CATEGORY
+	WHERE CATEGORY_ID=#{categoryId}
+	</select>
+	
+	<select id="selectSubByPath" parameterType="String" resultMap="categoryResultMap">
+	select * from CATEGORY
+	where CATEGORY_PATH LIKE #{categoryPath}||'%'
+	</select>
+	
+	<select id="queryInsertCategoryId" parameterType="com.bankcomm.novem.bo.category.CategoryInsertBo" resultType="int">
+	select CATEGORY_ID from CATEGORY
+	where PARENT_ID = #{parentId} and CATEGORY_NAME=#{categoryName}
+	</select>
+</mapper>
+	
+	
+	

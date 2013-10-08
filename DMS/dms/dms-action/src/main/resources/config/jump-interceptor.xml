@@ -1,0 +1,32 @@
+<x:beans xmlns:x="http://www.springframework.org/schema/beans" 
+	xmlns="http://www.bocom.com/schema/jump-core" 
+	xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-2.0-m1.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+						http://www.bocom.com/schema/jump-core http://www.bocom.com/schema/jump-core-1.0.xsd">
+						
+	<interceptors id="defaultInterceptors">
+	
+<!-- 		<interceptor class="com.bankcomm.risk.interceptor.RiskInterceptor" /> -->
+		 
+<!-- 		<interceptor class="com.bocom.jump.bp.process.interceptors.UserInSessionInterceptor"> -->
+<!--  			<x:property name="initContextUser"> -->
+<!--  				<x:bean class="com.bankcomm.risk.action.session.ContextUserSession" > -->
+<!--  				</x:bean> -->
+<!--  			</x:property> -->
+<!--  		</interceptor> -->
+ 		
+	</interceptors>
+	<!-- 
+	<interceptors id="gwisInterceptors">
+		<interceptor class="com.bocom.interceptor.GWISInterceptor" />
+	</interceptors>
+ -->
+ 
+ <interceptors id="sessionInterceptors">
+		<interceptor class="com.bankcomm.novem.interceptor.UserSessionInterceptor" />
+	</interceptors>
+</x:beans>

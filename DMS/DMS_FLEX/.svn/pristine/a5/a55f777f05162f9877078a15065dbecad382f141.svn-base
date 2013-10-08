@@ -1,0 +1,436 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.RoleConst;
+			
+			import flash.events.MouseEvent;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.core.IToolTip;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			import mx.managers.ToolTipManager;
+			import mx.containers.Canvas;
+			
+			public var xpos:String
+			
+			public var ypos:String 
+			
+			[Bindable] 
+			public var xypos:String 
+			
+			[Bindable] 
+			public var url1:String="recentUploadedFileOnlySearchable.ajax"; 
+				
+			[Bindable] 
+			public var url2:String="recentUploadedFile.ajax"; 
+			
+			private var tt:IToolTip;
+			
+			public var rowindex: int;	
+			
+			private function tooltipinit():void {
+				toolTipCreate();
+			}	
+			
+			[Bindable]
+			public var str: String;
+			
+			[Bindable]
+			public var isMouseDown:Boolean=false;
+			
+			[Bindable]
+			public var startp:Point=new Point(); 
+			
+			[Bindable]
+			public var endp:Point=new Point(); 
+			
+			[Bindable]
+			public var temp:Point=new Point(); 
+			
+			[Bindable]
+			public var startRow:int=0;//从0开始
+			
+			[Bindable]
+			public var endRow:int=0;//从0开始
+			
+			[Bindable]
+			public var temRow:int=0;//从0开始
+			
+			[Bindable]
+			public var debugStr:String ="";
+			
+			public function drawDashLine(x1:Number, y1:Number, x2:Number, y2:Number):void{    
+				/*画虚线*/
+				//第一个数值指定线的粗细程度，第二个参数指定虚线短线之间的间隔
+				var pattern:Array = [5,5];
+				var x:Number = x2 - x1;
+				var y:Number = y2 - y1;
+				var hyp:Number = Math.sqrt((x)*(x) + (y)*(y));
+				var units:Number = hyp/(pattern[0]+pattern[1]);
+				var dashSpaceRatio:Number = pattern[0]/(pattern[0]+pattern[1]);
+				var dashX:Number = (x/units)*dashSpaceRatio;
+				var spaceX:Number = (x/units)-dashX;
+				var dashY:Number = (y/units)*dashSpaceRatio;
+				var spaceY:Number = (y/units)-dashY;
+				myCanvas.graphics.lineStyle(3, 0x00ff00,1);
+				myCanvas.graphics.moveTo(x1,y1);
+				while (hyp > 0){
+					x1 += dashX;
+					y1 += dashY;
+					hyp -= pattern[0];
+					if (hyp < 0)
+					{
+						x1 = x2;
+						y1 = y2;
+					}
+					myCanvas.graphics.lineTo(x1, y1);
+					x1 += spaceX;
+					y1 += spaceY;
+					myCanvas.graphics.moveTo(x1, y1);
+					hyp -= pattern[1];
+				}
+				myCanvas.graphics.moveTo(x2, y2);
+			}
+			
+			public function updateRect():void{
+				myCanvas.graphics.clear();
+				drawDashLine(startp.x,startp.y,temp.x,startp.y);
+				drawDashLine(temp.x,startp.y,temp.x,temp.y);
+				drawDashLine(temp.x,temp.y,startp.x,temp.y);
+				drawDashLine(startp.x,temp.y,startp.x,startp.y);
+			}
+			
+			private function getFileId():String{
+				rowindex=Math.floor(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+			    if ((rowindex>=0)&&(rowindex<gridPage.dataProvider.length))
+				{return gridPage.dataProvider.getItemAt(rowindex)["fileId"].toString();}
+				else
+					return "N/A";
+			}
+			
+			private function getDebugStr():String{
+				 debugStr="您现在所在行的文件id是 "+getFileId()//gridPage.dataProvider.getItemAt(rowindex)["fileId"]
+					+"  目前被选中的行： "+recentUploadedFileDataGrid.selectedIndices.toString()
+					+"   鼠标按下状态: "+isMouseDown.toString()
+					+"   startRow:  "+startRow+  "  endRow:  "+endRow+"  temRow: "+temRow
+					+"   startp:  "+startp.toString()+  "  endp:  "+endp.toString()+"  temp: "+temp.toString();
+				 return debugStr;
+			}
+					
+			private function  onMouseDown(event:MouseEvent):void{
+				if (isMouseDown==false)
+				{	
+				isMouseDown=true;
+				startp=new Point(recentUploadedFileDataGrid.contentMouseX,recentUploadedFileDataGrid.contentMouseY);
+				endp=new Point();
+				startRow=(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+				if (startRow<0)
+					startRow=0;
+				if (startRow>gridPage.dataProvider.length)
+					startRow=gridPage.dataProvider.length;
+				str=getDebugStr();
+				//tt.text=str;
+				event.updateAfterEvent();
+				}	
+				temRow=(event.stageY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+				str=getDebugStr();
+				//tt.text=str;
+				event.updateAfterEvent();
+			}
+			
+			private function onMouseUp(event:MouseEvent):void{
+				if (isMouseDown==true)
+				{
+				isMouseDown=false;	
+				myCanvas.graphics.clear();
+				endp=new Point(recentUploadedFileDataGrid.contentMouseX,recentUploadedFileDataGrid.contentMouseY);
+				updateSelectedRow(startp,endp);
+				str=getDebugStr();
+				//tt.text=str;	
+				event.updateAfterEvent();
+				endp=new Point();
+				startp=new Point();
+				temp=new Point();
+				}
+				myCanvas.graphics.clear();
+				event.updateAfterEvent();
+			}
+			
+			public var arr1:ArrayCollection=new ArrayCollection();
+			public var arr2:ArrayCollection=new ArrayCollection();
+			
+			private function changeSelectStatus(event:MouseEvent):void{
+				rowindex=Math.floor(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+				arr1.source=recentUploadedFileDataGrid.selectedIndices;
+				if (arr1.getItemIndex(rowindex)!=-1)//该项目处于选择状态
+				{
+					arr1.removeItemAt(arr1.getItemIndex(rowindex));
+				}
+				else//该项目处于未选择状态
+				{
+					arr1.addItem(rowindex);
+				}				
+				recentUploadedFileDataGrid.dataProvider=  null;						
+				recentUploadedFileDataGrid.dataProvider = gridPage.dataProvider;
+				//recentUploadedFileDataGrid.selectedIndex = rowindex;
+				recentUploadedFileDataGrid.selectedIndices = arr1.source;	
+				recentUploadedFileDataGrid.verticalScrollPosition = rowindex;
+				recentUploadedFileDataGrid.validateNow();								
+			}
+			
+			private function updateSelectedRow(startp:Point ,endp:Point):void{
+				if ((startp!=null)&&(endp!=null)&&(startp.equals(endp)==false))
+				{
+					endRow=(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+					if (endRow<0)
+						endRow=0;
+					if (endRow>gridPage.dataProvider.length)
+						endRow=gridPage.dataProvider.length;
+					if (startRow<=endRow)
+					{
+						arr2=new ArrayCollection();
+						for (i=startRow;i<=endRow;i++)
+						{						
+						arr2.addItem(i);
+					    }
+						arr1.source= recentUploadedFileDataGrid.selectedIndices;
+						for each(var i:int in arr2)   
+						{     
+							if(arr1.contains(i))      
+								continue;    
+							arr1.addItem(i);   
+						}
+						recentUploadedFileDataGrid.dataProvider=  null;						
+						recentUploadedFileDataGrid.dataProvider = gridPage.dataProvider;						
+						recentUploadedFileDataGrid.selectedIndices = arr1.source;						
+						recentUploadedFileDataGrid.validateNow();							
+				    }
+					else
+					{						
+						arr2=new ArrayCollection();
+						for (i=endRow;i<=startRow;i++)
+						{						
+							arr2.addItem(i);
+						}
+						arr1.source = recentUploadedFileDataGrid.selectedIndices;
+						for each(var j:int in arr2)   
+						{     
+							if(arr1.contains(j)==true)      
+								continue;    
+							arr1.addItem(j);   
+						}						
+						recentUploadedFileDataGrid.dataProvider=  null;						
+						recentUploadedFileDataGrid.dataProvider = gridPage.dataProvider;						
+						recentUploadedFileDataGrid.selectedIndices = arr1.source;						
+						recentUploadedFileDataGrid.validateNow();					
+					}
+				}				
+			}
+			
+			private function mouseMovehandler(event:MouseEvent):void{
+				updatexypos();
+				onMouseMove(event);				
+			}
+			
+			private function onMouseMove(event:MouseEvent):void {
+				rowindex  = Math.floor(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+				if (isMouseDown==true)
+				{
+					temp.setTo(recentUploadedFileDataGrid.contentMouseX,recentUploadedFileDataGrid.contentMouseY);
+					temRow=(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition;
+					//改变选择行背景颜色
+					updateRect();
+				}
+				if ((rowindex>(gridPage.dataProvider.length-1))||(rowindex<0)||(recentUploadedFileDataGrid.contentMouseX<0))
+			     {
+					toolTipDestroy();					 
+			 	 }
+				else
+				 {	
+					if (tt)
+					{
+					if (event.stageX<(this.parentApplication.width-170))
+					tt.move(event.stageX + 10, event.stageY + 10);
+					else
+					tt.move(event.stageX - 170, event.stageY + 10);	
+					str=getDebugStr();
+					//tt.text=str;
+					event.updateAfterEvent();
+					}
+					else
+					{
+						toolTipCreate();
+						str="您现在所在行的文件id是 "+gridPage.dataProvider.getItemAt(rowindex)["fileId"];
+						//tt.text=str;
+						event.updateAfterEvent();
+					}					
+				 }					
+			}
+			
+			private function toolTipDestroy():void {
+				if (tt) {
+					ToolTipManager.destroyToolTip(tt);
+					tt = null;
+				}
+			}			
+			
+			private function toolTipCreate():void {
+				if (tt) {
+					toolTipDestroy();
+				}
+				tt = ToolTipManager.createToolTip("尚未初始化", recentUploadedFileDataGrid.contentMouseX, recentUploadedFileDataGrid.contentMouseY );
+			}		
+			
+			private function updatexpos():void
+			{
+				xpos = "当前X坐标是"+ mouseX.toString();
+			}
+		
+			private function updateypos():void
+			{
+				ypos = "当前Y坐标是"+ mouseY.toString();
+			}
+			
+			private function updatexypos():void
+			{
+				updatexpos();
+				updateypos();
+				xypos = xpos + "   " + ypos;
+			}
+			
+			public var arr:Array 
+			
+			public var myCanvas:Canvas = new Canvas();
+			
+			private function getUrl():String{
+				if (SessionBO.userInfo["userRole"]==RoleConst.ROLE_ADMIN)
+					return url2;
+				else
+					return url1;				
+			}
+			
+			private function query():void{				
+				tooltipinit();				
+				var params:URLParameter = new URLParameter();				
+				PaginationUtil.gridPageInit(recentUploadedFileDataGrid,gridPage);
+				recentUploadedFileDataGrid.addChild(myCanvas);
+				recentUploadedFileDataGrid.setChildIndex(myCanvas,recentUploadedFileDataGrid.numChildren-1);	
+			}	
+			
+			private function downloadBatch():void{
+				if(!recentUploadedFileDataGrid.selectedItems || recentUploadedFileDataGrid.selectedItems.length < 1){
+					Alert.show("请选择至少一个文件进行下载","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					var idstr:String ="您要下载的文件ID是： ";	
+					for each (var f:int in recentUploadedFileDataGrid.selectedIndices)
+					{
+						//if (gridPage.dataProvider.getItemAt(f).fileState==0)
+							idstr+=gridPage.dataProvider.getItemAt(f)["fileId"]+"  ";
+					}
+					Alert.show(idstr);
+				}
+				
+				Alert.show("是否确认下载全部选中文件?","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}},null,2);					
+			}			
+				
+			private function showRownum():void{Alert.show("现在所在行是第"+(1+Math.floor(recentUploadedFileDataGrid.contentMouseY/recentUploadedFileDataGrid.rowHeight)-1 + recentUploadedFileDataGrid.verticalScrollPosition).toString()+"行 ");}
+		]]>
+	</mx:Script>	
+	
+	
+	<bankcomm:DoubleClickCheckDataGrid id="recentUploadedFileDataGrid" width="100%" height="100%"
+									   creationComplete="query()" mouseDown="onMouseDown(event)" mouseUp="onMouseUp(event)" mouseMove="mouseMovehandler(event)" draggableColumns="false" sortableColumns="false" 
+									   dataProvider="{gridPage.dataProvider}"  doubleClick="changeSelectStatus(event)" >
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+			<mx:DataGridColumn dataField="userName" headerText="用户名"/>
+			<mx:DataGridColumn dataField="categoryName" headerText="所属分类"/>
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+			<mx:DataGridColumn dataField="fullName" headerText="文件全名"/>
+			<mx:DataGridColumn dataField="updateTime" headerText="更新时间"/>
+			<mx:DataGridColumn dataField="downloadCounts" headerText="下载量"/>
+			<mx:DataGridColumn >
+				<mx:itemRenderer> 
+					<mx:Component>            
+						<mx:Button creationComplete="updateButtonStatus()" label="{fileState}" click="showFileid()" enabled="{isDownloadable}"> 
+							<mx:Script>
+								<![CDATA[
+									import DMS_Util.ConnectParameter;
+									import DMS_Util.ExtentedStringUtil;
+									import DMS_Util.PaginationUtil;
+									
+									import com.adobe.utils.StringUtil;
+									import com.bankcomm.Connect;
+									import com.bankcomm.GuipPublic;
+									import com.bankcomm.URLParameter;
+									import com.bankcomm.dms.cnst.InterfaceModeConst;
+									
+									import mx.controls.Alert;
+									import mx.events.CloseEvent;
+									import mx.events.ItemClickEvent;
+									
+									[Bindable] 
+									public var fileState:String 
+					
+									public function getFileState():String{
+										if (data.fileState=='0')
+											return "文件下载";
+										else
+											return "禁止下载";
+									}
+									
+									[Bindable] 
+									public var isDownloadable:Boolean 
+									
+									public  function getisDownloadable():Boolean{
+										if (data.fileState=='0')
+											return true;
+										else
+											return false;
+									}									
+									public  function updateButtonStatus():void{
+										isDownloadable = getisDownloadable();
+										fileState = getFileState();
+									}				
+																		
+									private function showRownum():void{									
+										Alert.show("现在所在行是第"+(1+Math.floor(this.parentDocument.recentUploadedFileDataGrid.contentMouseY/this.parentDocument.recentUploadedFileDataGrid.rowHeight)-1 + this.parentDocument.recentUploadedFileDataGrid.verticalScrollPosition).toString()+"行 ");
+									}
+									private function showFileid():void{Alert.show("您要下载的文件下载量是 "+this.parentDocument.gridPage.dataProvider.getItemAt(Math.floor(this.parentDocument.recentUploadedFileDataGrid.contentMouseY/this.parentDocument.recentUploadedFileDataGrid.rowHeight)-1 + this.parentDocument.recentUploadedFileDataGrid.verticalScrollPosition)["downloadCounts"]);}	
+								]]>
+							</mx:Script>							
+						</mx:Button>
+					</mx:Component> 
+				</mx:itemRenderer> 
+			</mx:DataGridColumn>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<mx:Button label="下载选中文件" click="downloadBatch()" cornerRadius="1" />
+	<mx:Label text="{xypos}" visible="true"/>
+	<util:GridPage id="gridPage" dataUrl="{getUrl()}"/>
+</util:MyModule>

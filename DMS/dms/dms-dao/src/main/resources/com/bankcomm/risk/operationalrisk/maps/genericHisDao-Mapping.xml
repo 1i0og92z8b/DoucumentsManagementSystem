@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?> 
+<!DOCTYPE mapper 
+  PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN" 
+  "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.IGenericHisMapper">
+	<select id="queryFirstVersion" resultType="java.lang.Object">
+		SELECT
+		MIN(VERSION)
+		FROM
+		${tableName}
+		<if test="whereColumns != null and whereColumns.size() > 0">
+			WHERE
+			<foreach collection="whereColumns" item="entry" separator="and">
+				${entry.columnName} ${entry.operand} ${entry.value}
+			</foreach>
+		</if>
+		WITH
+		UR
+	</select>
+	<select id="queryLastVersion" resultType="java.lang.Object">
+		SELECT
+		MAX(VERSION)
+		FROM
+		${tableName}
+		<if test="whereColumns != null and whereColumns.size() > 0">
+			WHERE
+			<foreach collection="whereColumns" item="entry" separator="and">
+				${entry.columnName} ${entry.operand} ${entry.value}
+			</foreach>
+		</if>
+		WITH UR
+	</select>
+	
+	<update id="updateHistory" parameterType="com.bankcomm.novem.comm.history.QueryHistory">
+		update ${tableName} set ${columnName}=${columnValue} where ${whereColumnName} = ${whereColumnValue}
+		WITH UR
+	</update>
+</mapper>

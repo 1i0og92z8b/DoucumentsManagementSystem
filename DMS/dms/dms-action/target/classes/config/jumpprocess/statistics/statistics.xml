@@ -1,0 +1,39 @@
+<x:beans xmlns:x="http://www.springframework.org/schema/beans"
+	xmlns="http://www.bocom.com/schema/jump-core" xmlns:osgi="http://www.springframework.org/schema/osgi"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+						http://www.springframework.org/schema/osgi http://www.springframework.org/schema/osgi/spring-osgi-2.0-m1.xsd
+						http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+						http://www.bocom.com/schema/jump-core http://www.bocom.com/schema/jump-core-1.0.xsd">
+	
+	<process id="topDownloader" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="topDownloader"></action>
+		</actions>
+	</process>
+	
+		<process id="topDownloadedFile" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="topDownloadedFile"></action>
+		</actions>
+	</process>
+	
+		<process id="topUploaderByFileCount" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="topUploaderByFileCount"></action>
+		</actions>
+	</process>
+	
+		<process id="topUploaderByDownloadCount" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="topUploaderByDownloadCount"></action>
+		</actions>
+	</process>
+	
+		<process id="recentUploadedFile" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="recentUploadedFile"></action>
+		</actions>
+	</process>
+	
+</x:beans>

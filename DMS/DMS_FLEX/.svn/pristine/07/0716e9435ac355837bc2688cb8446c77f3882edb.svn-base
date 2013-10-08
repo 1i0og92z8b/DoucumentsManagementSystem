@@ -1,0 +1,325 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com" xmlns:s="library://ns.adobe.com/flex/spark">
+	<mx:Script>
+		<![CDATA[
+		
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.components.FileDownload;
+			import com.bankcomm.dms.components.FileDelete;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			
+			protected function queryUncheckedFile():void
+			{
+				// TODO Auto-generated method stub
+				gridPage.param = function():Object{
+					var PARAMS:Object = new Object();
+					
+			//		PARAMS["fileState"] = FileState.UncheckedState;
+					return PARAMS;
+				};
+				PaginationUtil.gridPageInit(checkGrid,gridPage);
+			}
+			
+			protected function batchPass():void
+			{
+				// TODO Auto-generated method stub
+				if(!checkGrid.selectedItems || checkGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();
+					var fileIdList:Array = new Array();
+					
+					for each(var item:Object in checkGrid.selectedItems){
+						fileIdList.push(item["fileId"]);
+					}
+								
+					params.reqBody = {"fileIdList":fileIdList,"userId":SessionBO.userInfo.userId};
+					
+					Connect.request(new ConnectParameter({url:"batchPass.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryUncheckedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认审核通过？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			protected function batchRefuse():void
+			{
+				// TODO Auto-generated method stub
+				if(!checkGrid.selectedItems || checkGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();
+					var fileIdList:Array = new Array();
+					
+					for each(var item:Object in checkGrid.selectedItems){
+						fileIdList.push(item["fileId"]);
+					}
+					
+					params.reqBody = {"fileIdList":fileIdList,"userId":SessionBO.userInfo.userId};
+//					params.reqBody = {"fileIdList":fileIdList,"userInfo":SessionBO.userInfo};
+//					params.reqBody = {"userId":SessionBO.userInfo.userId};
+					
+					Connect.request(new ConnectParameter({url:"batchRefuse.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryUncheckedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认审核不通过？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			protected function batchDelete():void
+			{
+				// TODO Auto-generated method stub
+				if(!checkGrid.selectedItems || checkGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();
+					var fileIdList:Array = new Array();
+					
+					for each(var item:Object in checkGrid.selectedItems){
+						fileIdList.push(item["fileId"]);
+					}
+								
+					params.reqBody = {"fileIdList":fileIdList,"userId":SessionBO.userInfo.userId};
+					
+					Connect.request(new ConnectParameter({url:"checkBatchDelete.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryUncheckedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认删除？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			protected function batchDownLoad():void
+			{
+				// TODO Auto-generated method stub
+				if(!checkGrid.selectedItems || checkGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					
+					for each(var item:Object in checkGrid.selectedItems){				
+						
+						var fileDownload:FileDownload = new FileDownload();
+						fileDownload.downloadFile(item["fileName"] + ".txt",item["fileId"].toString(),SessionBO.userInfo.userId.toString());
+					}
+				};
+				
+				Alert.show("是否确认下载？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function pass(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();		
+					params.reqBody = {"fileId":fileId,"userId":SessionBO.userInfo.userId};
+
+					Connect.request(new ConnectParameter({url:"checkPass.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryUncheckedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认审核通过？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function refuse(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();	
+					params.reqBody = {"fileId":fileId,"userId":SessionBO.userInfo.userId};
+					
+					Connect.request(new ConnectParameter({url:"checkRefuse.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryUncheckedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认审核不通过？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function deleteFile(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				var callbackFunc:Function = function():void{
+					
+					var fileDelete:FileDelete = new FileDelete();
+					fileDelete.deleteFile(fileId);
+					queryUncheckedFile();
+				};
+				
+				Alert.show("是否确认删除文件？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function downLoad(fileId:int,fileName:String):void
+			{
+				// TODO Auto-generated method stub
+				var callbackFunc:Function = function():void{
+					
+					var fileDownload:FileDownload = new FileDownload();
+					fileDownload.downloadFile(fileName + ".txt",fileId.toString(),SessionBO.userInfo.userId.toString());
+				};
+				
+				Alert.show("是否确认下载？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function queryDetail(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				
+
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:HBox  paddingTop="5" paddingBottom="2" paddingLeft="8">
+		<mx:Button label="批量通过" click="batchPass()"/>
+		<mx:Button label="批量不通过" click="batchRefuse()"/>
+		<mx:Button label="批量删除" click="batchDelete()"/>
+		<mx:Button label="批量下载" click="batchDownLoad()"/>
+	</mx:HBox>
+
+	<bankcomm:DoubleClickCheckDataGrid id="checkGrid" width="100%" height="100%"
+									   creationComplete="queryUncheckedFile()"
+									   dataProvider="{gridPage.dataProvider}">
+	
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="fileId" headerText="ID"/>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+			<mx:DataGridColumn dataField="userName" headerText="上传者"/>
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+			<mx:DataGridColumn dataField="keywords" headerText="关键字"/>
+			<mx:DataGridColumn dataField="fileDesc" headerText="文件描述"/>
+			<mx:DataGridColumn dataField="filePath" headerText="文件路径"/>
+
+			<mx:DataGridColumn headerText="审核操作" textAlign="left">
+				<mx:itemRenderer>
+					<mx:Component>
+						
+						<mx:HBox horizontalAlign="left" paddingLeft="10" horizontalGap="20">
+							<mx:Button label="通过" paddingLeft="10" click="outerDocument.pass(data.fileId)"/>
+							<mx:Button label="不通过" paddingRight="10" click="outerDocument.refuse(data.fileId)"/>							
+						</mx:HBox>
+						
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			
+			<mx:DataGridColumn headerText="删除文件" textAlign="left">
+				<mx:itemRenderer>
+					<mx:Component>
+						
+						<mx:HBox horizontalAlign="left" paddingLeft="10" horizontalGap="20">
+							<mx:Button label="删除" paddingLeft="10" click="outerDocument.deleteFile(data.fileId)"/>						
+						</mx:HBox>
+						
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			
+			<mx:DataGridColumn headerText="查看详情" textAlign="left">
+				<mx:itemRenderer>
+					<mx:Component>
+						
+						<mx:HBox horizontalAlign="left" paddingLeft="10" horizontalGap="20">
+						<!--	<mx:Button label="下载" paddingLeft="10" click="outerDocument.downLoad(data.fileId,data.fileName)"/>-->
+							<mx:Button label="查看详情" paddingRight="10" click="outerDocument.queryDetail(data.fileId)"/>								
+						</mx:HBox>
+						
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+					
+		</bankcomm:columns>		
+	</bankcomm:DoubleClickCheckDataGrid>
+	
+	
+	<util:GridPage id="gridPage" dataUrl="fileCheck.ajax"/>
+</util:MyModule>
+

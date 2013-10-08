@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.bankcomm.novem.dao.demo.IDemoMapper">
+
+	<resultMap type="com.bankcomm.novem.entry.demo.DemoEntry"
+		id="phaseDemoMap">
+		<result property="demoId" column="DEMO_ID" />
+		<result property="demoNo" column="DEMO_NO" />
+		<result property="demoName" column="DEMO_NAME" />
+	</resultMap>
+	
+<!-- 	<select id="queryByName" resultMap="phaseDemoMap"> -->
+<!-- 	SELECT DEMO_ID,DEMO_NO,DEMO_NAME  -->
+<!-- 		FROM DEMO -->
+<!-- 		WHERE DEMO_NAME=#{demoName} -->
+<!-- 	</select> -->
+	
+	
+	<select id="queryByName" resultType="com.bankcomm.novem.entry.demo.DemoEntry">
+	SELECT DEMO_ID as demoId
+		,DEMO_NO as demoNo
+		,DEMO_NAME as demoName
+	FROM DEMO
+	WHERE DEMO_NAME=#{demoName}
+	</select>
+	
+	<sql id="publicWhere">
+		<if test="keyword != null">
+			and (DEMO_NAME LIKE '%'||#{keyword}||'%'ESCAPE'\' or DEMO_NO LIKE '%'||#{keyword}||'%'ESCAPE'\')
+		</if>
+	</sql> 
+	
+	<select id="queryDemoCount" resultType="int" 
+		parameterType="com.bankcomm.novem.bo.demo.QueryDemoBo">
+		SELECT COUNT(1)
+		FROM DEMO
+		WHERE 1=1
+		<include refid="publicWhere"/>
+		WITH UR
+	</select>
+	
+	<select id="queryDemoList" resultType="com.bankcomm.novem.entry.demo.DemoEntry" 
+		parameterType="com.bankcomm.novem.bo.demo.QueryDemoBo">
+		SELECT DEMO_ID as demoId
+			,DEMO_NO as demoNo
+			,DEMO_NAME as demoName
+		 FROM(
+			SELECT DEMO_ID
+			,DEMO_NO
+			,DEMO_NAME
+			,rownumber() over (order by DEMO_ID) as rn 
+			FROM DEMO
+			WHERE 1=1
+			<include refid="publicWhere"/>
+		)
+		<if test="pageCond != null and pageCond !='' ">
+		 <![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+		</if>
+		WITH UR
+	</select>
+	
+<!-- 	<delete id="deleteDemo" parameterType="java.util.Map"> -->
+<!-- 		delete from DEMO -->
+<!-- 		where DEMO_ID in  -->
+<!-- 		<foreach item="item" index="index" collection="demoIdList" -->
+<!-- 			        open="(" close=")" separator=",">  -->
+<!-- 			     #{item} -->
+<!-- 		  </foreach> -->
+<!-- 	</delete> -->
+
+	<delete id="deleteDemo" parameterType="java.lang.Integer">
+		delete from DEMO
+		where DEMO_ID in 
+		<foreach item="item" index="index" collection="list"
+			        open="(" close=")" separator=","> 
+			     #{item}
+		  </foreach>
+	</delete>
+</mapper> 

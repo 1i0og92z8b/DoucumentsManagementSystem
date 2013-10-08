@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.bankcomm.novem.dao.statistics.IStatisticsMapper">
+
+<sql id="publictopDownloader">
+(
+select userId,userName,name,sex,email,extNo,counts,rownumber() over (order by counts desc) as rn
+from (
+select
+D.USER_ID as userId,
+D.USER_NAME as userName,
+D.NAME as name,
+D.SEX as sex,
+D.EMAIL as email,
+D.EXT_NO as extNo,
+C.counts as counts
+from (
+select 
+B.USER_ID as userId,
+COUNT(A.USER_ID) as counts
+from
+DOWNLOAD_REC as A inner join USER as B on A.USER_ID = B.USER_ID
+group by B.USER_ID
+) as C, USER as D
+where C.userId = D.USER_ID
+) as E
+)	
+</sql>
+	
+<select id="topDownloader" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.UserRankingBo">
+select * from 
+<include refid = "publictopDownloader"/>
+where rn between #{START} and #{END}
+</select>
+
+<select id="topDownloaderTotalCount" resultType="int">
+select COUNT(*) from 
+<include refid = "publictopDownloader"/>
+</select>
+
+
+<sql id="publictopDownloadedFile">
+(
+select 
+fileId,
+userId, 
+fileName,
+userName,
+categoryName,
+uploadTime,
+filePath,
+fileState,
+fullName,
+createTime,
+updateTime,
+updator,
+downloadCounts,
+rownumber() over (order by downloadCounts desc) as rn
+from ( 
+select *
+from (
+select
+A.FILE_ID as fileId,
+A.USER_ID as userId, 
+A.FILE_NAME as fileName,
+B.USER_NAME as userName,
+C.CATEGORY_NAME as categoryName,
+A.UPLOAD_TIME as uploadTime,
+A.FILE_PATH as filePath,
+A.FILE_STATE as fileState,
+A.FULL_NAME as fullName,
+A.CREATE_TIME as createTime,
+A.UPDATE_TIME as updateTime,
+A.UPDATOR as updator
+from 
+FILE as A left join USER as B on A.USER_ID = B.USER_ID
+left join CATEGORY as C on A.CATEGORY_ID = C.CATEGORY_ID 
+) as D,
+(select 
+E.FILE_ID as tem, 
+E.FILE_DOWNLOAD_COUNTS as downloadCounts
+from
+DOWNLOAD_COUNTS as E, FILE as F
+where E.FILE_ID = F.FILE_ID
+) as G
+where D.fileId = G.tem and G.downloadCounts > 0
+) as H
+)
+</sql>
+
+<select id="topDownloadedFile" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.DownloadedFileBo">
+select * from 
+<include refid = "publictopDownloadedFile"/>
+where rn between #{START} and #{END}
+</select>
+
+<select id="topDownloadedFileTotalCount" resultType="int">
+select COUNT(*) from 
+<include refid = "publictopDownloadedFile"/>  
+</select>
+
+<sql id="publictopUploaderByFileCount">
+( 
+select userId,userName,name,sex,email,extNo,counts,rownumber() over (order by counts desc) as rn
+from (
+select
+D.USER_ID as userId,
+D.USER_NAME as userName,
+D.NAME as name,
+D.SEX as sex,
+D.EMAIL as email,
+D.EXT_NO as extNo,
+C.counts as counts 
+from 
+(select 
+B.USER_ID as tem, COUNT(A.USER_ID) as counts
+from 
+FILE as A right join USER as B
+on A.USER_ID = B.USER_ID 
+group by B.USER_ID) as C, USER as D
+where C.tem = D.USER_ID and C.counts > 0
+) as E
+)
+</sql>
+
+<select id="topUploaderByFileCount" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.UserRankingBo">
+select * from 
+<include refid = "publictopUploaderByFileCount"/> 
+where rn between #{START} and #{END}
+</select>
+
+<select id="topUploaderByFileCountTotalCount" resultType="int">
+select COUNT(*) from 
+<include refid = "publictopUploaderByFileCount"/>  
+</select>
+
+<sql id="publictopUploaderByDownloadCount">
+(
+select userId,userName,name,sex,email,extNo,counts,rownumber() over (order by counts desc) as rn 
+from (
+select
+D.USER_ID as userId,
+D.USER_NAME as userName,
+D.NAME as name,
+D.SEX as sex,
+D.EMAIL as email,
+D.EXT_NO as extNo,
+C.counts as counts 
+from 
+(select 
+B.USER_ID as tem, SUM(A.FILE_DOWNLOAD_COUNTS) as counts
+from 
+DOWNLOAD_COUNTS as A, FILE as B
+where A.FILE_ID = B.FILE_ID 
+group by B.USER_ID) as C inner join USER as D
+on C.tem = D.USER_ID where C.counts > 0
+) as E
+)
+</sql>
+
+<select id="topUploaderByDownloadCount" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.UserRankingBo">
+select * from 
+<include refid = "publictopUploaderByDownloadCount"/> 
+where rn between #{START} and #{END}
+</select>
+
+<select id="topUploaderByDownloadCountTotalCount" resultType="int">
+select COUNT(*) from 
+<include refid = "publictopUploaderByDownloadCount"/> 
+</select>
+
+
+<sql id="publicrecentUploadedFile">
+(
+select 
+fileId,
+userId, 
+fileName,
+userName,
+categoryName,
+uploadTime,
+filePath,
+fileState,
+fullName,
+createTime,
+updateTime,
+updator,
+downloadCounts,
+rownumber() over (order by uploadTime desc) as rn
+from ( 
+select *
+from (
+select
+A.FILE_ID as fileId,
+A.USER_ID as userId, 
+A.FILE_NAME as fileName,
+B.USER_NAME as userName,
+C.CATEGORY_NAME as categoryName,
+A.UPLOAD_TIME as uploadTime,
+A.FILE_PATH as filePath,
+A.FILE_STATE as fileState,
+A.FULL_NAME as fullName,
+A.CREATE_TIME as createTime,
+A.UPDATE_TIME as updateTime,
+A.UPDATOR as updator
+from 
+FILE as A left join USER as B on A.USER_ID = B.USER_ID
+left join CATEGORY as C on A.CATEGORY_ID = C.CATEGORY_ID 
+) as D,
+(select 
+E.FILE_ID as tem, 
+E.FILE_DOWNLOAD_COUNTS as downloadCounts
+from
+DOWNLOAD_COUNTS as E, FILE as F
+where E.FILE_ID = F.FILE_ID
+) as G
+where D.fileId = G.tem
+) as H
+) 
+</sql>
+
+<select id="recentUploadedFile" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.DownloadedFileBo">
+select * from 
+<include refid = "publicrecentUploadedFile"/> 
+where rn between #{START} and #{END}
+</select>
+
+<select id="recentUploadedFileTotalCount" resultType="int">
+select COUNT(*) from
+<include refid = "publicrecentUploadedFile"/> 
+</select>
+
+<update id="updateDownloadCount" parameterType="int">
+update DOWNLOAD_COUNTS 
+set FILE_DOWNLOAD_COUNTS = FILE_DOWNLOAD_COUNTS+1
+where FILE_ID = #{fileid} 
+</update>
+
+<insert id="insertDownloadCount" parameterType="int">
+insert into DOWNLOAD_COUNTS 
+values 
+(
+#{fileId},
+0,
+(select CREATE_TIME from FILE as A where A.FILE_ID = #{fileId}),
+(select UPDATE_TIME from FILE as A where A.FILE_ID = #{fileId}),
+(select UPDATOR from FILE as A where A.FILE_ID = #{fileId})
+) 
+</insert>
+
+</mapper>
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com">
+	
+	<mx:Script>
+		<![CDATA[
+			
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;			
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.bo.FileStateBo;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			import com.bankcomm.dms.components.FileDownload;		
+			
+			protected function queryDeletedFile():void
+			{
+				// TODO Auto-generated method stub
+				gridPage.param = function():Object{
+					
+					var PARAMS:Object = new Object();					
+					PARAMS["fileState"] = FileStateBo.DeletedState;
+					
+					if(keyInput.text != null && StringUtil.trim(keyInput.text) != "")
+						PARAMS["fileName"] = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keyInput.text));
+					
+					//判断用户是否为管理员，如果不是，将userId传给后台，搜索由该用户上传的已删除文件
+					if(SessionBO.userInfo.userRole != "admin")
+						PARAMS["userId"] = SessionBO.userInfo.userId;
+					
+					return PARAMS;
+				};
+				PaginationUtil.gridPageInit(recycleGrid,gridPage);
+			}
+			
+			protected function recover():void
+			{
+				// TODO Auto-generated method stub
+				if(!recycleGrid.selectedItems || recycleGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();
+					var fileIdList:Array = new Array();
+					
+					for each(var item:Object in recycleGrid.selectedItems){
+						fileIdList.push(item["fileId"]);
+					}
+					
+					
+					params.reqBody = {"fileIdList":fileIdList,"userId":SessionBO.userInfo.userId};
+					
+					Connect.request(new ConnectParameter({url:"batchRecoverDeletedFiles.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryDeletedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认恢复文件？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			
+			protected function batchDelete():void
+			{
+				// TODO Auto-generated method stub
+				if(!recycleGrid.selectedItems || recycleGrid.selectedItems.length < 1){
+					Alert.show("请选择一条或多条记录进行操作！","提示");
+					return;
+				}
+				
+				
+				var callbackFunc:Function = function():void{
+					var params:URLParameter = new URLParameter();
+					var fileIdList:Array = new Array();
+					
+					for each(var item:Object in recycleGrid.selectedItems){
+						fileIdList.push(item["fileId"]);
+					}
+					
+					
+					params.reqBody = {"fileIdList":fileIdList,"userId":SessionBO.userInfo.userId};
+					
+					Connect.request(new ConnectParameter({url:"recycleBatchDelete.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryDeletedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认删除？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function deleteFile(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				var callbackFunc:Function = function():void{
+					
+					var params:URLParameter = new URLParameter();
+					params.reqBody = {"fileId":fileId};
+					
+					Connect.request(new ConnectParameter({url:"recycleDeleteFile.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+						queryDeletedFile();
+					},isMaskAvailable:true
+					}));
+				};
+				
+				Alert.show("是否确认删除？","确认",3,null,function(event:CloseEvent):void{
+					if(event.detail == Alert.YES){
+						if(null != callbackFunc){
+							callbackFunc();
+						}
+					}
+				},null,2);
+			}
+			
+			public function downLoad(fileId:int,fileName:String):void
+			{
+				// TODO Auto-generated method stub
+//				var callbackFunc:Function = function():void{
+//					
+//					var fileDownload:FileDownload = new FileDownload();
+//					fileDownload.downloadFile(fileName + ".txt",fileId.toString());
+//				};
+//				
+//				Alert.show("是否确认下载？","确认",3,null,function(event:CloseEvent):void{
+//					if(event.detail == Alert.YES){
+//						if(null != callbackFunc){
+//							callbackFunc();
+//						}
+//					}
+//				},null,2);
+			}
+			
+			public function queryDetail(fileId:int):void
+			{
+				// TODO Auto-generated method stub
+				
+				
+			}
+			
+		]]>
+	</mx:Script>
+	
+	
+	<mx:HBox width="100%" paddingTop="5" paddingBottom="2" paddingLeft="8">
+		<mx:Button label="恢复文件" click="recover()"/>
+		<mx:Button label="批量删除" click="batchDelete()"/>
+		
+		<mx:Spacer width="70%"/>		
+		<util:MySearchTextInput id="keyInput" width="200" prompt="文件名"
+								txChange="keyInput.showClearButton = (keyInput.text != '')"
+								clear="keyInput.showClearButton = false;queryDeletedFile()" enter="queryDeletedFile()"
+								showClearButton="false" maxChars="50"/>
+		<mx:Button width="23" height="23" click="queryDeletedFile()" cornerRadius="0" toolTip="搜索"
+				   icon="@Embed('assets/magnifier.png')"/>
+	</mx:HBox>
+	
+	<bankcomm:DoubleClickCheckDataGrid id="recycleGrid" width="100%" height="100%"
+									   creationComplete="queryDeletedFile()"
+									   dataProvider="{gridPage.dataProvider}">
+		
+		<bankcomm:columns>
+			<mx:DataGridColumn dataField="fileId" headerText="ID"/>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+			<mx:DataGridColumn dataField="userName" headerText="上传者"/>
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+			<mx:DataGridColumn dataField="keywords" headerText="关键字"/>
+			<mx:DataGridColumn dataField="fileDesc" headerText="文件描述"/>
+			<mx:DataGridColumn dataField="updator" headerText="修改人"/>
+			<mx:DataGridColumn dataField="updateTime" headerText="修改时间"/>
+			<mx:DataGridColumn dataField="filePath" headerText="文件路径"/>
+			
+			<mx:DataGridColumn headerText="彻底删除文件" textAlign="left">
+				<mx:itemRenderer>
+					<mx:Component>
+						
+						<mx:HBox horizontalAlign="left" paddingLeft="10" horizontalGap="20">
+							<mx:Button label="删除" paddingLeft="10" click="outerDocument.deleteFile(data.fileId)"/>				
+						</mx:HBox>
+						
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			
+			<mx:DataGridColumn headerText="查看详情" textAlign="left">
+				<mx:itemRenderer>
+					<mx:Component>
+						
+						<mx:HBox horizontalAlign="left" paddingLeft="10" horizontalGap="20">
+							<mx:Button label="下载" paddingLeft="10" click="outerDocument.downLoad(data.fileId,data.fileName)"/>
+							<mx:Button label="查看详情" paddingRight="10" click="outerDocument.queryDetail(data.fileId)"/>								
+						</mx:HBox>
+						
+					</mx:Component>
+				</mx:itemRenderer>
+			</mx:DataGridColumn>
+			
+		</bankcomm:columns>		
+	</bankcomm:DoubleClickCheckDataGrid>
+	
+	<util:GridPage id="gridPage" dataUrl="recycle.ajax"/>
+</util:MyModule>
+
