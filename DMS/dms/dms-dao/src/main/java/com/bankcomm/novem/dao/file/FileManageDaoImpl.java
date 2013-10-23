@@ -20,8 +20,8 @@ public class FileManageDaoImpl extends BaseDao implements IFileManageDao {
 	private IFileManageMapper iFileManageMapper;
 	
 	@Override
-	public void insertFile(final FileUploadBo newFile) {
-		iFileManageMapper.insertFile(newFile);
+	public int insertFile(final FileUploadBo newFile) {
+		return iFileManageMapper.insertFile(newFile);
 	}
 	
 	@Override

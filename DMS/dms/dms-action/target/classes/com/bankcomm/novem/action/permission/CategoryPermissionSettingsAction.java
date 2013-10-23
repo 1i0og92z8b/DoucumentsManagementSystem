@@ -50,7 +50,7 @@ public class CategoryPermissionSettingsAction extends BaseAction {
 	public void updatePermission(final Context context) {
 		
 		final CategoryStateBo categoryStateBo = ContextExtractor.extractBean(context, "category", CategoryStateBo.class);
-		int userId = 1; //等前台session中有记录时，加入前台参数"category"中
+		final Integer userId = (Integer)ContextExtractor.extractValue(context, "userId");
 		categoryStateBo.setModifyUser(userId);
 		categoryStateBo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		

@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com" xmlns:jwolib="http://www.jwolib.com/2006/mxml">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.FileStateBo;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.components.FileDownload;
+			
+			import mx.controls.Alert;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			import mx.collections.ArrayCollection;
+			
+			import index;
+			import mx.modules.ModuleLoader;
+			import com.bankcomm.IModuleData;
+			import com.bankcomm.ModuleData;
+			import DMS_Util.Global;
+			import mx.core.FlexGlobals;
+			import com.bankcomm.dms.modules.search.componets.FileDetail;
+
+			
+			[Bindable]
+			private var dataProvider1:ArrayCollection;
+			
+			private var topParameter:int = 10;
+			
+			[Bindable]
+			private var dataProvider2:ArrayCollection;
+			
+			private var recentFileParameter:int = 10;
+			
+			protected function queryTopFile(value:int):void
+			{
+				// TODO Auto-generated method stub
+				var topParameter:int = value;
+					
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"topParameter":topParameter};
+					
+				Connect.request(new ConnectParameter({url:"homeTopDownLoadedFile.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+					var rspBody:Object=r["RSP_BODY"];	
+					dataProvider1=new ArrayCollection(rspBody["downloadedFileList"] as Array);
+				},isMaskAvailable:true
+				}));		
+			}
+			
+			protected function queryRecentFile(value:int):void
+			{
+				// TODO Auto-generated method stub				
+				var recentFileParameter:int = value;
+				
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"recentFileParameter":recentFileParameter};
+				
+				Connect.request(new ConnectParameter({url:"homeRecentUploadedFile.ajax",params:params.toParameter(),callback:function(r:Object,e:Event):void{
+					var rspBody:Object=r["RSP_BODY"];	
+					dataProvider2=new ArrayCollection(rspBody["recentFileList"] as Array);
+				},isMaskAvailable:true
+				}));
+			}
+			
+			protected function chooseTopParameter(event:ItemClickEvent):void
+			{
+				// TODO Auto-generated method stub
+				switch(event.index)
+				{
+					case 0:
+						topParameter = 10;
+						break;
+					case 1:
+						topParameter = 20;
+						break;
+					case 2:
+						topParameter = 50;
+						break;
+					case 3:
+						var moduleData:IModuleData=new ModuleData();
+						moduleData.label="文件下载量排名";
+						moduleData.url="config/statistics/DMS_Statistics_TopDownloadedFileModule.vxml";
+						moduleData.uid="9002";
+						moduleData.systemId="dms_TopDownloadedFile";
+						var params:Object = new Object();				 				
+						moduleData.params=params;	
+						FlexGlobals.topLevelApplication.loadModule(moduleData, FlexGlobals.topLevelApplication.nav, Global.IP);
+						return;
+					default:
+						break;
+				}
+				queryTopFile(topParameter);
+			}
+			
+			protected function chooseRecentFileParameter(event:ItemClickEvent):void
+			{
+				// TODO Auto-generated method stub
+				switch(event.index)
+				{
+					case 0:
+						recentFileParameter = 10;
+						break;
+					case 1:
+						recentFileParameter = 20;
+						break;
+					case 2:
+						recentFileParameter = 50;
+						break;
+					case 3:
+						var moduleData:IModuleData=new ModuleData();
+						moduleData.label="最近上传文件";
+						moduleData.url="config/statistics/DMS_Statistics_RecentUploadedFileModule.vxml";
+						moduleData.uid="9005";
+						moduleData.systemId="dms_RecentUploadedFile";
+						var params:Object = new Object();				 				
+						moduleData.params=params;	
+						FlexGlobals.topLevelApplication.loadModule(moduleData, FlexGlobals.topLevelApplication.nav, Global.IP);
+						return;
+					default:
+						break;
+				}
+				queryRecentFile(recentFileParameter);
+			}
+			
+			protected function search():void
+			{
+				// TODO Auto-generated method stub
+				var moduleData:IModuleData=new ModuleData();
+				moduleData.label="搜索模块";
+				moduleData.url="config/search/DMS_FileSearchModule.vxml";
+				moduleData.uid="2001";
+				moduleData.systemId="dms_demo";
+				
+				var params:Object = new Object();				 								
+				if(keyInput.text != null && StringUtil.trim(keyInput.text) != "")
+					params.inputFileName = ExtentedStringUtil.symbolTranslation(StringUtil.trim(keyInput.text));
+				moduleData.params=params;	
+				
+				FlexGlobals.topLevelApplication.loadModule(moduleData, FlexGlobals.topLevelApplication.nav, Global.IP);
+			}
+			
+			public function downLoad(fileId:int,fileName:String):void
+			{
+				// TODO Auto-generated method stub
+//				var callbackFunc:Function = function():void{
+//					
+//					var fileDownload:FileDownload = new FileDownload();
+//					fileDownload.downloadFile(fileName + ".txt",fileId.toString(),SessionBO.userInfo.userId.toString());
+//				};
+//				
+//				Alert.show("是否确认下载？","确认",3,null,function(event:CloseEvent):void{
+//					if(event.detail == Alert.YES){
+//						if(null != callbackFunc){
+//							callbackFunc();
+//						}
+//					}
+//				},null,2);
+				
+				var fileDownload:FileDownload = new FileDownload();
+				fileDownload.downloadFile(fileName,fileId.toString(),SessionBO.userInfo.userId.toString());
+			}
+			
+			public function queryDetail(item:Object):void
+			{
+				// TODO Auto-generated method stub
+				var detail:FileDetail= new FileDetail();
+				detail.fileInfoBo.fileId = item["fileId"];
+				detail.fileInfoBo.fileName = item["fileName"];
+				detail.fileInfoBo.userName = item["userName"];
+				detail.fileInfoBo.userId = item["userId"];
+				detail.fileInfoBo.categoryPath = item["categoryPath"];
+				detail.fileInfoBo.uploadTime = item["uploadTime"];
+				detail.fileInfoBo.keywords = item["keywords"];
+				detail.fileInfoBo.filePath = item["filePath"];
+				detail.fileInfoBo.fileDesc = item["fileDesc"];
+				detail.fileInfoBo.fullName = item["fullName"];
+				detail.title="文件详细信息";
+				GuipPublic.popUp(detail);
+			}
+		]]>
+	</mx:Script>
+
+	<mx:HBox width="100%" height="20%" horizontalAlign="center" verticalAlign="middle">
+		
+		<util:MySearchTextInput id="keyInput" width="400" height="40" prompt="文件名"
+								txChange="keyInput.showClearButton = (keyInput.text != '')"
+								clear="keyInput.showClearButton = false;search()" enter="search()"
+								showClearButton="false" maxChars="50"/>
+		<mx:Button width="40" height="40" cornerRadius="0" toolTip="搜索" click="search()"
+				   icon="@Embed('assets/magnifier.png')"/>
+		
+	</mx:HBox>
+	
+	<mx:HBox width="100%" height="100%" paddingBottom="10" paddingLeft="10" paddingRight="10" horizontalGap="15">
+		
+		<jwolib:FieldSet width="100%" height="100%" title="下载Top" cornerRadius="5" horizontalAlign="center" verticalAlign="middle">
+			
+			<mx:HBox  horizontalAlign="right">
+				<mx:Spacer width="100%"/>
+				<mx:ToggleButtonBar horizontalGap="5" itemClick="chooseTopParameter(event)">
+					<mx:dataProvider>
+						<mx:Array>
+							<mx:String>top10</mx:String>
+							<mx:String>top20</mx:String>
+							<mx:String>top50</mx:String>
+							<mx:String>更多</mx:String>
+						</mx:Array>
+					</mx:dataProvider>
+				</mx:ToggleButtonBar>
+			</mx:HBox>
+			
+			<mx:DataGrid id="downLoadTop" width="100%" height="100%"
+						 creationComplete="queryTopFile(topParameter)"
+						 dataProvider="{dataProvider1}">
+				<mx:columns>
+					<mx:DataGridColumn dataField="fileId" headerText="ID" visible="false"/>
+					<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+					<mx:DataGridColumn dataField="userName" headerText="上传者"/>
+					<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+					<mx:DataGridColumn dataField="categoryName" headerText="所属分类" />
+					<mx:DataGridColumn dataField="downloadCounts" headerText="下载量"/>
+					
+					<mx:DataGridColumn headerText="操作" textAlign="left">
+						<mx:itemRenderer>
+							<mx:Component>
+								
+								<mx:HBox horizontalAlign="center" paddingLeft="10" horizontalGap="20">
+									<mx:Button label="下载" paddingLeft="10" click="outerDocument.downLoad(data.fileId,data.fileName)"/>								
+								</mx:HBox>
+								
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+			</mx:DataGrid>
+
+		</jwolib:FieldSet>
+		
+		<jwolib:FieldSet width="100%" height="100%" title="最近上传" cornerRadius="5" horizontalAlign="center" verticalAlign="middle">
+			
+			<mx:ToggleButtonBar horizontalGap="5" itemClick="chooseRecentFileParameter(event)">
+				<mx:dataProvider>
+					<mx:Array>
+						<mx:String>top10</mx:String>
+						<mx:String>top20</mx:String>
+						<mx:String>top50</mx:String>
+						<mx:String>更多</mx:String>
+					</mx:Array>
+				</mx:dataProvider>
+			</mx:ToggleButtonBar>
+			
+			<mx:DataGrid id="recentUploadedFile" width="100%" height="100%"
+						 creationComplete="queryRecentFile(recentFileParameter)"
+						 dataProvider="{dataProvider2}">
+				<mx:columns>
+					<mx:DataGridColumn dataField="fileId" headerText="ID" visible="false"/>
+					<mx:DataGridColumn dataField="fileName" headerText="文件名"/>
+					<mx:DataGridColumn dataField="userName" headerText="上传者"/>
+					<mx:DataGridColumn dataField="uploadTime" headerText="上传时间"/>
+					<mx:DataGridColumn dataField="categoryName" headerText="所属分类" />
+					
+					<mx:DataGridColumn headerText="操作" textAlign="left">
+						<mx:itemRenderer>
+							<mx:Component>
+								
+								<mx:HBox horizontalAlign="center" paddingLeft="10" horizontalGap="20">
+									<mx:Button label="下载" paddingLeft="10" click="outerDocument.downLoad(data.fileId,data.fileName)"/>							
+								</mx:HBox>
+								
+							</mx:Component>
+						</mx:itemRenderer>
+					</mx:DataGridColumn>
+					
+				</mx:columns>
+			</mx:DataGrid>
+
+		</jwolib:FieldSet>
+		
+	</mx:HBox>
+	
+</util:MyModule>

@@ -66,7 +66,6 @@ public class CategoryBizImplTest extends BaseBizTest<CategoryBizImpl>{
 		categoryBo.setIsLeaf(false);
 		categoryBo.setCategoryDesc("testInsertBiz");
 		categoryBo.setCategoryState(true);
-		categoryBo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		categoryBo.setModifyUser(4);//更新人也需要从用户Session中自动获取
 		
 		Map<String,Object> map=categoryBizImpl.insertCategory(categoryBo);
@@ -78,20 +77,20 @@ public class CategoryBizImplTest extends BaseBizTest<CategoryBizImpl>{
 	@Test
 	public void testUpdateQuery(){
 		int chosenId=3;
+		Boolean change=true;
 		
 		CategoryBo categoryBo=new CategoryBo();
-		categoryBo.setCategoryId(148);
-		categoryBo.setParentId(3);
+		categoryBo.setCategoryId(14);
+		categoryBo.setParentId(10);
 		categoryBo.setCategoryName("testUpdateBiz");
-		categoryBo.setCategoryPath("0.1.3.8");
+		categoryBo.setCategoryPath("0.1.3.14");
 		categoryBo.setIsLeaf(true);
 		categoryBo.setCategoryDesc("testUpdateBiz");
 		categoryBo.setCategoryState(true);
-		categoryBo.setModifyUser(8);
 		categoryBo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		categoryBo.setModifyUser(4);//更新人也需要从用户Session中自动获取
 		
-		Map<String,Object> map=categoryBizImpl.updateCategory(chosenId, categoryBo);
+		Map<String,Object> map=categoryBizImpl.updateCategory(change, chosenId, categoryBo);
 		LOG.info(categoryBo);
 		LOG.info(map);
 		System.out.println("Success");		

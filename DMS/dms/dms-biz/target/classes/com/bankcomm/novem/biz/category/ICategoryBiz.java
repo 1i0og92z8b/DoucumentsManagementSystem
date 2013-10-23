@@ -28,6 +28,12 @@ public interface ICategoryBiz {
 	 */
 	List<CategoryBo> queryCategory(final int categoryId);
 	/**
+	 * 根据父类ID，返回类的所有可见子类
+	 * @param categoryId
+	 * @return List<CategoryBo>
+	 */
+	public List<CategoryBo> queryCategoryState(final int categoryId);
+	/**
 	 * 根据分类ID返回该类的明细信息
 	 * @param categoryId
 	 * @return CategoryBo
@@ -44,7 +50,7 @@ public interface ICategoryBiz {
 	 * @param categoryBo
 	 * @return 
 	 */
-	Map<String,Object> updateCategory(final int chosenId, final CategoryBo categoryBo);
+	Map<String,Object> updateCategory(final boolean change, final int chosenId, final CategoryBo categoryBo);
 	/**
 	 * 修改分类状态
 	 * @param categoryStateBo

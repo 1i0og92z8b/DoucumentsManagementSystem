@@ -1,10 +1,12 @@
 package com.bankcomm.novem.dao.statistics;
 
+import java.util.HashMap;
 import java.util.List;
 
 import  com.bankcomm.novem.bo.statistics.DownloadedFileBo;
+import  com.bankcomm.novem.bo.statistics.FilePathBo;
 import  com.bankcomm.novem.bo.statistics.UserRankingBo;
-import com.bankcomm.novem.comm.PageCond;
+import  com.bankcomm.novem.comm.PageCond;
 
 import com.bankcomm.novem.dao.annote.DbSchemaType;
 
@@ -30,6 +32,13 @@ public class StatisticsDaoImpl implements IStatisticsDao{
 		final int count = iStatisticsMapper.topDownloadedFileTotalCount();
 		pageCond.setCOUNT(count);
 		return iStatisticsMapper.topDownloadedFile(pageCond);
+	}
+	
+	@Override 
+	public List<DownloadedFileBo> topDownloadedFileOnlySearchable(PageCond pageCond){
+		final int count = iStatisticsMapper.topDownloadedFileOnlySearchableTotalCount();
+		pageCond.setCOUNT(count);
+		return iStatisticsMapper.topDownloadedFileOnlySearchable(pageCond);
 	}
 
 	@Override 
@@ -61,15 +70,24 @@ public class StatisticsDaoImpl implements IStatisticsDao{
 	}
 	
 	
-
 	@Override
 	public Boolean updateDownloadCount(int fileId){
 		return iStatisticsMapper.updateDownloadCount(fileId);
 	}
 	
 	@Override
+	public Boolean updateDownloadCountList(HashMap<String,Object> hm){
+		return iStatisticsMapper.updateDownloadCountList(hm);
+	}
+	
+	@Override
 	public Boolean insertDownloadCount(int fileId){
 		return iStatisticsMapper.insertDownloadCount(fileId);
 	}	
+	
+	@Override
+	public List<FilePathBo> filePathQueryByFileId(List<Integer> fileIdList){
+		return iStatisticsMapper.filePathQueryByFileId(fileIdList);
+	}
 
 }

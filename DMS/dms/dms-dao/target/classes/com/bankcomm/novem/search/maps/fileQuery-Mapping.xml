@@ -18,7 +18,7 @@
             </if>
     	<!-- categoryId初始化时默认为零  -->
     	<if test="categoryId > 0">
-    	LOCATE((select CATEGORY_PATH from CATEGORY where CATEGORY_ID = #{categoryId}),C.CATEGORY_PATH)>0
+    	AND LOCATE((select CATEGORY_PATH from CATEGORY where CATEGORY_ID = #{categoryId}),C.CATEGORY_PATH)>0
     	</if>
     	<if test=" fileName != null ">
 		AND F.FILE_NAME LIKE CONCAT('%',CONCAT(#{fileName},'%'))

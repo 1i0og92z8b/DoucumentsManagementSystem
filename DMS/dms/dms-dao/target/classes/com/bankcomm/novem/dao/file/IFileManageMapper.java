@@ -14,7 +14,7 @@ public interface IFileManageMapper {
 	/**
 	 * 插入文件
 	 */
-	void insertFile(final FileUploadBo newFile);
+	int insertFile(final FileUploadBo newFile);
 	/**
 	 * 删除文件
 	 */

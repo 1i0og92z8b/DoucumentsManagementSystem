@@ -3,7 +3,6 @@ package com.bankcomm.novem.dao.user.impl;
 import java.sql.Timestamp;
 import java.util.List;
 
-import org.junit.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -15,6 +14,8 @@ import org.springframework.stereotype.Repository;
 
 
 
+
+import com.bankcomm.novem.bo.user.UserBo;
 import com.bankcomm.novem.bo.user.UserQueryBo;
 import com.bankcomm.novem.bo.user.UserRoleBo;
 import com.bankcomm.novem.comm.PageCond;
@@ -92,5 +93,11 @@ public class UserManageDaoImpl implements IUserManageDao {
 	public Boolean deleteUserRole(final List<Integer> userid){
 		// TODO Auto-generated method stub
 		return usermanagedaomapper.deleteUserRole(userid);
+	}
+	
+	@Override
+	public Boolean updatePassword(final UserBo userbo){
+		// TODO Auto-generated method stub
+		return usermanagedaomapper.updatePassword(userbo);
 	}
 }

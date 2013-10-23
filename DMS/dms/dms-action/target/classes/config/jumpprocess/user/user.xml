@@ -37,6 +37,12 @@
 		</actions>
 	</process>
 	
+	<process id="updatePassword" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="userManageAction" operations="updatePasswordAction"></action>
+		</actions>
+	</process>
+	
 	<process id="query" template="defaultTemplate" interceptors="defaultInterceptors">
 		<actions>
 			<action id="defaultTemplateAction" ref="userManageAction" operations="queryAction"></action>

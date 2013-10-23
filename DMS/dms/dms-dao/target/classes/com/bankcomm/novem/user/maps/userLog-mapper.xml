@@ -44,8 +44,8 @@
   </select>
   
   <update id="setLog" parameterType="com.bankcomm.novem.bo.user.UserLogBo">
-  update USER set IF_LOGIN=1
-  where USER_NAME=#{userName}
+ 	update USER set IF_LOGIN=1
+  	where USER_NAME=#{userName}
   </update>
   
   <update id="logout" parameterType="com.bankcomm.novem.bo.user.UserLogBo">

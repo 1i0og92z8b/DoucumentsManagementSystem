@@ -38,7 +38,8 @@ public class FileManageDaoImplTest extends BaseDaoTest<FileUploadBo> {
 		fileUploadBo.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		fileUploadBo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		fileUploadBo.setModifyUser(100);
-		fileManageDao.insertFile(fileUploadBo);
+		int a = fileManageDao.insertFile(fileUploadBo);
+		System.out.println(a);
 	}
 	
 	@Test

@@ -44,7 +44,8 @@ public class UserManageBizImplTest extends BaseBizTest{
 		userbo.setEmail("666");
 		userbo.setExtNo("555");
 		userbo.setIfLogin(0);
-		iusermanagebiz.updateUser(userbo);
+		String p="test";
+		iusermanagebiz.updateUser(userbo,p);
 	}
 	@Test
 	@Rollback(false)

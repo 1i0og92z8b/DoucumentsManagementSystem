@@ -43,6 +43,22 @@ public class HomeAction extends BaseAction {
 	//	context.setData("PAGE_COND", pageCond);
 	}
 	
+	public void topSearchableDownLoadedFile(final Context context) {
+		
+//		final PageCond pageCond = ContextExtractor.extractPageCond(context);
+//		PageCond item = ContextExtractor.extractBean(context, "PARAMS", PageCond.class);
+		
+		final int topParameter = (Integer)ContextExtractor.extractValue(context, "topParameter");
+		
+		final PageCond pageCond = new PageCond();
+		pageCond.setLIMIT(topParameter);
+		
+		List<DownloadedFileBo> downloadedFileList = statisticsBizImpl.topDownloadedFileOnlySearchable(pageCond);
+		
+		context.setData("downloadedFileList", downloadedFileList);	
+	//	context.setData("PAGE_COND", pageCond);
+	}
+	
 	public void recentUploadedFile(final Context context) {
 		
 //		final PageCond pageCond = ContextExtractor.extractPageCond(context);
@@ -52,6 +68,20 @@ public class HomeAction extends BaseAction {
 		pageCond.setLIMIT(recentFileParameter);
 		
 		List<DownloadedFileBo> recentFileList = statisticsBizImpl.recentUploadedFile(pageCond);
+		
+		context.setData("recentFileList", recentFileList);	
+//		context.setData("PAGE_COND", pageCond);
+	}
+	
+	public void recentSearchableUploadedFile(final Context context) {
+		
+//		final PageCond pageCond = ContextExtractor.extractPageCond(context);
+		final int recentFileParameter = (Integer)ContextExtractor.extractValue(context, "recentFileParameter");
+		
+		final PageCond pageCond = new PageCond();
+		pageCond.setLIMIT(recentFileParameter);
+		
+		List<DownloadedFileBo> recentFileList = statisticsBizImpl.recentUploadedFileOnlySearchable(pageCond);
 		
 		context.setData("recentFileList", recentFileList);	
 //		context.setData("PAGE_COND", pageCond);

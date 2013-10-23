@@ -3,25 +3,11 @@
  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.bankcomm.novem.dao.file.IFileDownloadMapper">
 
-<insert id="insertRec" parameterType="com.bankcomm.novem.bo.file.DownloadRecBo" useGeneratedKeys="true" keyProperty="seqID">
+<insert id="insertRec" parameterType="com.bankcomm.novem.bo.file.DownloadRecBo">
 	insert into DOWNLOAD_REC
-	<trim prefix="(" suffix=")" suffixOverrides="," >
-		<if test="fileId!=null" >FILE_ID,</if>
-		<if test="userId!=null" >USER_ID,</if>
-		<if test="downloadTime!=null" >DOWNLOAD_TIME,</if>
-		<if test="createTime!=null">CREATE_TIME,</if>
-		<if test="updateTime!=null">UPDATE_TIME,</if>
-		<if test="modifyUser!=null">UPDATOR</if>
-	</trim>
+	(FILE_ID,USER_ID,DOWNLOAD_TIME,CREATE_TIME,UPDATE_TIME,UPDATOR)
 	values
-	<trim prefix="(" suffix=")" suffixOverrides="," >
-		<if test="fileId!=null" >#{fileId:INTEGER},</if>
-		<if test="userId!=null" >#{userId:INTEGER},</if>
-		<if test="downloadTime!=null" >#{downloadTime:TIMESTAMP},</if>
-		<if test="createTime!=null">#{createTime:TIMESTAMP},</if>
-		<if test="updateTime!=null">#{updateTime:TIMESTAMP},</if>
-		<if test="modifyUser!=null">#{modifyUser:INTEGER}</if>
-	</trim>
+	(#{fileId:INTEGER},#{userId:INTEGER},#{downloadTime:TIMESTAMP},#{createTime:TIMESTAMP},#{updateTime:TIMESTAMP},#{modifyUser:INTEGER})
 </insert>
 
 <update id="updateCounts" parameterType="com.bankcomm.novem.bo.file.DownloadCountsBo">
@@ -36,7 +22,17 @@
 	insert into DOWNLOAD_COUNTS 
 	(FILE_ID, FILE_DOWNLOAD_COUNTS, CREATE_TIME, UPDATE_TIME, UPDATOR) 
 	 values
-	 (#{fileId}, 1, #{createTime}, #{updateTime}, #{modifyUser})
+	 (#{fileId}, 0, #{createTime}, #{updateTime}, #{modifyUser})
 </insert>
+
+<select id="selectFileId" parameterType="String" resultType="int">
+	select FILE_ID from FILE
+	where FULL_NAME = #{fullName}
+</select>
+
+<select id="selectCounts" parameterType="int" resultType="int">
+	select FILE_DOWNLOAD_COUNTS from DOWNLOAD_COUNTS
+	where FILE_ID = #{fileId}
+</select>
 
 </mapper>

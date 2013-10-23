@@ -35,18 +35,12 @@ public class UserManageAction extends BaseAction{
 		querybo.setUserName(userbo.getUserName());
 		List<UserBo> list=iusermanagebiz.queryUserList(querybo);
 		Integer userId=list.get(0).getUserId();
-		Boolean b=false;
-		if(userRole!=""){
-			b=iusermanagebiz.insertUserRole(userId, userRole);
-		}
-		if(a.equals(true)&&b.equals(true)){
+		if(a.equals(true)&&userRole!=""){
+			iusermanagebiz.insertUserRole(userId, userRole);
 			context.setData("RESULT", "插入用户信息成功");
 		}
 		else if(a.equals(false)){
 			context.setData("RESULT","用户名不能重复");
-		}
-		else if(a.equals(true)&&b.equals(false)){
-			context.setData("RESULT", "创建角色信息失败");
 		}
 	}
 	
@@ -69,31 +63,33 @@ public class UserManageAction extends BaseAction{
 	{
 		UserBo userbo=ContextExtractor.extractBean(context, "userBo", UserBo.class);
 		String userRole=ContextExtractor.extractValue(context, "userRole");
-		Boolean a=iusermanagebiz.updateUser(userbo);
-		UserQueryBo querybo=new UserQueryBo();
-		querybo.setUserName(userbo.getUserName());
-		List<UserBo> list=iusermanagebiz.queryUserList(querybo);
-		Integer userId=list.get(0).getUserId();
-		Boolean b=false;
-		if(userRole!=null){
-			b=iusermanagebiz.updateUserRole(userId, userRole);
-		}		
-		if(a.equals(true)&&b.equals(true)){
+		String p=ContextExtractor.extractValue(context, "perviousUserName");
+		Boolean a=false;
+		a=iusermanagebiz.updateUser(userbo,p);
+		if(!userRole.equals("")){
+			iusermanagebiz.updateUserRole(userbo.getUserId(), userRole);
+		}
+		if(a.equals(true)){
 			context.setData("RESULT", "更新用户信息成功");
 		}
-		else if(a.equals(false)){
-			context.setData("RESULT","此用户名已存在");
-		}
-		else if(a.equals(true)&&b.equals(false)){
-			context.setData("RESULT", "更新角色信息失败");
-		}
+		else context.setData("RESULT", "此用户名已存在");
+	}
+	
+	public void updatePasswordAction(final Context context)
+	{
+		UserBo userbo=ContextExtractor.extractBean(context, "userBo",UserBo.class);
+		iusermanagebiz.updatePassword(userbo);
+		context.setData("RESULT","修改密码成功");
 	}
 	
 	public void queryAction(final Context context)
 	{
-		Integer userId = (Integer)ContextExtractor.extractValue(context, "userId");
+		UserBo userbo = ContextExtractor.extractBean(context, "userBo",UserBo.class);
+		Integer userId=userbo.getUserId();
 		final UserBo userBo= iusermanagebiz.queryUserInfo(userId);
-		context.setData("userBo", userBo);
+		String password=userBo.getPassWord();
+		context.setData("userBo",userBo);
+		context.setData("password", password);
 	}
 	
 	public void queryAllAction(final Context context)

@@ -52,6 +52,7 @@ public class UserLogAction extends BaseAction{
 		String username=context.getData("userName");
 		UserLogBo userlogbo=new UserLogBo();
 		userlogbo.setUserName(username);
+		iuserlogbiz.logout(userlogbo);
 		context.setData("RESULT", "登出成功");
 	}
 }

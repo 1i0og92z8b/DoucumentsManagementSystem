@@ -17,6 +17,10 @@ public interface IFileDownloadMapper {
 	boolean updateCounts(DownloadCountsBo downloadCountsBo);
 	//void insertRecAndUpdateCounts(DownloadRecBo downloadRec, DownloadCountsBo downloadCountsBo);
 	
-	boolean insertCounts(DownloadCountsBo downloadCountsBo);
+	void insertCounts(DownloadCountsBo downloadCountsBo);
+	
+	int selectFileId(String fullName);
+	
+	int selectCounts(int fileId);
 
 }

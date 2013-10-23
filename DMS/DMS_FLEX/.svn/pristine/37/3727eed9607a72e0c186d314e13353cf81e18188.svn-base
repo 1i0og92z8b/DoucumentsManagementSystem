@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Text xmlns:mx="http://www.adobe.com/2006/mxml"
+		 xmlns:util="DMS_Util.*"
+		 width="100%" height="100%" 
+		 xmlns:bankcomm="http://www.bankcomm.com"
+		 >
+	<mx:Script>  
+       <![CDATA[  
+          override public function set data(value:Object):void{  
+               super.data = value;  
+                if(value.fileState == '0'){  
+                    setStyle('color',0x000000);  
+                }  
+				if(value.fileState == '1'){  
+					setStyle('color',0x00008B); 
+					setStyle('fontWeight','bold');
+					setStyle('fontSize',13);
+				} 
+				if(value.fileState == '2'){  
+					setStyle('color',0x696969);
+					setStyle('fontWeight','bold');
+					setStyle('fontSize',13);
+				} 
+				if(value.fileState == '3'){  
+					setStyle('color',0xDC143C); 
+					setStyle('fontWeight','bold');
+					setStyle('fontSize',13);
+				}
+				
+            }  
+       ]]>  
+  </mx:Script> 
+
+</mx:Text>

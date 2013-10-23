@@ -16,6 +16,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.test.annotation.Rollback;
 
+@SuppressWarnings("rawtypes")
 @DbSchemaType("DMSDB")
 @Repository
 
@@ -165,11 +166,6 @@ public class StatisticsDaoImplTest extends BaseDaoTest{
 	}
 		
 	
-	@Test
-	public void updateDownloadCountTest(){
-		System.out.println("Test for updateDownloadCount");
-		iStatisticsDao.updateDownloadCount(1);
-	}	
 
 }
 

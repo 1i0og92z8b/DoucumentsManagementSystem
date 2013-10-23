@@ -19,5 +19,12 @@ public interface ICategoryPermissionSettingsBiz {
 	 * @param categoryID
 	 * @return 成功与否
 	 */
-	void updatePermission(CategoryStateBo categoryStateBo);
+	void updatePermission(final CategoryStateBo categoryStateBo);
+	
+//	/**
+//	 * 更改子分类权限
+//	 * @param categoryID
+//	 * @return 成功与否
+//	 */
+//	void updateSubCategoryPermission(final CategoryBo categoryBo);
 }

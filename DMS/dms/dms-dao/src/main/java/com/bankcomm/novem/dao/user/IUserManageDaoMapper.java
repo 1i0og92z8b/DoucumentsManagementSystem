@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Repository;
 
+import com.bankcomm.novem.bo.user.UserBo;
 import com.bankcomm.novem.bo.user.UserQueryBo;
 import com.bankcomm.novem.bo.user.UserRoleBo;
 import com.bankcomm.novem.entry.user.UserEntry;
@@ -57,4 +58,5 @@ public interface IUserManageDaoMapper {
 	public Boolean insertUserRole(final UserRoleBo userrolebo);
 	public Boolean updateUserRole(final UserRoleBo userrolebo);
 	public Boolean deleteUserRole(final List<Integer> userid);
+	public Boolean updatePassword(final UserBo userbo);
 }

@@ -1,5 +1,7 @@
 package com.bankcomm.novem.action.file;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +10,7 @@ import java.util.Map;
 import lombok.Data;
 
 import org.apache.poi.hdf.model.hdftypes.FileInformationBlock;
+import org.hamcrest.core.Is;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 
@@ -27,13 +30,9 @@ import com.bankcomm.novem.bo.search.FileBo;
 import com.bankcomm.novem.bo.search.FileFieldBo;
 import com.bankcomm.novem.bo.special.ExportBo;
 import com.bankcomm.novem.bo.special.ImportBo;
-
-
 import com.bankcomm.novem.bo.statistics.DownloadedFileBo;
-
 import com.bankcomm.novem.comm.PageCond;
-//import com.bankcomm.novem.interceptor.FileUploadResolverInterceptor;
-
+import com.bankcomm.novem.interceptor.FileUploadResolverInterceptor;
 import com.bocom.jump.bp.core.Context;
 import com.ibm.ws.webservices.xml.wassysapp.systemApp;
 
@@ -45,13 +44,15 @@ public class FileAction extends BaseAction {
 	private IFileManageBiz fileManageBizImpl;
 	@Autowired
 	private IQueryMethodSelectBiz queryMethodSelectBizImpl;
+	@Autowired
+	private IFileSearchBiz fileSearchBizImpl;
 	
 	private Object frontData;
 	
 //	@Autowired
 //	private FileUploadResolverInterceptor fileUploadResolverInterceptor = new FileUploadResolverInterceptor();
 	
-	public void insertFileInfo(final Context context, String fullName) {
+	public void insertFileInfo(final Context context, String fullName) throws UnsupportedEncodingException {
 		final FileUploadBo fileUploadBo = ContextExtractor.extractBean(context, "fileInfo", FileUploadBo.class);
 //		final FileUploadBo fileUploadBo = new FileUploadBo();
 //		fileUploadBo.setFileName((String)ContextExtractor.extractValue(context, "fileName"));
@@ -60,16 +61,26 @@ public class FileAction extends BaseAction {
 //		fileUploadBo.setUserId((Integer)ContextExtractor.extractValue(context, "userId"));
 //		fileUploadBo.setFileState((Character)ContextExtractor.extractValue(context, "fileState")); 
 //		fileUploadBo.setFilePath(filePath)
+		fileUploadBo.setFileName(new String(fileUploadBo.getFileName().getBytes("ISO8859-1"),"utf-8"));
+		fileUploadBo.setKeywords(new String(fileUploadBo.getKeywords().getBytes("ISO8859-1"),"utf-8"));
+		fileUploadBo.setFileDesc(new String(fileUploadBo.getFileDesc().getBytes("ISO8859-1"),"utf-8"));
 		fileUploadBo.setFullName(fullName);
 		fileUploadBo.setFilePath("D:");
 		fileUploadBo.setUploadTime(new Timestamp(System.currentTimeMillis()));
 		fileUploadBo.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		fileUploadBo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		fileUploadBo.setModifyUser(fileUploadBo.getUserId());
 		fileManageBizImpl.insertFile(fileUploadBo);
+		final DownloadCountsBo downloadCountsBo = new DownloadCountsBo();
+		downloadCountsBo.setFileId(fileManageBizImpl.selectFileId(fullName));
+		downloadCountsBo.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		downloadCountsBo.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		downloadCountsBo.setModifyUser(fileUploadBo.getUserId());
+		fileManageBizImpl.insertCounts(downloadCountsBo);
 		context.setData("RESULT", "上传成功！");
 	}
 	
-	public void uploadFile(final Context context) {
+	public void uploadFile(final Context context) throws Exception {
 		final Map<String, Object> map = context.getDataMap();
 		final String fullName = (String) map.get("ATTACHMENTID");
 //		final String fileName = map.get("fileName").toString();
@@ -124,7 +135,18 @@ public class FileAction extends BaseAction {
 			fileFieldBo = new FileFieldBo();
 		}
 		fileFieldBo.setPageCond(pageCond);
-		final List<FileBo> list = queryMethodSelectBizImpl.QueryMethodSelectByFlag(fileFieldBo, 5);
+		List<FileBo> list = new ArrayList<FileBo>();	
+		if(fileFieldBo.getUserId() > 0)
+		{
+			list = queryMethodSelectBizImpl.QueryMethodSelectByFlag(fileFieldBo, 5);
+		}
+		else {
+			list = fileSearchBizImpl.fileSearch(fileFieldBo);
+		}
+		for(FileBo fb:list)
+		{
+			fb.setUpdator(fileManageBizImpl.selectCounts(fb.getFileId()));
+		}
 		context.setData("list", list);
 		context.setData("PAGE_COND", fileFieldBo.getPageCond());
 	}

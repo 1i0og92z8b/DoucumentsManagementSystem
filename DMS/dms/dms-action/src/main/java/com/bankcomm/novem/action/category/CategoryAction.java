@@ -56,6 +56,12 @@ public class CategoryAction extends BaseAction{
 		context.setData("list", list);
 	}
 	
+	public void queryCategoryState(final Context context){
+		final int categoryId=ContextExtractor.extractValue(context,"categoryId");
+		list=categoryBizImpl.queryCategoryState(categoryId);
+		context.setData("list", list);
+	}
+	
 	/**
 	 * 
 	 * @description 查看分类	 方法描述
@@ -98,8 +104,9 @@ public class CategoryAction extends BaseAction{
 	 */
 	public void updateCategory(final Context context){
 		final int chosenId=ContextExtractor.extractValue(context,"chosenId");
+		final boolean change=ContextExtractor.extractValue(context,"change");
 		final CategoryBo categoryBo=ContextExtractor.extractBean(context, "categoryBo", CategoryBo.class);
-		Map<String,Object> map=categoryBizImpl.updateCategory(chosenId, categoryBo);
+		Map<String,Object> map=categoryBizImpl.updateCategory(change, chosenId, categoryBo);
 		context.setData("map",map);
 	}
 	

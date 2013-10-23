@@ -1,0 +1,8 @@
+<module>
+    <type>module</type>
+    <version>1.0.20131008</version>
+    <author>yanping_li</author>
+    <description>CategoryManage</description>
+    <file>com/bankcomm/dms/modules/category/DMS_CategoryManageModule.swf</file>
+    <dict>state</dict>
+</module>

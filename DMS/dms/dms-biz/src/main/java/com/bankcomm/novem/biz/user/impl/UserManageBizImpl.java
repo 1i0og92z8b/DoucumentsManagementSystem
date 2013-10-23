@@ -1,11 +1,11 @@
 package com.bankcomm.novem.biz.user.impl;
 
-import java.lang.reflect.InvocationTargetException;
+//import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
+//import java.util.ArrayList;
 import java.util.List;
 
-import org.python.modules.newmodule;
+//import org.python.modules.newmodule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,11 +15,10 @@ import com.bankcomm.novem.bo.user.UserBo;
 import com.bankcomm.novem.bo.user.UserQueryBo;
 import com.bankcomm.novem.bo.user.UserRoleBo;
 import com.bankcomm.novem.dao.user.IUserManageDao;
-import com.bankcomm.novem.entry.demo.DemoEntry;
 import com.bankcomm.novem.entry.user.UserEntry;
-import com.bocom.jump.component.euif.exception.BusinessException;
+//import com.bocom.jump.component.euif.exception.BusinessException;
 
-import org.apache.commons.beanutils.BeanUtils;  
+//import org.apache.commons.beanutils.BeanUtils;  
 
 /**
  * 
@@ -35,11 +34,17 @@ public class UserManageBizImpl extends BaseBiz implements IUserManageBiz {
 	@Override
 	public Boolean insertUser(UserBo userbo) {
 		// TODO Auto-generated method stub
+		int n=0;
 		final UserEntry userentry = super.map(userbo, UserEntry.class);
 		UserQueryBo userquerybo=new UserQueryBo();
 		userquerybo.setUserName(userbo.getUserName());
 		List<UserEntry> list=iusermanagedao.queryUserList(userquerybo);
-		if(list.size()==0){
+		for(int i=0;i<list.size();i++){
+			if(userquerybo.getUserName().equals(list.get(i).getUserName())){
+				n=1;
+			}
+		}
+		if((list.size()!=0&&n==0)||list.size()==0){
 			return iusermanagedao.insertUser(userentry);
 		}else{
 			return false;
@@ -53,13 +58,22 @@ public class UserManageBizImpl extends BaseBiz implements IUserManageBiz {
 	}
 
 	@Override
-	public Boolean updateUser(UserBo userbo) {
+	public Boolean updateUser(UserBo userbo,String pUserName) {
 		// TODO Auto-generated method stub
+		int n=0;
 		final UserEntry userentry = super.map(userbo, UserEntry.class);
 		UserQueryBo userquerybo=new UserQueryBo();
 		userquerybo.setUserName(userbo.getUserName());
 		List<UserEntry> list=iusermanagedao.queryUserList(userquerybo);
-		if(list.size()!=0){
+		for(int i=0;i<list.size();i++){
+			if(userquerybo.getUserName().equals(list.get(i).getUserName())){
+				n=1;
+			}
+		}
+		if(list.size()!=0&&(n==0||(n!=0&&userquerybo.getUserName().equals(pUserName)))){
+			return iusermanagedao.updateUser(userentry);
+		}
+		else if(list.size()==0){
 			return iusermanagedao.updateUser(userentry);
 		}else{
 			return false;
@@ -111,4 +125,9 @@ public class UserManageBizImpl extends BaseBiz implements IUserManageBiz {
 		return iusermanagedao.deleteUserRole(userid);
 	}
 
+	@Override
+	public Boolean updatePassword(UserBo userbo) {
+		// TODO Auto-generated method stub
+		return iusermanagedao.updatePassword(userbo);
+	}
 }

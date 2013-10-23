@@ -76,12 +76,12 @@ public interface IFileRecycleBiz {
 	 * @param fileID,userID
 	 * @return 成功与否
 	 */
-	boolean deleteFile(final int fileId,final int userId);
+	boolean deleteFile(final int fileId);
 	
 	/**
 	 * 批量彻底删除文件
 	 * @param fileID,userID
 	 * @return 成功与否
 	 */
-	boolean batchDelete(final List<Integer> fileIdList,final int userId);
+	boolean batchDelete(final List<Integer> fileIdList);
 }

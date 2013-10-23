@@ -22,27 +22,27 @@ public class UserLogDaoImplTest extends BaseDaoTest {
 	@Test
 	public void testCheckUsername() {
 		UserLogBo userlogbo=new UserLogBo();
-		userlogbo.setUserName("a1");
+		userlogbo.setUserName("ji");
 		UserLoginReturnInfoBo userloginreturninfobo=iuserlogdao.checkUsername(userlogbo);
-		Assert.assertEquals(1, (long)userloginreturninfobo.getUserId());
-		Assert.assertEquals("111",userloginreturninfobo.getPassWord() );
+		Assert.assertEquals(168, (long)userloginreturninfobo.getUserId());
+		Assert.assertEquals("ji",userloginreturninfobo.getPassWord() );
 		//Assert.assertEquals(111, userloginreturninfobo.getPassWord());
 	}
 
 	@Test
 	public void testCheckPassword() {
 		UserLogBo userlogbo=new UserLogBo();
-		userlogbo.setUserName("a1");
-		userlogbo.setPassWord("111");
+		userlogbo.setUserName("ji");
+		userlogbo.setPassWord("ji");
 		UserLoginReturnInfoBo userloginreturninfobo=iuserlogdao.checkPassword(userlogbo);
-		Assert.assertEquals(1,(long)userloginreturninfobo.getUserId());
+		Assert.assertEquals(168,(long)userloginreturninfobo.getUserId());
 	}	
 	
 	@Test
 	public void testGetUserRole(){
 		UserLoginReturnInfoBo userloginreturninfobo=new UserLoginReturnInfoBo();
-		userloginreturninfobo.setUserName("a1");
-		userloginreturninfobo.setPassWord("111");
+		userloginreturninfobo.setUserName("ji");
+		userloginreturninfobo.setPassWord("ji");
 		userloginreturninfobo.setUserRole(iuserlogdao.getUserRole(userloginreturninfobo));
 		System.out.println(userloginreturninfobo.getUserRole());
 		Assert.assertEquals("admin", userloginreturninfobo.getUserRole());
@@ -52,7 +52,7 @@ public class UserLogDaoImplTest extends BaseDaoTest {
 	//@Rollback(false)
 	public void testSetLog(){
 		UserLogBo userlogbo=new UserLogBo();
-		userlogbo.setUserName("a3");
+		userlogbo.setUserName("ji");
 		//userlogbo.setPassword("111");
 		Integer a=iuserlogdao.setLog(userlogbo);
 		Assert.assertEquals(1, (long)a);
@@ -62,7 +62,7 @@ public class UserLogDaoImplTest extends BaseDaoTest {
 	@Rollback(false)
 	public void testLogout() {
 		UserLogBo userlogbo=new UserLogBo();
-		userlogbo.setUserName("a3");
+		userlogbo.setUserName("ji");
 		//userlogbo.setPassword("111");
 		Integer a=iuserlogdao.logout(userlogbo);
 		Assert.assertEquals(1, (long)a);

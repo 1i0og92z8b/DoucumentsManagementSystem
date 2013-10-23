@@ -15,6 +15,14 @@ public interface IFileManageBiz {
 	 * 上传单个文件
 	 */
 	void insertFile(final FileUploadBo newFile);
+	
+	int selectFileId(final String fullName);
+	
+	void insertCounts(final DownloadCountsBo downloadCountsBo);
+	
+	boolean updateCounts(final DownloadCountsBo downloadCountsBo);
+	
+	int selectCounts(final int fileId);
 //	/**
 //	 * 上传多个文件
 //	 */

@@ -21,5 +21,10 @@
 			<artifactId>dms-bo</artifactId>
 			<version>${dms.version}</version>
 		</dependency>
+		<dependency>
+	<groupId>org.apache.ant</groupId>
+	<artifactId>ant</artifactId>
+	<version>1.8.1</version>
+      </dependency>             
 	</dependencies>
 </project>

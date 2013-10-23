@@ -34,7 +34,15 @@
 	</resultMap>
 	
 	<sql id="publicWhere">
-
+		<if test="userName != null">
+			and (USER_NAME LIKE '%'||#{userName}||'%'ESCAPE'\')
+		</if>
+		<if test="email != null">
+			and (EMAIL LIKE '%'||#{email}||'%'ESCAPE'\')
+		</if>
+		<if test="extNo != null">
+			and (EXT_NO LIKE '%'||#{extNo}||'%'ESCAPE'\')
+		</if>
 	</sql> 
 
 
@@ -68,7 +76,7 @@
   <update id="updateUser" parameterType="com.bankcomm.novem.entry.user.UserEntry" >
 		update USER 
 		<set>
-		<if test="userName!=null">User_NAME = #{userName},</if>
+		<if test="userName!=null">USER_NAME = #{userName},</if>
 		<if test="passWord!=null">PASSWORD = #{passWord},</if>
 		<if test="fullName!=null">NAME = #{fullName},</if>
 		<if test="sex!=null">SEX = #{sex},</if>
@@ -87,12 +95,30 @@
   
   <select id="queryUserList"  parameterType="com.bankcomm.novem.bo.user.UserQueryBo" resultMap="UserMap">
   	select USER_ID,USER_NAME,PASSWORD,NAME,SEX,EMAIL,EXT_NO
-  	from USER
-  	<where>
-		<if test="userName!=null">User_NAME = #{userName}</if>
+  	from(
+			SELECT USER_ID
+			,USER_NAME
+			,PASSWORD
+			,NAME
+			,SEX
+			,EMAIL
+			,EXT_NO
+			,rownumber() over (order by USER_ID) as rn 
+			FROM USER
+			WHERE 1=1
+			<include refid="publicWhere"/>
+		)
+		<if test="pageCond != null and pageCond !='' ">
+		 <![CDATA[	
+	 		where rn >= #{pageCond.START} and rn < #{pageCond.END}
+		]]>
+		</if>
+		WITH UR
+  	<!--<where>
+		<if test="userName!=null">USER_NAME = #{userName}</if>
 		<if test="email!=null">and EMAIL = #{email}</if>
 		<if test="extNo!=null">and EXT_NO = #{extNo}</if>
-		</where>
+		</where>-->
   </select> 
   
   <!--<update id="updatePassWord" parameterType="com.bankcomm.novem.entry.user.UserEntry">
@@ -113,6 +139,14 @@
 		<set>
 		<if test="userRole!=null">USER_ROLE = #{userRole},</if>
 		<if test="updateTime!=null">UPDATE_TIME=#{updateTime}</if>
+		</set>	
+		where USER_ID = #{userId}
+  </update>
+  
+  <update id="updatePassword" parameterType="com.bankcomm.novem.bo.user.UserBo" >
+		update USER
+		<set>
+		<if test="passWord!=null">PASSWORD = #{passWord}</if>
 		</set>	
 		where USER_ID = #{userId}
   </update>

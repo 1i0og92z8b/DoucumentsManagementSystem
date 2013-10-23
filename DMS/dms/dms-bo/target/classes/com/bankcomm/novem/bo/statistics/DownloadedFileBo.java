@@ -3,6 +3,8 @@ package com.bankcomm.novem.bo.statistics;
 import java.sql.Timestamp;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+
 
 /**
  * 
@@ -10,6 +12,7 @@ import lombok.Data;
  * 
  */
 @Data
+@EqualsAndHashCode(callSuper = false)
 public class DownloadedFileBo {
 	
 	private int fileId;
@@ -19,8 +22,10 @@ public class DownloadedFileBo {
 	private String categoryName;
 	private Timestamp uploadTime;
 	private String filePath;
-	private int fileState;
+	private char fileState;
 	private String fullName;
+	private String keywords;
+	private String filedesc;
 	private Timestamp createTime;
 	private Timestamp updateTime;
 	private int updator;

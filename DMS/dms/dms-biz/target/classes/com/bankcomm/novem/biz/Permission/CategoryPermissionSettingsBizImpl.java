@@ -25,7 +25,7 @@ public class CategoryPermissionSettingsBizImpl extends BaseBiz implements ICateg
 	}
 	
 	@Override
-	public void updatePermission(CategoryStateBo categoryStateBo){
+	public void updatePermission(final CategoryStateBo categoryStateBo){
 		
 		List<CategoryBo> categoryBoList = categoryBizImpl.queryCategory(categoryStateBo.getCategoryId());
 		
@@ -37,8 +37,13 @@ public class CategoryPermissionSettingsBizImpl extends BaseBiz implements ICateg
 			subCategoryStateBo.setModifyUser(categoryStateBo.getModifyUser());
 			subCategoryStateBo.setUpdateTime(categoryStateBo.getUpdateTime());
 			
+			if(categoryBo.getIsLeaf())
+				updatePermission(subCategoryStateBo);
 			categoryBizImpl.updateCategoryState(subCategoryStateBo);
 		}
 		categoryBizImpl.updateCategoryState(categoryStateBo);
 	}
+
 }
+
+

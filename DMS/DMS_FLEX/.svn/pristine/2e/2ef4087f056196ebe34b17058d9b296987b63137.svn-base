@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="utf-8"?>
+<util:MyModule xmlns:mx="http://www.adobe.com/2006/mxml"
+			   xmlns:util="DMS_Util.*"
+			   width="100%" height="100%" 
+			   xmlns:bankcomm="http://www.bankcomm.com"
+			   xmlns:conp="components.*">
+	<mx:Script>
+		<![CDATA[
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.Global;
+			import DMS_Util.PaginationUtil;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			import com.bankcomm.dms.bo.SessionBO;
+			import com.bankcomm.dms.cnst.InterfaceModeConst;
+			import com.bankcomm.dms.cnst.RoleConst;
+			import com.bankcomm.dms.components.*;
+			import com.bankcomm.dms.modules.file.DMS_ManageUploadedFilesModule;
+			//import com.bankcomm.dms.modules.statistics.components.MyRenderer;
+			import com.bankcomm.dms.modules.statistics.components.myPopUpBox;
+			
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.events.TimerEvent;
+			import flash.net.FileReference;
+			import flash.net.URLLoader;
+			import flash.net.URLLoaderDataFormat;
+			import flash.net.URLRequest;
+			import flash.net.URLRequestMethod;
+			import flash.utils.Timer;
+			
+			import mx.binding.utils.ChangeWatcher;
+			import mx.collections.ArrayCollection;
+			import mx.containers.Canvas;
+			import mx.controls.Alert;
+			import mx.core.IToolTip;
+			import mx.events.CloseEvent;
+			import mx.events.ItemClickEvent;
+			import mx.events.ScrollEvent;
+			import mx.formatters.DateFormatter;
+			import mx.managers.PopUpManager;
+			import mx.managers.ToolTipManager; 
+			
+			
+			public function getFileState(item:Object, column:DataGridColumn):String{	
+				var str:String = item.fileState;
+				if (str=="0")
+					return "可搜索";
+				else
+					if  (str=="1")
+						return "未审核";	
+					else
+						if  (str=="2")
+							return "未通过";	
+						else
+							if  (str=="3")
+								return "已删除";	
+							else
+								return "未知";
+			}			
+			
+			
+			[Bindable] 
+			public var url1:String="topDownloadedFileOnlySearchable.ajax"; 
+			
+			//			[Bindable] 
+			//			public var url1:String="topDownloadedFile.ajax"; 
+			
+			[Bindable] 
+			public var url2:String="topDownloadedFile.ajax"; 
+			
+			private var tt:IToolTip;
+			
+			public var rowindex: int;	
+			
+			private function tooltipinit():void {
+				//toolTipCreate();
+			}	
+			
+			[Bindable]
+			public var str: String;
+			
+			[Bindable]
+			public var isMouseDown:Boolean=false;
+			
+			[Bindable]
+			public var startp:Point=new Point(); 
+			
+			[Bindable]
+			public var endp:Point=new Point(); 
+			
+			[Bindable]
+			public var temp:Point=new Point(); 
+			
+			[Bindable]
+			public var startRow:int=0;//从0开始
+			
+			[Bindable]
+			public var endRow:int=0;//从0开始
+			
+			[Bindable]
+			public var tempRow:int=0;//从0开始
+			
+			[Bindable]
+			public var debugStr:String ="";
+			
+			//			public function drawDashLine(x1:Number, y1:Number, x2:Number, y2:Number):void{    
+			//				/*画虚线*/
+			//				//第一个数值指定线的粗细程度，第二个参数指定虚线短线之间的间隔
+			//				var pattern:Array = [5,4];
+			//				var x:Number = x2 - x1;
+			//				var y:Number = y2 - y1;
+			//				var hyp:Number = Math.sqrt((x)*(x) + (y)*(y));
+			//				var units:Number = hyp/(pattern[0]+pattern[1]);
+			//				var dashSpaceRatio:Number = pattern[0]/(pattern[0]+pattern[1]);
+			//				var dashX:Number = (x/units)*dashSpaceRatio;
+			//				var spaceX:Number = (x/units)-dashX;
+			//				var dashY:Number = (y/units)*dashSpaceRatio;
+			//				var spaceY:Number = (y/units)-dashY;
+			//				myCanvas.graphics.lineStyle(3, 0x1196EE,0.7);
+			//				myCanvas.graphics.moveTo(x1,y1);
+			//				while (hyp > 0){
+			//					x1 += dashX;
+			//					y1 += dashY;
+			//					hyp -= pattern[0];
+			//					if (hyp < 0)
+			//					{
+			//						x1 = x2;
+			//						y1 = y2;
+			//					}
+			//					myCanvas.graphics.lineTo(x1, y1);
+			//					x1 += spaceX;
+			//					y1 += spaceY;
+			//					myCanvas.graphics.moveTo(x1, y1);
+			//					hyp -= pattern[1];
+			//				}
+			//				myCanvas.graphics.moveTo(x2, y2);
+			//			}
+			
+			public function getDisplayStartY(starty:int):int
+			{
+				var ret:int;
+				ret	= starty - topDownloadedFileDataGrid.rowHeight*(topDownloadedFileDataGrid.verticalScrollPosition-startScrollPos); 
+				if (ret < topDownloadedFileDataGrid.rowHeight)
+					ret = topDownloadedFileDataGrid.rowHeight;
+				if (ret > topDownloadedFileDataGrid.height)
+					ret = topDownloadedFileDataGrid.height;
+				return ret;			
+			} 
+			
+			public function updateRect2(e:Event):void{updateRect();}	
+			
+			public function updateRect():void{//需要解决卷轴显示错位问题，思路：根据开始和现在航行数决定矩形框起始位置，而不是开始和现在点
+				myCanvas.graphics.clear();
+				var x:int=Math.min(startp.x,temp.x);
+				var y:int=Math.min(getDisplayStartY(startp.y),temp.y);
+				var width:int = Math.abs(startp.x-temp.x); 
+				var height:int = Math.abs(getDisplayStartY(startp.y)-temp.y);
+				myCanvas.graphics.lineStyle(2, 0x3399FF,0.85);
+				myCanvas.graphics.beginFill(0x3399FF,0.3);
+				myCanvas.graphics.drawRect(x,y,width,height);				
+				//				drawDashLine(startp.x,startp.y,temp.x,startp.y);
+				//				drawDashLine(temp.x,startp.y,temp.x,temp.y);
+				//				drawDashLine(temp.x,temp.y,startp.x,temp.y);
+				//				drawDashLine(startp.x,temp.y,startp.x,startp.y);
+			}
+			
+			private function getFileId():String{
+				rowindex=Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition;
+				if ((rowindex>=0)&&(rowindex<gridPage.dataProvider.length))
+				{return gridPage.dataProvider.getItemAt(rowindex)["fileId"].toString();}
+				else
+					return "N/A";
+			}
+			
+			private function getDebugStr():String{
+				debugStr="您现在所在行的文件id是 "+getFileId()//gridPage.dataProvider.getItemAt(rowindex)["fileId"]
+				//					+"  目前被选中的行： "+topDownloadedFileDataGrid.selectedIndices.toString()
+				//					+"   鼠标按下状态: "+isMouseDown.toString()
+				//					+"   startRow:  "+startRow+  "  endRow:  "+endRow+"  tempRow: "+tempRow
+				//				+"   startp:  "+startp.toString()+  "  endp:  "+endp.toString()+"  temp: "+temp.toString();
+				return debugStr;
+			}
+			
+			[Bindable]
+			public var startScrollPos:int = 0;//记录按下鼠标时的卷轴位置
+			
+			[Bindable]
+			public var myScrollPos:int = 0;
+			
+			private function  onMouseDown(event:MouseEvent):void{
+				if ((isMouseDown==false)&&(topDownloadedFileDataGrid.contentMouseX<this.parentApplication.width-150))
+				{	
+					isMouseDown=true;
+					startp=new Point(topDownloadedFileDataGrid.contentMouseX,topDownloadedFileDataGrid.contentMouseY);
+					endp=new Point();
+					startRow=Math.floor((topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition);
+					startScrollPos = topDownloadedFileDataGrid.verticalScrollPosition;
+					//str=getDebugStr();
+					//tt.text=str;
+					event.updateAfterEvent();
+				}	
+				tempRow=Math.floor((topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition);
+				//str=getDebugStr();
+				//tt.text=str;
+				event.updateAfterEvent();
+			}
+			
+			private function setScrollPos():void
+			{
+				topDownloadedFileDataGrid.verticalScrollPosition = myScrollPos;
+			}
+			
+			private function onMouseUp(event:MouseEvent):void{
+				if (isMouseDown==true)
+				{
+					isMouseDown=false;	
+					myCanvas.graphics.clear();
+					endp=new Point(topDownloadedFileDataGrid.contentMouseX,topDownloadedFileDataGrid.contentMouseY);
+					updateSelectedRow(startp,endp);
+					//str=getDebugStr();
+					//tt.text=str;	
+					event.updateAfterEvent();
+					endp=new Point();
+					startp=new Point();
+					temp=new Point();
+				}
+				myCanvas.graphics.clear();
+				event.updateAfterEvent();
+			}
+			
+			public var arr1:ArrayCollection=new ArrayCollection();
+			public var arr2:ArrayCollection=new ArrayCollection();
+			
+			//有bug
+			//			private function changeSelectStatus(event:MouseEvent):void{
+			//				rowindex=Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition;//当然不能大于Array的长度
+			//				if ((rowindex<gridPage.dataProvider.length)&&(rowindex>=0))//当然不能大于Array的长度或小于0
+			//				{
+			//					
+			//					arr1.source=topDownloadedFileDataGrid.selectedIndices;
+			//					if (arr1.getItemIndex(rowindex)!=-1)//该项目处于选择状态
+			//					{
+			//						arr1.removeItemAt(arr1.getItemIndex(rowindex));
+			//					}
+			//					else//该项目处于未选择状态
+			//					{
+			//						arr1.addItem(rowindex);
+			//					}				
+			//					topDownloadedFileDataGrid.dataProvider=  null;						
+			//					topDownloadedFileDataGrid.dataProvider = gridPage.dataProvider;
+			//					topDownloadedFileDataGrid.selectedIndices = arr1.source;	
+			//					topDownloadedFileDataGrid.verticalScrollPosition = rowindex;
+			//					topDownloadedFileDataGrid.validateNow();
+			//				}
+			//			}
+			
+			private function isBothOutOfBound(sr:int ,er:int):Boolean{
+				if ((sr<0)&&(er<0))
+					return true;
+				else
+					if ((sr>=gridPage.dataProvider.length)&&(er>=gridPage.dataProvider.length))
+						return true;
+					else
+						return false;				
+			} 
+			
+			public function mySetSelectedIndices():void
+			{
+				topDownloadedFileDataGrid.selectedIndices = arr1.source;
+			}
+			
+			private function updateSelectedRow(startp:Point ,endp:Point):void{
+				if ((startp!=null)&&(endp!=null)&&(startp.equals(endp)==false))
+				{
+					endRow=Math.floor((topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition);
+					if (isBothOutOfBound(startRow,endRow)==false)
+					{
+						if (startRow<0)
+							startRow=0;
+						if (startRow>=gridPage.dataProvider.length)
+							startRow=gridPage.dataProvider.length-1;
+						if (endRow<0)
+							endRow=0;
+						if (endRow>=gridPage.dataProvider.length)
+							endRow=gridPage.dataProvider.length-1;
+						if (startRow<=endRow)
+						{
+							arr2=new ArrayCollection();
+							for (i=startRow;i<=endRow;i++)
+							{						
+								arr2.addItem(i);
+							}
+							arr1.source= topDownloadedFileDataGrid.selectedIndices;
+							for each(var i:int in arr2)   
+							{     
+								if(arr1.contains(i))      
+									continue;    
+								arr1.addItem(i);   
+							}
+							myScrollPos = topDownloadedFileDataGrid.verticalScrollPosition;
+							callLater(setScrollPos);
+							callLater(mySetSelectedIndices);
+							//							topDownloadedFileDataGrid.dataProvider=  null;						
+							//							topDownloadedFileDataGrid.dataProvider = gridPage.dataProvider;
+							//							topDownloadedFileDataGrid.selectedIndices = arr1.source;		
+							//							topDownloadedFileDataGrid.validateNow();							
+						}
+						else
+						{						
+							arr2=new ArrayCollection();
+							for (i=endRow;i<=startRow;i++)
+							{						
+								arr2.addItem(i);
+							}
+							arr1.source = topDownloadedFileDataGrid.selectedIndices;
+							for each(var j:int in arr2)   
+							{     
+								if(arr1.contains(j)==true)      
+									continue;    
+								arr1.addItem(j);   
+							}		
+							myScrollPos = topDownloadedFileDataGrid.verticalScrollPosition;
+							callLater(setScrollPos);
+							callLater(mySetSelectedIndices);
+							//							topDownloadedFileDataGrid.dataProvider=  null;						
+							//							topDownloadedFileDataGrid.dataProvider = gridPage.dataProvider;						
+							//							topDownloadedFileDataGrid.selectedIndices = arr1.source;						
+							//							topDownloadedFileDataGrid.validateNow();					
+						}
+					}
+				}				
+			}
+			
+			private function mouseMoveHandler(event:MouseEvent):void{
+				onMouseMove(event);				
+			}
+			
+			private function onMouseMove(event:MouseEvent):void {
+				rowindex  = Math.floor(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition;
+				if (isMouseDown==true)
+				{
+					temp.setTo(topDownloadedFileDataGrid.contentMouseX,topDownloadedFileDataGrid.contentMouseY);
+					tempRow=(topDownloadedFileDataGrid.contentMouseY/topDownloadedFileDataGrid.rowHeight)-1 + topDownloadedFileDataGrid.verticalScrollPosition;
+					updateRect();
+				}
+				if ((rowindex>(gridPage.dataProvider.length-1))||(rowindex<0)||(topDownloadedFileDataGrid.contentMouseX<0))
+				{
+					toolTipDestroy();					 
+				}
+				else
+				{	
+					if (tt)
+					{
+						//						if (event.stageX<(this.parentApplication.width-170))
+						//							tt.move(event.stageX + 10, event.stageY + 10);
+						//						else
+						//							tt.move(event.stageX - 170, event.stageY + 10);	
+						//						str=getDebugStr();
+						//						tt.text=str;
+						//						event.updateAfterEvent();
+					}
+					else
+					{
+						//toolTipCreate();
+						//str="您现在所在行的文件id是 "+gridPage.dataProvider.getItemAt(rowindex)["fileId"];
+						//tt.text=str;
+						//event.updateAfterEvent();
+					}					
+				}					
+			}
+			
+			private function toolTipDestroy():void {
+				if (tt) {
+					ToolTipManager.destroyToolTip(tt);
+					tt = null;
+				}
+			}			
+			
+			private function toolTipCreate():void {
+				if (tt) {
+					toolTipDestroy();
+				}
+				tt = ToolTipManager.createToolTip("尚未初始化", topDownloadedFileDataGrid.contentMouseX, topDownloadedFileDataGrid.contentMouseY );
+			}		
+			public var arr:Array 
+			
+			public var myCanvas:Canvas = new Canvas();
+			
+			private function getUrl():String{
+				if (SessionBO.userInfo["userRole"]==RoleConst.ROLE_ADMIN)
+					return url2;
+				else
+					return url1;				
+			}			
+			
+			private function query():void{				
+				//tooltipinit();				
+				var params:URLParameter = new URLParameter();				
+				PaginationUtil.gridPageInit(topDownloadedFileDataGrid,gridPage);
+				topDownloadedFileDataGrid.addChild(myCanvas);
+				topDownloadedFileDataGrid.setChildIndex(myCanvas,topDownloadedFileDataGrid.numChildren-1);
+				topDownloadedFileDataGrid.addEventListener(ScrollEvent.SCROLL,updateRect2);
+			}			
+			
+			
+			private function downloadBatch():void
+			{
+				if(!topDownloadedFileDataGrid.selectedItems || topDownloadedFileDataGrid.selectedItems.length < 1)
+				{
+					Alert.show("请选择至少一个文件进行下载","提示");
+					return;
+				}
+				
+				var showFileList:String = new String;
+				for each (var i:int in topDownloadedFileDataGrid.selectedIndices)
+				{
+					showFileList+=gridPage.dataProvider.getItemAt(i)["fileName"]+"\n";
+				}
+				
+				//				Alert.show("您选择打包的文件是\n"+showFileList+"是否打包选中文件?","确认",3,null,function(event:CloseEvent):void
+				//				{
+				//					if(event.detail == Alert.YES)
+				//					{
+				//						if(null != callbackFunc)
+				//						{
+				//							callbackFunc();
+				//						}
+				//					}
+				//				},null,2);
+				
+				//				var callbackFunc:Function = function():void
+				//				{	
+				var filePathList:Array = new Array();	
+				var fileNameList:Array = new Array();
+				var time:Date=new Date(); 					
+				var zipFileName:String = "Tempzip"+time.time.toString()+".zip";//这里是文件名部分，存放路径部分在后台指定，默认是D盘根目录
+				
+				for each (var f:int in topDownloadedFileDataGrid.selectedIndices)
+				{
+					var str:String = gridPage.dataProvider.getItemAt(f)["filePath"] + "\\" +gridPage.dataProvider.getItemAt(f)["fullName"];
+					filePathList.push(str);
+					var name:String = gridPage.dataProvider.getItemAt(f)["fileName"];
+					fileNameList.push(name);
+				}
+				
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"filePathList":filePathList,"fileNameList":fileNameList,"userId":SessionBO.userInfo.userId,"zipFileName":zipFileName};
+				
+				var updateGridPage:Function = function(e:Event):void
+				{
+					gridPage.loadData(gridPage.curpage);
+				}
+				
+				Connect.request(new ConnectParameter(
+					{url:"compressFile.ajax",
+						params:params.toParameter(),
+						callback:function(r:Object,e:Event):void
+						{
+							var box:myPopUpBox = myPopUpBox(PopUpManager.createPopUp(topDownloadedFileDataGrid, myPopUpBox,true));	
+							box.addEventListener("updateList",updateGridPage);//updateList在myPopUpBox里面发出
+							box.x=topDownloadedFileDataGrid.parentApplication.width/2;
+							box.y=topDownloadedFileDataGrid.parentApplication.height/2;
+							box.fileList.text="您选择打包的文件是\n"+showFileList;
+							box.myfilePath = "D:\\"+zipFileName;
+							box.myfileName = zipFileName;
+							var tempArr:Array = new Array();
+							for each (var i:int in topDownloadedFileDataGrid.selectedIndices)
+							{
+								tempArr.push(gridPage.dataProvider.getItemAt(i)["fileId"]);
+							}
+							box.myFileIdList = new ArrayCollection(tempArr);
+						},
+						isMaskAvailable:false
+					}));
+				//				}
+				
+			}			
+		]]>
+	</mx:Script>	
+	
+	
+	<bankcomm:DoubleClickCheckDataGrid id="topDownloadedFileDataGrid" width="100%" height="100%"
+									   creationComplete="query()" mouseDown="onMouseDown(event)" mouseUp="onMouseUp(event)" mouseMove="mouseMoveHandler(event)" draggableColumns="false" sortableColumns="false" 
+									   dataProvider="{gridPage.dataProvider}" >
+		<bankcomm:columns>
+			<mx:DataGridColumn width = "80" >
+				<mx:itemRenderer> 
+					<mx:Component>            
+						<mx:Button width = "80" label="{fileState}" click="downloadSingleFile()" > 
+							<mx:Script>
+								<![CDATA[
+									import DMS_Util.ConnectParameter;
+									import DMS_Util.ExtentedStringUtil;
+									import DMS_Util.PaginationUtil;
+									
+									import com.adobe.utils.StringUtil;
+									import com.bankcomm.Connect;
+									import com.bankcomm.GuipPublic;
+									import com.bankcomm.URLParameter;
+									import com.bankcomm.dms.cnst.InterfaceModeConst;
+									
+									import mx.controls.Alert;
+									import mx.events.CloseEvent;
+									import mx.events.ItemClickEvent;
+									
+									import com.bankcomm.dms.modules.file.DMS_ManageUploadedFilesModule;
+									import com.bankcomm.dms.components.*;
+									import com.bankcomm.dms.bo.SessionBO;
+									
+									[Bindable] 
+									public var fileState:String = "下载文件";
+									
+									public function downloadSingleFile():void{
+										var fileDownload:FileDownload = new FileDownload();
+										fileDownload.downloadFile(data["fileName"] + "",data["fileId"].toString(),SessionBO.userInfo.userId);
+									}
+									
+									
+								]]>
+							</mx:Script>							
+						</mx:Button>
+					</mx:Component> 
+				</mx:itemRenderer> 
+			</mx:DataGridColumn>
+			<mx:DataGridColumn dataField="fileName" headerText="文件名" itemRenderer="com.bankcomm.dms.components.MyRenderer"/>
+			<mx:DataGridColumn dataField="userName" headerText="上传用户名" />
+			<mx:DataGridColumn dataField="categoryName" headerText="所属分类" />
+			<mx:DataGridColumn dataField="uploadTime" headerText="上传时间" />
+			<mx:DataGridColumn dataField="downloadCounts" headerText="下载量" />
+			<mx:DataGridColumn labelFunction="getFileState" headerText="文件状态" itemRenderer="com.bankcomm.dms.components.MyRenderer"/>
+		</bankcomm:columns>
+	</bankcomm:DoubleClickCheckDataGrid>
+	<mx:Button label="选中文件打包" click="downloadBatch()" cornerRadius="1" />
+	<util:GridPage id="gridPage" dataUrl="{getUrl()}"/>
+</util:MyModule>

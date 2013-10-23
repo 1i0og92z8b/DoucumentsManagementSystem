@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mx:TitleWindow xmlns:mx="http://www.adobe.com/2006/mxml" 
+				title="打包文件列表" x="150" y="80">
+	
+	<mx:Script>
+		<![CDATA[ 
+			import DMS_Util.ConnectParameter;
+			import DMS_Util.ExtentedStringUtil;
+			import DMS_Util.Global;
+			
+			import com.adobe.utils.StringUtil;
+			import com.bankcomm.Connect;
+			import com.bankcomm.GuipPublic;
+			import com.bankcomm.URLParameter;
+			
+			import flash.events.Event;
+			import flash.events.MouseEvent;
+			import flash.net.FileReference;
+			import flash.net.URLLoader;
+			import flash.net.URLLoaderDataFormat;
+			import flash.net.URLRequest;
+			import flash.net.URLRequestMethod;
+			
+			import mx.collections.ArrayCollection;
+			import mx.controls.Alert;
+			import mx.controls.List;
+			import mx.controls.Text;
+			import mx.events.ItemClickEvent;
+			import mx.managers.PopUpManager;
+			
+			public var myfilePath:String = null;
+			public var myfileName:String = null;
+			public var myFileIdList:ArrayCollection = null;
+			
+			public function onDownloadSuccess(event:Event):void{
+				updateDownloadCounts();				
+				mx.controls.Alert.show("下载成功！");
+				this.dispatchEvent(new Event("updateList",true));
+				this.dispatchEvent(new Event("updateList",false));
+			}
+			
+			public function onDownloadCancel(event:Event):void{
+				deleteTempFile();   
+			}
+			
+			public function startDownload():void{//输入包含绝对路径名
+				var params:URLParameter = new URLParameter();				
+				var loader:URLLoader = new URLLoader();
+				loader.dataFormat = URLLoaderDataFormat.BINARY;
+				var req:URLRequest = new URLRequest(Global.IP + "batchDownload.ajax");
+				params.reqBody = {"zipFilePath":myfilePath};
+				req.data = params.toParameter();
+				req.method = URLRequestMethod.POST;
+				var fileRef:FileReference = new FileReference();
+		        fileRef.addEventListener(Event.COMPLETE, onDownloadSuccess);
+				fileRef.addEventListener(Event.CANCEL, onDownloadCancel);
+			    fileRef.download(req, myfileName);
+				PopUpManager.removePopUp(this);
+			}
+			
+			public function updateDownloadCounts():void
+			{
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"fileIdList":myFileIdList.source};
+				
+				Connect.request(new ConnectParameter(
+					{url:"updateDownloadCountList.ajax",
+						params:params.toParameter(),
+						callback:function(r:Object,e:Event):void
+						{;},
+						isMaskAvailable:false
+					}));	
+			}	
+			
+			public function deleteTempFile():void
+			{
+				var params:URLParameter = new URLParameter();
+				params.reqBody = {"zipFilePath":myfilePath};
+				
+				Connect.request(new ConnectParameter(
+					{url:"deleteTempFile.ajax",
+						params:params.toParameter(),
+						callback:function(r:Object,e:Event):void
+						{;},
+						isMaskAvailable:false
+					}));	
+				PopUpManager.removePopUp(this);
+			}
+			
+		]]>
+	</mx:Script>
+	
+	<mx:VBox>
+	  <mx:Text id = "fileList" text="压缩包内的文件包括\n"/>
+	  <mx:HBox>
+		<mx:Button label="下载" click="startDownload()"/>
+		<mx:Button label="关闭" click="deleteTempFile();"/>
+	  </mx:HBox>
+	</mx:VBox>
+	
+</mx:TitleWindow>

@@ -18,6 +18,12 @@
 		</actions>
 	</process>
 	
+		<process id="topDownloadedFileOnlySearchable" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="topDownloadedFileOnlySearchable"></action>
+		</actions>
+	</process>
+	
 		<process id="topUploaderByFileCount" template="defaultTemplate" interceptors="defaultInterceptors">
 		<actions>
 			<action id="defaultTemplateAction" ref="statisticsAction" operations="topUploaderByFileCount"></action>
@@ -35,5 +41,48 @@
 			<action id="defaultTemplateAction" ref="statisticsAction" operations="recentUploadedFile"></action>
 		</actions>
 	</process>
+	
+		<process id="recentUploadedFileOnlySearchable" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="recentUploadedFileOnlySearchable"></action>
+		</actions>
+	</process>
+	
+			<process id="updateDownloadCount" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="updateDownloadCount"></action>
+		</actions>
+	</process>
+	
+				<process id="updateDownloadCountList" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="updateDownloadCountList"></action>
+		</actions>
+	</process>
+	
+			<process id="insertDownloadCount" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="insertDownloadCount"></action>
+		</actions>
+	</process>
+	
+		<process id="compressFile" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="compressFile"></action>
+		</actions>
+	</process>	
+	
+	<process id="batchDownload" template="defaultTemplate" interceptors="sessionInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="batchDownload"></action>
+		</actions>
+	</process> 
+	
+	<process id="deleteTempFile" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="statisticsAction" operations="deleteTempFile"></action>
+		</actions>
+	</process>    
+	
 	
 </x:beans>

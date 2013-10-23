@@ -19,6 +19,12 @@
 		</actions>
 	</process>
 	
+	<process id="queryCategoryState" template="defaultTemplate" interceptors="defaultInterceptors">
+		<actions>
+			<action id="defaultTemplateAction" ref="categoryAction" operations="queryCategoryState"></action>
+		</actions>
+	</process>
+	
 	<process id="viewCategory" template="defaultTemplate" interceptors="defaultInterceptors">
 		<actions>
 			<action id="defaultTemplateAction" ref="categoryAction" operations="viewCategory"></action>

@@ -26,8 +26,18 @@ public class FileDownloadDaoImpl extends BaseDao implements IFileDownloadDao {
 	}
 	
 	@Override
-	public boolean insertCounts(DownloadCountsBo downloadCountsBo) {
-		return iFileDownloadMapper.insertCounts(downloadCountsBo);
+	public void insertCounts(DownloadCountsBo downloadCountsBo) {
+		iFileDownloadMapper.insertCounts(downloadCountsBo);
+	}
+	
+	@Override
+	public int selectFileId(String fullName) {
+		return iFileDownloadMapper.selectFileId(fullName);
+	}
+	
+	@Override
+	public int selectCounts(int fileId) {
+		return iFileDownloadMapper.selectCounts(fileId);
 	}
 //	public void insertRecAndUpdateCounts(DownloadRecBo downloadRec, DownloadCountsBo downloadCountsBo) {
 //		iFileDownloadMapper.insertRecAndUpdateCounts(downloadRec, downloadCountsBo);

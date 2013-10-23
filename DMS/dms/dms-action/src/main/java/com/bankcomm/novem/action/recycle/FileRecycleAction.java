@@ -34,6 +34,7 @@ public class FileRecycleAction extends BaseAction {
 		fileFieldBo.setPageCond(pageCond);
 				
 		List<FileBo> fileList = new ArrayList<FileBo>();
+		/*
 		if(fileFieldBo.getUserId() == 0)
 		{
 			if(fileFieldBo.getFileName() == null)
@@ -43,7 +44,13 @@ public class FileRecycleAction extends BaseAction {
 		}
 		else {
 				fileList.addAll(fileRecycleBizImpl.queryFileByUserIdAndFileStateAndFileName(fileFieldBo));		
-		}
+		}*/
+		
+		if(fileFieldBo.getFileName() == null)
+			fileList.addAll(fileRecycleBizImpl.queryFileByState(fileFieldBo));
+		else
+			fileList.addAll(fileRecycleBizImpl.queryRecycleFileByFileName(fileFieldBo));
+		
 		
 		context.setData("list", fileList);	
 		context.setData("PAGE_COND", fileFieldBo.getPageCond());
@@ -153,9 +160,9 @@ public class FileRecycleAction extends BaseAction {
 	public void deleteFile(final Context context) {
 		
 		final int fileId = (Integer)ContextExtractor.extractValue(context, "fileId");
-		final Integer userId = (Integer)ContextExtractor.extractValue(context, "userId");
+//		final Integer userId = (Integer)ContextExtractor.extractValue(context, "userId");
 	
-		fileRecycleBizImpl.deleteFile(fileId, userId);
+		fileRecycleBizImpl.deleteFile(fileId);
 	}
 	
 	/**
@@ -166,8 +173,8 @@ public class FileRecycleAction extends BaseAction {
 	public void batchDelete(final Context context) {
 		
 		final List<Integer> fileIdList= (List<Integer>) ContextExtractor.extractArray(context, "fileIdList", Integer.class);
-		final Integer userId = (Integer)ContextExtractor.extractValue(context, "userId");
+//		final Integer userId = (Integer)ContextExtractor.extractValue(context, "userId");
 	
-		fileRecycleBizImpl.batchDelete(fileIdList, userId);
+		fileRecycleBizImpl.batchDelete(fileIdList);
 	}
 }

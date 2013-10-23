@@ -29,4 +29,5 @@
  <interceptors id="sessionInterceptors">
 		<interceptor class="com.bankcomm.novem.interceptor.UserSessionInterceptor" />
 	</interceptors>
+	
 </x:beans>

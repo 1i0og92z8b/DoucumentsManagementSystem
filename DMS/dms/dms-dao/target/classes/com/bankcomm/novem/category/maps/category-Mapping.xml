@@ -11,7 +11,8 @@
 		IS_LEAF=#{isLeaf},
 		CATEGORY_PATH = #{categoryPath},
 		CATEGORY_DESC = #{categoryDesc},
-		CATEGORY_STATE=#{categoryState},
+		CATEGORY_STATE = #{categoryState},
+		UPDATE_TIME = #{updateTime},
 		UPDATOR = #{modifyUser}
 		where CATEGORY_ID = #{categoryId}
 	</update>
@@ -39,7 +40,9 @@
 	
 	<update id="updateCategoryState" parameterType="com.bankcomm.novem.bo.category.CategoryStateBo">
 		update CATEGORY set
-		CATEGORY_STATE = #{categoryState}
+		CATEGORY_STATE = #{categoryState},
+		UPDATE_TIME = #{updateTime},
+		UPDATOR = #{modifyUser}
 		where CATEGORY_ID = #{categoryId}
 	</update>
 	

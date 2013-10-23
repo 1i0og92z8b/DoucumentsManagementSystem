@@ -40,7 +40,6 @@ select COUNT(*) from
 <include refid = "publictopDownloader"/>
 </select>
 
-
 <sql id="publictopDownloadedFile">
 (
 select 
@@ -53,6 +52,8 @@ uploadTime,
 filePath,
 fileState,
 fullName,
+keywords,
+filedesc,
 createTime,
 updateTime,
 updator,
@@ -71,6 +72,8 @@ A.UPLOAD_TIME as uploadTime,
 A.FILE_PATH as filePath,
 A.FILE_STATE as fileState,
 A.FULL_NAME as fullName,
+A.KEYWORDS as keywords,
+A.FILE_DESC as filedesc,
 A.CREATE_TIME as createTime,
 A.UPDATE_TIME as updateTime,
 A.UPDATOR as updator
@@ -90,6 +93,61 @@ where D.fileId = G.tem and G.downloadCounts > 0
 )
 </sql>
 
+<sql id="publictopDownloadedFileOnlySearchable">
+(
+select 
+fileId,
+userId, 
+fileName,
+userName,
+categoryName,
+uploadTime,
+filePath,
+fileState,
+fullName,
+keywords,
+filedesc,
+createTime,
+updateTime,
+updator,
+downloadCounts,
+rownumber() over (order by downloadCounts desc) as rn
+from ( 
+select *
+from (
+select
+A.FILE_ID as fileId,
+A.USER_ID as userId, 
+A.FILE_NAME as fileName,
+B.USER_NAME as userName,
+C.CATEGORY_NAME as categoryName,
+A.UPLOAD_TIME as uploadTime,
+A.FILE_PATH as filePath,
+A.FILE_STATE as fileState,
+A.FULL_NAME as fullName,
+A.KEYWORDS as keywords,
+A.FILE_DESC as filedesc,
+A.CREATE_TIME as createTime,
+A.UPDATE_TIME as updateTime,
+A.UPDATOR as updator
+from 
+FILE as A left join USER as B on A.USER_ID = B.USER_ID
+left join CATEGORY as C on A.CATEGORY_ID = C.CATEGORY_ID 
+) as D,
+(select 
+E.FILE_ID as tem, 
+E.FILE_DOWNLOAD_COUNTS as downloadCounts
+from
+DOWNLOAD_COUNTS as E, FILE as F
+where E.FILE_ID = F.FILE_ID
+) as G
+where D.fileId = G.tem and G.downloadCounts > 0
+) as H
+where H.fileState = '0'
+)
+</sql>
+
+
 <select id="topDownloadedFile" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.DownloadedFileBo">
 select * from 
 <include refid = "publictopDownloadedFile"/>
@@ -99,6 +157,17 @@ where rn between #{START} and #{END}
 <select id="topDownloadedFileTotalCount" resultType="int">
 select COUNT(*) from 
 <include refid = "publictopDownloadedFile"/>  
+</select>
+
+<select id="topDownloadedFileOnlySearchable" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.DownloadedFileBo">
+select * from 
+<include refid = "publictopDownloadedFileOnlySearchable"/>
+where rn between #{START} and #{END}
+</select>
+
+<select id="topDownloadedFileOnlySearchableTotalCount" resultType="int">
+select COUNT(*) from 
+<include refid = "publictopDownloadedFileOnlySearchable"/>  
 </select>
 
 <sql id="publictopUploaderByFileCount">
@@ -184,6 +253,8 @@ uploadTime,
 filePath,
 fileState,
 fullName,
+keywords,
+filedesc,
 createTime,
 updateTime,
 updator,
@@ -202,13 +273,15 @@ A.UPLOAD_TIME as uploadTime,
 A.FILE_PATH as filePath,
 A.FILE_STATE as fileState,
 A.FULL_NAME as fullName,
+A.KEYWORDS as keywords,
+A.FILE_DESC as filedesc,
 A.CREATE_TIME as createTime,
 A.UPDATE_TIME as updateTime,
 A.UPDATOR as updator
 from 
 FILE as A left join USER as B on A.USER_ID = B.USER_ID
 left join CATEGORY as C on A.CATEGORY_ID = C.CATEGORY_ID 
-) as D,
+) as D left join
 (select 
 E.FILE_ID as tem, 
 E.FILE_DOWNLOAD_COUNTS as downloadCounts
@@ -216,8 +289,62 @@ from
 DOWNLOAD_COUNTS as E, FILE as F
 where E.FILE_ID = F.FILE_ID
 ) as G
-where D.fileId = G.tem
+on D.fileId = G.tem
 ) as H
+) 
+</sql>
+
+<sql id="publicrecentUploadedFileOnlySearchable">
+(
+select 
+fileId,
+userId, 
+fileName,
+userName,
+categoryName,
+uploadTime,
+filePath,
+fileState,
+fullName,
+keywords,
+filedesc,
+createTime,
+updateTime,
+updator,
+downloadCounts,
+rownumber() over (order by uploadTime desc) as rn
+from ( 
+select *
+from (
+select
+A.FILE_ID as fileId,
+A.USER_ID as userId, 
+A.FILE_NAME as fileName,
+B.USER_NAME as userName,
+C.CATEGORY_NAME as categoryName,
+A.UPLOAD_TIME as uploadTime,
+A.FILE_PATH as filePath,
+A.FILE_STATE as fileState,
+A.FULL_NAME as fullName,
+A.KEYWORDS as keywords,
+A.FILE_DESC as filedesc,
+A.CREATE_TIME as createTime,
+A.UPDATE_TIME as updateTime,
+A.UPDATOR as updator
+from 
+FILE as A left join USER as B on A.USER_ID = B.USER_ID
+left join CATEGORY as C on A.CATEGORY_ID = C.CATEGORY_ID 
+) as D left join
+(select 
+E.FILE_ID as tem, 
+E.FILE_DOWNLOAD_COUNTS as downloadCounts
+from
+DOWNLOAD_COUNTS as E, FILE as F
+where E.FILE_ID = F.FILE_ID
+) as G
+on D.fileId = G.tem 
+) as H
+where H.fileState = '0'
 ) 
 </sql>
 
@@ -232,10 +359,30 @@ select COUNT(*) from
 <include refid = "publicrecentUploadedFile"/> 
 </select>
 
+<select id="recentUploadedFileOnlySearchable" parameterType="com.bankcomm.novem.comm.PageCond" resultType="com.bankcomm.novem.bo.statistics.DownloadedFileBo">
+select * from 
+<include refid = "publicrecentUploadedFileOnlySearchable"/> 
+where rn between #{START} and #{END}
+</select>
+
+<select id="recentUploadedFileOnlySearchableTotalCount" resultType="int">
+select COUNT(*) from
+<include refid = "publicrecentUploadedFileOnlySearchable"/> 
+</select>
+
 <update id="updateDownloadCount" parameterType="int">
 update DOWNLOAD_COUNTS 
 set FILE_DOWNLOAD_COUNTS = FILE_DOWNLOAD_COUNTS+1
 where FILE_ID = #{fileid} 
+</update>
+
+<update id="updateDownloadCountList" parameterType="java.util.HashMap">
+update DOWNLOAD_COUNTS 
+set 
+FILE_DOWNLOAD_COUNTS = FILE_DOWNLOAD_COUNTS+1,
+UPDATE_TIME = #{updateTime},
+UPDATOR = #{modifyUser}
+where FILE_ID in ${downloadCountList}	
 </update>
 
 <insert id="insertDownloadCount" parameterType="int">
@@ -249,6 +396,19 @@ values
 (select UPDATOR from FILE as A where A.FILE_ID = #{fileId})
 ) 
 </insert>
+
+<select id="filePathQueryByFileId" parameterType="List" resultType="com.bankcomm.novem.bo.statistics.FilePathBo" >
+select
+   	FILE_ID as fileId,         
+    FILE_NAME as fileName,   
+	FILE_PATH as filePath,  
+	FULL_NAME as fullName 
+from FILE 
+where FILE_ID in
+	<foreach collection="list" index="index" item="item" open="(" separator="," close=")">
+		#{item}
+	</foreach>
+</select>
 
 </mapper>
 

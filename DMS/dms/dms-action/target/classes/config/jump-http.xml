@@ -128,13 +128,15 @@
 					</property>
 				</bean>
 
-				<!-- <bean class="com.bocom.jump.bp.channel.http.interceptors.FileUploadsInterceptor">
+				<bean class="com.bocom.jump.bp.channel.http.interceptors.FileUploadsInterceptor">
 					<property name="uploadResolver">
 						<bean class="com.bankcomm.novem.interceptor.FileUploadResolverInterceptor"/>
 					</property>
 				</bean>
 				
-				<bean class="com.bankcomm.novem.interceptor.FileDownloadInterceptor" />-->
+				<bean class="com.bankcomm.novem.interceptor.FileDownloadInterceptor" />
+				
+				<bean class="com.bankcomm.novem.interceptor.BatchDownloadInterceptor" />
 				
 				<bean class="com.bocom.jump.bp.channel.http.interceptors.ServletContextInterceptor"/>
 				 

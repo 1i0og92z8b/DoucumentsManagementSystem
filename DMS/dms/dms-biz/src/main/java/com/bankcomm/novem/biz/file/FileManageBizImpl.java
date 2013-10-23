@@ -26,6 +26,26 @@ public class FileManageBizImpl implements IFileManageBiz {
 	public void insertFile(final FileUploadBo newFile) {
 		fileManageDaoImpl.insertFile(newFile);
 	}
+	
+	@Override
+	public int selectFileId(final String fullName) {
+		return fileDownloadDaoImpl.selectFileId(fullName);
+	}
+	
+	@Override
+	public void insertCounts(final DownloadCountsBo downloadCountsBo) {
+		fileDownloadDaoImpl.insertCounts(downloadCountsBo);
+	}
+	
+	@Override
+	public boolean updateCounts(final DownloadCountsBo downloadCountsBo) {
+		return fileDownloadDaoImpl.updateCounts(downloadCountsBo);
+	}
+	
+	@Override
+	public int selectCounts(final int fileId) {
+		return fileDownloadDaoImpl.selectCounts(fileId);
+	}
 //	public void uploadFile(final FileUploadBo newFile, final String localPath) {
 //		
 //	}
@@ -48,6 +68,7 @@ public class FileManageBizImpl implements IFileManageBiz {
 	@Override
 	public void recDownload(final DownloadRecBo downloadRec, final DownloadCountsBo downloadCountsBo) {
 		fileDownloadDaoImpl.insertRec(downloadRec);
+		fileDownloadDaoImpl.updateCounts(downloadCountsBo);
 //		if(fileDownloadDaoImpl.insertCounts(downloadCountsBo))
 //		{
 //			return;

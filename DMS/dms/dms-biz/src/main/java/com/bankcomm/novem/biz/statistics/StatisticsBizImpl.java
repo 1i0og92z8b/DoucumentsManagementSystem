@@ -1,14 +1,16 @@
 package com.bankcomm.novem.biz.statistics;
 
-import java.util.List;
+import  java.util.HashMap;
+import  java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import  org.springframework.beans.factory.annotation.Autowired;
+import  org.springframework.stereotype.Service;
 
 import  com.bankcomm.novem.bo.statistics.DownloadedFileBo;
+import  com.bankcomm.novem.bo.statistics.FilePathBo;
 import  com.bankcomm.novem.bo.statistics.UserRankingBo;
 import  com.bankcomm.novem.comm.PageCond;
-import com.bankcomm.novem.dao.annote.DbSchemaType;
+import  com.bankcomm.novem.dao.annote.DbSchemaType;
 import  com.bankcomm.novem.dao.statistics.IStatisticsDao;
 
 /**
@@ -36,6 +38,11 @@ public class StatisticsBizImpl implements IStatisticsBiz{
 	}
 	
 	@Override 
+	public List<DownloadedFileBo> topDownloadedFileOnlySearchable(PageCond pageCond){
+		return iStatisticsDao.topDownloadedFileOnlySearchable(pageCond);
+	}
+	
+	@Override 
 	public List<UserRankingBo> topUploaderByFileCount(PageCond pageCond){
 		return iStatisticsDao.topUploaderByFileCount(pageCond);
 	}
@@ -53,6 +60,26 @@ public class StatisticsBizImpl implements IStatisticsBiz{
 	@Override 
 	public List<DownloadedFileBo> recentUploadedFileOnlySearchable(PageCond pageCond){
 		return iStatisticsDao.recentUploadedFileOnlySearchable(pageCond);
+	}
+	
+	@Override
+	public Boolean updateDownloadCount(int fileId){
+		return iStatisticsDao.updateDownloadCount(fileId);
+	}
+	
+	@Override
+	public Boolean updateDownloadCountList(HashMap<String,Object> hm){
+		return iStatisticsDao.updateDownloadCountList(hm);
+	}
+	
+	@Override
+	public Boolean insertDownloadCount(int fileId){
+		return iStatisticsDao.insertDownloadCount(fileId);
+	}	
+	
+	@Override
+	public List<FilePathBo> filePathQueryByFileId(List<Integer> fileIdList){
+		return iStatisticsDao.filePathQueryByFileId(fileIdList);
 	}
 
 }

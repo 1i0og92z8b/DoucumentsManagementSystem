@@ -112,13 +112,13 @@ public class FileRecycleBizImpl extends BaseBiz implements IFileRecycleBiz {
 	}
 	
 	@Override
-	public boolean deleteFile(final int fileId,final int userId)
+	public boolean deleteFile(final int fileId)
 	{
 		return fileManageBizImpl.deleteFile(fileId);
 	}
 	
 	@Override
-	public boolean batchDelete(final List<Integer> fileIdList,int userId)
+	public boolean batchDelete(final List<Integer> fileIdList)
 	{
 		return fileManageBizImpl.deleteFile(fileIdList);
 	}
